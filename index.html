@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Asistencia Luiz-Labs</title>
+
+  <!-- RESPONSIVE -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+      background: #f5f7fa;
+    }
+
+    h2, h3 {
+      color: #333;
+    }
+
+    input, button {
+      width: 100%;
+      max-width: 320px;
+      padding: 12px;
+      margin: 8px 0;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #panel {
+      margin-top: 20px;
+    }
+
+    video {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    #mensaje {
+      margin-top: 15px;
+      font-weight: bold;
+      white-space: pre-line;
+    }
+
+    /* 📱 TABLET */
+    @media (min-width: 768px) {
+      body {
+        padding: 40px;
+      }
+
+      input, button {
+        max-width: 400px;
+        font-size: 18px;
+      }
+    }
+
+    /* 💻 LAPTOP */
+    @media (min-width: 1024px) {
+      body {
+        max-width: 500px;
+        margin: auto;
+      }
+    }
+  </style>
+
+</head>
+<body>
+
+<h2>Login</h2>
+
+<div id="loginBox">
+  <input type="text" id="dni" placeholder="DNI"><br><br>
+  <input type="password" id="password" placeholder="Contraseña"><br><br>
+  <button onclick="login()">Ingresar</button>
+</div>
+
+<div id="panel" style="display:none;">
+  <h3>Panel de Asistencia</h3>
+
+  <button onclick="iniciarEscaneo()">📷 Escanear QR</button><br><br>
+
+  <video id="video" width="300" style="display:none;"></video>
+  <canvas id="canvas" style="display:none;"></canvas>
+
+</div>
+
+<p id="mensaje"></p>
+
+<!-- SUPABASE -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<!-- LIBRERÍA QR -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr"></script>
+
+<script>
+const supabaseUrl = 'https://kcapmyovaigjntaqeqwn.supabase.co'
+const supabaseKey = 'sb_publishable_oObf3s5mQ4sfmJ03JKQrnQ__8Rmb63F'
+
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+// 📱 DEVICE
+function getDeviceId() {
+  let deviceId = localStorage.getItem("device_id")
+
+  if (!deviceId) {
+    deviceId = 'dev-' + Math.random().toString(36).substring(2, 10)
+    localStorage.setItem("device_id", deviceId)
+  }
+
+  return deviceId
+}
+
+// 🔐 LOGIN
+async function login() {
+  const dni = document.getElementById("dni").value
+  const password = document.getElementById("password").value
+  const deviceId = getDeviceId()
+
+  const { data, error } = await supabaseClient
+    .from('Usuarios')
+    .select('*')
+    .eq('dni', dni)
+    .eq('password', password)
+    .single()
+
+  if (error || !data) {
+    document.getElementById("mensaje").innerText = "❌ Usuario incorrecto"
+    return
+  }
+
+  if (!data.dispositivo_id) {
+    await supabaseClient
+      .from('Usuarios')
+      .update({ dispositivo_id: deviceId })
+      .eq('id', data.id)
+
+  } else if (data.dispositivo_id !== deviceId) {
+    document.getElementById("mensaje").innerText = "⛔ Dispositivo no autorizado"
+    return
+  }
+
+  localStorage.setItem("usuario_id", data.id)
+
+  document.getElementById("loginBox").style.display = "none"
+  document.getElementById("panel").style.display = "block"
+
+  document.getElementById("mensaje").innerText = "✅ Login correcto"
+}
+
+// 📷 ESCANEAR QR
+function iniciarEscaneo() {
+  const video = document.getElementById("video")
+  video.style.display = "block"
+
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+    .then(stream => {
+      video.srcObject = stream
+      video.setAttribute("playsinline", true)
+      video.play()
+      requestAnimationFrame(scanQR)
+    })
+}
+
+// 🔍 DETECTAR QR
+function scanQR() {
+  const video = document.getElementById("video")
+  const canvas = document.getElementById("canvas")
+  const ctx = canvas.getContext("2d")
+
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    canvas.height = video.videoHeight
+    canvas.width = video.videoWidth
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+
+    const code = jsQR(imageData.data, imageData.width, imageData.height)
+
+    if (code) {
+      registrarAsistencia(code.data)
+      return
+    }
+  }
+
+  requestAnimationFrame(scanQR)
+}
+
+// 📍 REGISTRAR ASISTENCIA
+async function registrarAsistencia(qrData) {
+
+  // 🔐 VALIDAR QR (aquí defines tu código válido)
+  const QR_VALIDO = "EMPRESA-001"
+
+  if (qrData !== QR_VALIDO) {
+    document.getElementById("mensaje").innerText = "❌ QR inválido"
+    return
+  }
+
+  navigator.geolocation.getCurrentPosition(async function(position) {
+
+    const lat = position.coords.latitude
+    const lng = position.coords.longitude
+    const usuario_id = localStorage.getItem("usuario_id")
+
+    const { error } = await supabaseClient
+      .from('asistencias')
+      .insert([
+        {
+          usuario_id: usuario_id,
+          latitud: lat,
+          longitud: lng
+        }
+      ])
+
+    if (error) {
+      document.getElementById("mensaje").innerText = "❌ Error al guardar"
+    } else {
+      document.getElementById("mensaje").innerText = "✅ Asistencia registrada"
+    }
+
+  }, function() {
+    document.getElementById("mensaje").innerText = "⚠ Activa GPS"
+  })
+}
+</script>
+
+</body>
+</html>
