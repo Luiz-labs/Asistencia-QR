@@ -540,10 +540,25 @@ async function guardarAsistencia() {
     const lat = position.coords.latitude
     const lng = position.coords.longitude
 
+    const ahora = new Date()
+    const fechaLocal = ahora.toISOString().split("T")[0]
+    const horaLocal = ahora.toTimeString().split(" ")[0]
+
     const { error } = await supabaseClient
       .from('asistencias')
       .insert([
-        { dni, nombre, ubo, seccion, latitud: lat, longitud: lng, device_id: deviceId }
+        {
+          dni,
+          nombre,
+          ubo,
+          seccion,
+          latitud: lat,
+          longitud: lng,
+          device_id: deviceId,
+          fecha: fechaLocal,
+          hora: horaLocal,
+          timestamp_local: ahora.toString()
+        }
       ])
 
     ocultarLoader()
@@ -559,7 +574,6 @@ async function guardarAsistencia() {
     } else {
       mostrarMensaje("✅ Asistencia registrada", "ok")
 
-      // limpiar form
       document.getElementById("formulario").style.display = "none"
     }
 
