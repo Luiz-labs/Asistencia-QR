@@ -93,6 +93,28 @@
       width: 100px;
     }
   }
+
+  #secciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  }
+
+  .btn-seccion {
+    background: #333;
+    border: 2px solid #555;
+    padding: 12px;
+    border-radius: 10px;
+    color: white;
+    font-size: 15px;
+  }
+
+  .btn-seccion.activo {
+    background: #2d8cf0;
+    border-color: #2d8cf0;
+  }
+
   </style>
 
 </head>
@@ -147,12 +169,23 @@
   <input type="text" id="nombre" placeholder="Nombre completo">
   <input type="text" id="ubo" placeholder="UBO / Compañía">
 
-  <select id="seccion">
-    <option value="">Selecciona sección</option>
-    <option>Sección A (Martes y Jueves presencial B28)</option>
-    <option>Sección B (Sábado presencial B28)</option>
-    <option>Sección C (Sábado virtual)</option>
-  </select>
+  <p style="margin-top:10px;">Selecciona tu sección</p>
+
+  <div id="secciones">
+
+    <button type="button" class="btn-seccion" onclick="seleccionarSeccion(this, 'A')">
+      Sección A
+    </button>
+
+    <button type="button" class="btn-seccion" onclick="seleccionarSeccion(this, 'B')">
+      Sección B
+    </button>
+
+    <button type="button" class="btn-seccion" onclick="seleccionarSeccion(this, 'C')">
+      Sección C
+    </button>
+
+  </div>
 
   <button onclick="guardarAsistencia()">✅ Registrar Asistencia</button>
 
@@ -491,7 +524,7 @@ async function guardarAsistencia() {
   const dni = document.getElementById("dni").value
   const nombre = document.getElementById("nombre").value
   const ubo = document.getElementById("ubo").value
-  const seccion = document.getElementById("seccion").value
+  const seccion = seccionSeleccionada
 
   if (!dni || !nombre || !ubo || !seccion) {
     mostrarMensaje("⚠ Completa todos los campos", "warn")
@@ -534,6 +567,19 @@ async function guardarAsistencia() {
     ocultarLoader()
     mostrarMensaje("⚠ Activa GPS", "warn")
   })
+}
+
+let seccionSeleccionada = ""
+
+function seleccionarSeccion(btn, valor) {
+
+  seccionSeleccionada = valor
+
+  document.querySelectorAll(".btn-seccion").forEach(b => {
+    b.classList.remove("activo")
+  })
+
+  btn.classList.add("activo")
 }
 
 </script>
