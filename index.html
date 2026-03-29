@@ -1,424 +1,476 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>ESBAS - Asistencia</title>
+<meta charset="UTF-8">
+<title>ESBAS Sistema</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  font-family:-apple-system, BlinkMacSystemFont;
+  background:#e9ecf1; /* gris marcado estilo mac */
+  color:#1c1c1e;
+}
 
-  <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: black;
-    color: white;
-    text-align: center;
-  }
+/* HEADER */
+.header{
+  height:60px;
+  background:white;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 20px;
+  border-bottom:1px solid #e5e5e5;
+}
 
-  .topbar {
-    background: #2d8cf0;
-    padding: 15px;
-    font-weight: bold;
-    font-size: 18px;
-  }
+/* SIDEBAR */
+.sidebar{
+  width:200px;
+  background:#ffffff;
+  padding:20px;
+  border-right:1px solid #e5e5e5;
+}
 
-  .container {
-    max-width: 500px;
-    margin: auto;
-    padding: 20px;
-    background: rgba(255,255,255,0.02);
-    border-radius: 12px;
-  }
+/* TARJETAS */
+.card{
+  background:white;
+  border-radius:16px;
+  padding:16px;
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.18),
+    0 10px 20px rgba(0, 0, 0, 0.10),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+}
 
-  h2 {
-    margin-top: 10px;
-  }
+/* INPUTS */
+input, select{
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  font-size:14px;
+  background:white;
+  height:40px; /* 🔥 clave para igualar altura */
+  box-sizing:border-box;
+}
+select{
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+}
 
-  .logo {
-    width: 140px;
-    max-width: 80%;
-    height: auto;
-    margin: 25px auto;
-    display: block;
-    object-fit: contain;
-  }
+/* FILTROS GRID */
+.filtros{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  flex-wrap:wrap;
+}
 
-  input {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: none;
-    font-size: 16px;
-  }
+/* BOTONES */
+button{
+  background:#0a84ff;
+  color:white;
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  min-width:100px;
+  height:40px;
+}
 
-  button {
-  width: auto;
-  padding: 14px;
-  margin-top: 10px;
-  border-radius: 12px;
-  border: none;
-  background: #2d8cf0;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  }
+button:hover{
+  opacity:0.9;
+}
 
-  button:hover {
-    transform: scale(1.02);
-    opacity: 0.9;
-  }
+button.secondary{
+  background:#e5e5ea;
+  color:#000;
+  min-width:100px;
+}
 
-  button:active {
-    transform: scale(0.98);
-  }
+/* TABLA */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
 
-  video {
-    width: 100%;
-    margin-top: 15px;
-    border-radius: 10px;
-  }
+td,th{
+  padding:10px;
+  border-bottom:1px solid #d1d1d6; /* más visible */
+  font-size:14px;
+  text-align:left; /* alineado a la izquierda */
+}
 
-  #mensaje {
-    margin-top: 15px;
-    font-weight: bold;
-  }
+th{
+  background:#f2f2f7; /* gris estilo mac */
+  font-weight:600;
+}
 
-  footer {
-    margin-top: 30px;
-    font-size: 12px;
-    color: #aaa;
-  }
+/* BOTONES SOLO ADMIN */
+#vistaDesktop button{
+  box-shadow:
+    0 10px 20px rgba(0,0,0,0.15),
+    0 4px 8px rgba(0,0,0,0.10);
+  transition:0.2s;
+}
 
-  /* 📱 CELULAR */
-  @media (max-width: 600px) {
-    .logo {
-      width: 140px;
-    }
-  }
+/* EFECTO HOVER */
+#vistaDesktop button:hover{
+  transform:translateY(-1px);
+  box-shadow:
+    0 14px 24px rgba(0,0,0,0.18),
+    0 6px 12px rgba(0,0,0,0.12);
+}
 
-  /* 💻 PANTALLA GRANDE */
-  @media (min-width: 900px) {
-    .container {
-      margin-top: 40px;
-    }
+.input-date{
+  position:relative;
+  display:flex;
+  align-items:center;
+}
 
-    .logo {
-      width: 100px;
-    }
-  }
+.input-date input{
+  padding-right:35px; /* espacio para icono */
+}
 
-  #secciones {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
-  }
+/* icono calendario */
+.input-date::after{
+  content:"📅";
+  position:absolute;
+  right:10px;
+  font-size:16px;
+  opacity:0.6;
+  pointer-events:none;
+}
 
-  .btn-seccion {
-    background: #333;
-    border: 2px solid #555;
-    padding: 12px;
-    border-radius: 10px;
-    color: white;
-    font-size: 15px;
-  }
-
-  .btn-seccion.activo {
-    background: #2d8cf0;
-    border-color: #2d8cf0;
-  }
-
-  th, td {
-  padding: 10px;
-  text-align: left;
-  }
-
-  th {
-    background: #2d8cf0;
-  }
-
-  tr:nth-child(even) {
-    background: #111;
-  }
-
-  * {
-    transition: all 0.2s ease;
-  }
-
-  @media (min-width: 768px) {
-    #btnMenu {
-      display: none;
-    }
-  }
-
-  </style>
-
+</style>
 </head>
 
 <body>
 
-<div id="loader" style="
-  display:none;
+<!-- LOGIN -->
+<div id="loginScreen" style="
   position:fixed;
-  top:0;
-  left:0;
   width:100%;
   height:100%;
-  background:rgba(0,0,0,0.8);
-  color:white;
-  font-size:20px;
+  display:flex;
+  flex-direction:column;
   justify-content:center;
   align-items:center;
-  z-index:9999;
+  background:#f2f2f7;
 ">
-  ⏳ Procesando...
+
+  <!-- TITULO FUERA -->
+  <div style="text-align:center;margin-bottom:30px;">
+    <h1 style="margin:0;">XXIV Comandancia Departamental Lima Sur</h1>
+    <h2 style="margin:5px 0;">Incorporación y ESBAS</h2>
+    <p style="color:#666;">Instrucción ESBAS 2026</p>
+  </div>
+
+  <!-- CARD LOGIN -->
+  <div style="
+    background:white;
+    padding:25px;
+    border-radius:18px;
+    box-shadow:
+      0 30px 60px rgba(0, 0, 0, 0.18),
+      0 10px 20px rgba(0, 0, 0, 0.10),
+      0 2px 6px rgba(0, 0, 0, 0.06);
+    width:380px;
+    text-align:center;
+    border:1px solid rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+  ">
+
+    <img src="logo.png" style="width:80px;margin-bottom:10px;">
+
+    <h2 style="margin-bottom:20px;">ESBAS 2026</h2>
+
+    <!-- INPUTS EN LINEA -->
+    <div style="display:flex;gap:10px;margin-bottom:15px;">
+      <input id="loginUser" placeholder="Usuario" style="flex:1;">
+      <input id="loginPass" type="password" placeholder="Clave" style="flex:1;">
+    </div>
+
+    <!-- BOTON -->
+    <button onclick="login()" style="width:100%;">Ingresar</button>
+
+    <p id="loginMsg" style="margin-top:10px;color:red;"></p>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div style="
+    position:absolute;
+    bottom:15px;
+    font-size:12px;
+    color:#777;
+  ">
+    Desarrollado por Luiz-Labs @ 2026
+  </div>
+
 </div>
 
-<!-- HEADER -->
-<div class="topbar">INICIO</div>
-
-<!-- CONTENIDO -->
-<div class="container">
+<!-- 📱 VISTA MOVIL -->
+<div id="vistaMovil" style="display:none;text-align:center;padding:20px;">
 
   <h2>XXIV Comandancia Departamental Lima Sur</h2>
   <h2>Incorporación y ESBAS</h2>
   <p>Instrucción ESBAS 2026</p>
 
-  <!-- LOGO (CAMBIAS LA RUTA LUEGO) -->
-  <img src="logo.png" class="logo">
+  <img src="logo.png" style="width:140px;margin:20px auto;">
 
-<!-- BOTÓN PRINCIPAL -->
-<button onclick="iniciarEscaneo()" style="width:100%;">📷 Escanear QR</button>
+  <button onclick="iniciarEscaneo()">📷 Escanear QR</button>
 
-<button id="btnCancelar" onclick="detenerCamara()" style="display:none;">
-  ❌ Cancelar
-</button>
+  <footer style="margin-top:40px;font-size:12px;color:#aaa;">
+    Desarrollado por Luiz-Labs @ 2026
+  </footer>
+
+</div>
+
+<!-- FORMULARIO -->
+<div id="formulario" style="display:none;padding:20px;text-align:center;">
+
+  <input id="dni" placeholder="DNI">
+  <input id="nombre" placeholder="Nombre completo">
+  <input id="ubo" placeholder="UBO">
+
+  <p>Selecciona tu sección</p>
+
+  <button onclick="setSeccion('A')">Sección A (Martes y Jueves Presencial)</button>
+  <button onclick="setSeccion('B')">Sección B (Sábados Presencial)</button>
+  <button onclick="setSeccion('C')">Sección C (Sábados Virtual)</button>
+
+  <button onclick="guardarAsistencia()">Registrar</button>
+  <button onclick="volverInicio()">Salir</button>
+
+  <p id="mensaje"></p>
+
+</div>
 
 <video id="video" style="display:none;"></video>
 <canvas id="canvas" style="display:none;"></canvas>
 
-<p id="mensaje"></p>
+<!-- 💻 ADMIN (TU PANEL ORIGINAL) -->
+<div id="vistaDesktop" style="display:none;">
 
-<!-- FORMULARIO (APARECE DESPUÉS DEL QR) -->
-<div id="formulario" style="display:none; margin-top:20px;">
-
-  <input type="text" id="dni" placeholder="DNI">
-  <input type="text" id="nombre" placeholder="Nombre completo">
-  <input type="text" id="ubo" placeholder="UBO / Compañía">
-
-  <p style="margin-top:10px;">Selecciona tu sección</p>
-
-  <div id="secciones">
-
-    <button type="button" class="btn-seccion" onclick="seleccionarSeccion(this, 'A')">
-      Sección A (Martes y Jueves Presencial)
-    </button>
-
-    <button type="button" class="btn-seccion" onclick="seleccionarSeccion(this, 'B')">
-      Sección B (Sábado Presencial)
-    </button>
-
-    <button type="button" class="btn-seccion" onclick="seleccionarSeccion(this, 'C')">
-      Sección C (Sábado Virtual)
-    </button>
-
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="logo.png" style="width:28px;">
+      <strong>ESBAS Panel Administrativo</strong>
+    </div>
+    <button onclick="logout()" class="secondary">Salir</button>
   </div>
 
-  <button onclick="guardarAsistencia()" style="width:100%;">✅ Registrar Asistencia</button>
+  <div style="display:flex;min-height:calc(100vh - 60px);">
 
-</div>
+    <div class="sidebar">
 
-<!-- ADMIN -->
-<button onclick="mostrarAdmin()" style="width:100%;">👩‍💼 Panel Admin</button>
+        <p onclick="mostrarVista('reportes')">📄 Reportes</p>
 
-<footer>
-  Desarrollado por  Luiz-Labs © 2026
-</footer>
+        <p onclick="mostrarVista('dashboard')">📊 Dashboard</p>
 
-<div id="adminPanel" style="
-  display:none;
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:black;
-  z-index:9999;
-">
+        <p onclick="mostrarVista('config')">⚙️ Configuración</p>
 
-  <!-- HEADER -->
-  <div style="
-    background:#2d8cf0;
-    height:60px;
-    padding:0 20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-  ">
-
-    <!-- IZQUIERDA -->
-    <div style="
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:600;
-      font-size:18px;
-    ">
-      📊 ESBAS Admin
     </div>
 
-    <!-- DERECHA -->
-    <div style="
-      display:flex;
-      align-items:center;
-      gap:12px;
-    ">
+    <div style="flex:1;padding:20px;">
 
-      <div style="
-        display:flex;
-        align-items:center;
-        gap:6px;
-        height:34px;
-        font-size:14px;
-      ">
-        <span>👤</span>
-        <span>Admin</span>
+      <div id="vistaDashboard" style="display:none;">
+
+        <h2>Dashboard</h2>
+
+        <div class="card" style="margin-bottom:15px;">
+          <div style="display:flex; gap:10px; align-items:center;">
+            
+            <input type="date" id="dashDesde">
+            <input type="date" id="dashHasta">
+
+            <button onclick="cargarDashboard()">Filtrar</button>
+            <button class="secondary" onclick="limpiarDashboard()">Limpiar</button>
+
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div style="display:flex; gap:15px; margin-bottom:20px;">
+
+          <div class="card" style="flex:1; text-align:center;">
+            <h3 id="kpiTotal">0</h3>
+            <p>Total Activos</p>
+          </div>
+
+          <div class="card" style="flex:1; text-align:center;">
+            <h3 id="kpiAsistencia">0%</h3>
+            <p>% Asistencia</p>
+          </div>
+
+        </div>
+
+        <!-- SEMÁFORO -->
+        <div style="display:flex; gap:15px; margin-bottom:20px;">
+
+          <div class="card" style="flex:1; text-align:center; cursor:pointer;" onclick="verDetalle('verde')">
+            <h3 id="verdeCount">0</h3>
+            <p>🟢 Verde</p>
+          </div>
+
+          <div class="card" style="flex:1; text-align:center; cursor:pointer;" onclick="verDetalle('amarillo')">
+            <h3 id="amarilloCount">0</h3>
+            <p>🟡 Amarillo</p>
+          </div>
+
+          <div class="card" style="flex:1; text-align:center; cursor:pointer;" onclick="verDetalle('rojo')">
+            <h3 id="rojoCount">0</h3>
+            <p>🔴 Rojo</p>
+          </div>
+
+        </div>
+
+        <!-- TOP RIESGO UBO -->
+        <div class="card">
+          <h3>⚠ Riesgo por UBO</h3>
+          <div id="topUbo"></div>
+        </div>
+
       </div>
 
-      <button onclick="cerrarAdmin()" style="
-        height:34px;
-        padding:0 14px;
-        background:rgba(255,255,255,0.9);
-        color:#2d8cf0;
-        border:none;
-        border-radius:10px;
-        font-weight:600;
-        cursor:pointer;
-        display:flex;
-        align-items:center;
-      ">
-        Salir
-      </button>
-
-    </div>
-
-  </div> <!-- 🔥 ESTE ERA EL DIV QUE FALTABA -->
-
-  <!-- CONTENEDOR FLEX -->
-  <div style="
-    display:flex;
-    height:calc(100vh - 60px);
-  ">
-
-    <!-- SIDEBAR -->
-    <div id="sidebar" style="
-      width:220px;
-      background:#0d0d0d;
-      padding:20px;
-      border-right:1px solid #222;
-      transition: all 0.3s ease;
-      overflow:hidden;
-      text-align:left;
-      flex-shrink:0;
-    ">
-
-      <button onclick="toggleSidebar()" style="width:100%; margin-bottom:20px;">
-        ☰
-      </button>
-
-      <p onclick="mostrarVista('reportes')" style="cursor:pointer;">📊 Reportes</p>
-      <p onclick="mostrarVista('config')" style="cursor:pointer;">
-        ⚙ Configuración
-      </p>
-
-    </div>
-
-    <!-- CONTENIDO -->
-    <div style="
-      flex:1;
-      padding:20px;
-      overflow-y:auto;
-    ">
-
-      <!-- VISTA INICIO -->
-      <div id="vistaInicio">
-        <h2>Bienvenido</h2>
-        <p>Panel ESBAS listo</p>
-      </div>
-
-      <!-- VISTA REPORTES -->
-      <div id="vistaReportes" style="display:none;">
+      <div id="vistaReportes">
 
         <h2>Reportes</h2>
+        <!-- CARD FILTROS -->
+        <div class="card" style="margin-bottom:20px;">
 
-        <!-- FILTROS -->
-        <div style="
-          display:flex;
-          gap:10px;
-          flex-wrap:wrap;
-          align-items:center;
-          margin-bottom:20px;
-        ">
-          <button onclick="filtrarHoy()">Hoy</button>
-          <button onclick="filtrar7()">7 días</button>
-          <button onclick="filtrar30()">30 días</button>
+          <h3 style="margin-bottom:10px;">Filtros</h3>
 
-          <button onclick="cargarDatos()">Aplicar</button>
-          <button onclick="limpiarFiltros()">Limpiar</button>
+          <div class="filtros">
 
-          <button onclick="exportarExcel()" style="margin-left:auto;">
-            📥 Exportar
-          </button>
+            <select id="filtroUbo" style="width:160px;"></select>
+
+            <div class="input-date">
+              <input type="date" id="fechaDesde">
+            </div>
+
+            <div class="input-date">
+              <input type="date" id="fechaHasta">
+            </div>
+
+            <button onclick="aplicarFiltros()">Aplicar</button>
+            <button class="secondary" onclick="limpiarFiltros()">Limpiar</button>
+            <button onclick="cargarDatos()">Todos</button>
+
+          </div>
+
         </div>
+        
+          <!-- 🔥 TABLA RESULTADOS (AQUI VA) -->
+        <div id="tabla" class="card"></div>
 
-        <!-- TABLA -->
-        <div style="width:100%; padding-bottom:50px;">
-          <table style="
-            width:100%;
-            border-collapse: collapse;
-            background:#1a1a1a;
-            border-radius:10px;
-          ">
-            <thead>
-              <tr>
-                <th>DNI</th>
-                <th>Nombre</th>
-                <th>UBO</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-              </tr>
-            </thead>
-            <tbody id="tablaBody"></tbody>
-          </table>
-        </div>
-
-        <div id="indicadores" style="margin-top:20px;"></div>
 
       </div>
 
-      <!-- CONFIG -->
       <div id="vistaConfig" style="display:none;">
+
         <h2>Configuración</h2>
 
-        <p>⚙ Próximamente:</p>
+        <!-- GPS -->
+        <div class="card" style="margin-bottom:20px;">
+          <h3>GPS</h3>
+          <label>
+            <input type="checkbox" id="toggleGPS">
+            Activar validación GPS
+          </label>
+        </div>
 
-        <ul style="text-align:left;">
-          <li>📍 GPS configurable</li>
-          <li>📅 Inicio y fin de curso</li>
-          <li>📆 Días de asistencia por sección</li>
-        </ul>
+        <!-- RETIRAR ASPIRANTE -->
+        <div class="card">
+
+          <h3>Retirar Aspirante</h3>
+
+          <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <select id="filtroUboConfig"></select>
+            <button onclick="buscarAspirantes()">Buscar</button>
+            <button class="secondary" onclick="limpiarRetiro()">Limpiar</button>
+          </div>
+          
+          <div id="listaAspirantes"></div>
+
+        </div>
+
+        <!-- CURSO -->
+        <div class="card" style="margin-top:20px;">
+
+          <h3>Configuración de Curso</h3>
+
+          <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <input type="date" id="cursoInicio">
+            <input type="date" id="cursoFin">
+          </div>
+
+          <button onclick="guardarCurso()">Guardar Curso</button>
+          <button class="secondary" onclick="limpiarCurso()">Limpiar</button>
+
+        </div>
+
+        <!-- SECCIONES -->
+        <div class="card" style="margin-top:20px;">
+
+          <h3>Secciones</h3>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+            <select id="secNombre">
+              <option>A</option>
+              <option>B</option>
+              <option>C</option>
+              <option>D</option>
+            </select>
+
+            <select id="secDias" multiple>
+              <option>Lunes</option>
+              <option>Martes</option>
+              <option>Miércoles</option>
+              <option>Jueves</option>
+              <option>Viernes</option>
+              <option>Sábado</option>
+              <option>Domingo</option>
+            </select>
+
+            <input type="time" id="secHora">
+
+            <label>
+              <input type="checkbox" id="secPresencial"> Presencial
+            </label>
+
+            <label>
+              <input type="checkbox" id="secVirtual"> Virtual
+            </label>
+
+            <button onclick="agregarSeccion()">Agregar</button>
+            <button class="secondary" onclick="limpiarSecciones()">Limpiar</button>
+
+          </div>
+
+          <div id="listaSecciones" style="margin-top:10px;"></div>
+
+        </div>
+
       </div>
+
+      
 
     </div>
 
   </div>
 
+  <div style="text-align:center;padding:10px;font-size:12px;color:#777;">
+    Desarrollado por Luiz-Labs @ 2026
+  </div>
+
 </div>
 
-<!-- LIBRERÍAS -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr"></script>
 
@@ -428,450 +480,564 @@ const supabaseKey = 'sb_publishable_oObf3s5mQ4sfmJ03JKQrnQ__8Rmb63F'
 
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey)
 
-// DEVICE ID
-function getDeviceId() {
-  let deviceId = localStorage.getItem("device_id")
-
-  if (!deviceId) {
-    deviceId = 'dev-' + Math.random().toString(36).substring(2, 10)
-    localStorage.setItem("device_id", deviceId)
-  }
-
-  return deviceId
+function esMovil(){
+  return /Android|iPhone/i.test(navigator.userAgent)
 }
 
-let streamGlobal = null
+window.onload = ()=>{
+  if(esMovil()){
+    vistaMovil.style.display="block"
+    loginScreen.style.display="none"
+  } else {
+    vistaDesktop.style.display="none"
+    loginScreen.style.display="flex"
+  }
+    // 🔥 NUEVO
+  cargarUbos()
 
-function iniciarEscaneo() {
-
-  const video = document.getElementById("video")
-  const btnCancelar = document.getElementById("btnCancelar")
-
-  video.style.display = "block"
-  btnCancelar.style.display = "block"
-
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-    .then(stream => {
-      streamGlobal = stream
-      video.srcObject = stream
-      video.play()
-      requestAnimationFrame(scanQR)
-    })
 }
 
-function scanQR() {
-  const video = document.getElementById("video")
-  const canvas = document.getElementById("canvas")
-  const ctx = canvas.getContext("2d")
-
-  if (video.readyState === video.HAVE_ENOUGH_DATA) {
-    canvas.height = video.videoHeight
-    canvas.width = video.videoWidth
-
-    ctx.drawImage(video, 0, 0)
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const code = jsQR(imageData.data, imageData.width, imageData.height)
-
-    if (code) {
-      detenerCamara()
-
-      if (code.data !== "ESBAS-2026") {
-        mostrarMensaje("❌ QR inválido", "error")
-        return
-      }
-
-      mostrarMensaje("✅ QR válido, completa tus datos", "ok")
-      document.getElementById("formulario").style.display = "block"
-      return
-    }
+function login(){
+  if(loginUser.value==="12345678" && loginPass.value==="1234"){
+    loginScreen.style.display="none"
+    vistaDesktop.style.display="block"
+  } else {
+    loginMsg.innerText="Error"
   }
-
-  requestAnimationFrame(scanQR)
 }
 
-function detenerCamara() {
-  if (streamGlobal) {
-    streamGlobal.getTracks().forEach(track => track.stop())
-  }
-
-  document.getElementById("video").style.display = "none"
-  document.getElementById("btnCancelar").style.display = "none"
+function logout(){
+  location.reload()
 }
 
+/* QR */
+let stream,seccion=""
 
-
-// REGISTRAR
-async function registrarAsistencia(qrData) {
-
-  const QR_VALIDO = "ESBAS-2026"
-
-  if (qrData !== QR_VALIDO) {
-    mostrarMensaje("❌ QR inválido", "error")
-    return
-  }
-
-  const dni = document.getElementById("dni").value
-  const nombre = document.getElementById("nombre").value
-  const ubo = document.getElementById("ubo").value
-  const deviceId = getDeviceId()
-
-  navigator.geolocation.getCurrentPosition(async function(position) {
-
-    const lat = position.coords.latitude
-    const lng = position.coords.longitude
-
-    const { error } = await supabaseClient
-      .from('asistencias')
-      .insert([
-        { dni, nombre, ubo, latitud: lat, longitud: lng, device_id: deviceId }
-      ])
-
-    if (error) {
-
-      // detectar duplicado
-      if (error.message.includes("duplicate")) {
-        mostrarMensaje("⚠ Ya registraste asistencia hoy", "warn")
-      } else {
-        mostrarMensaje("❌ Error al registrar", "error")
-      }
-
-    } else {
-      mostrarMensaje("✅ Asistencia registrada", "ok")
-    }
-
-  }, function() {
-    mostrarMensaje("⚠ Activa GPS", "warn")
+function iniciarEscaneo(){
+  navigator.mediaDevices.getUserMedia({video:true})
+  .then(s=>{
+    stream=s
+    video.srcObject=s
+    video.play()
+    scanQR()
   })
 }
 
-// 🔐 CLAVE SIMPLE
-const ADMIN_PASS = "1234"
+function scanQR(){
+  const ctx=canvas.getContext("2d")
 
-// Mostrar panel
-function mostrarAdmin() {
-  const pass = prompt("Ingrese clave admin")
+  if(video.readyState===video.HAVE_ENOUGH_DATA){
+    canvas.width=video.videoWidth
+    canvas.height=video.videoHeight
+    ctx.drawImage(video,0,0)
 
-  if (pass === ADMIN_PASS) {
-    document.getElementById("adminPanel").style.display = "block"
+    const img=ctx.getImageData(0,0,canvas.width,canvas.height)
+    const code=jsQR(img.data,img.width,img.height)
 
-    setTimeout(() => {
-      mostrarVista("reportes")
-    }, 300)
-
-  } else {
-    alert("Clave incorrecta")
-  }
-}
-
-function cerrarAdmin() {
-  document.getElementById("adminPanel").style.display = "none"
-}
-
-function mostrarMensaje(texto, tipo="ok") {
-
-  const el = document.getElementById("mensaje")
-
-  let bg = "#2d8cf0"
-
-  if (tipo === "error") bg = "#ff4d4f"
-  if (tipo === "warn") bg = "#faad14"
-
-  el.style.background = bg
-  el.style.color = "white"
-  el.style.padding = "10px"
-  el.style.borderRadius = "8px"
-  el.style.marginTop = "15px"
-
-  el.innerText = texto
-
-  setTimeout(() => {
-    el.innerText = ""
-    el.style.background = "transparent"
-  }, 3000)
-}
-
-// 📊 Cargar datos
-async function cargarDatos() {
-
-  console.log("Inicio:", window.fechaInicio)
-  console.log("Fin:", window.fechaFin)
-
-  if (!window.fechaInicio || !window.fechaFin) {
-    mostrarMensaje("⚠ Primero selecciona Hoy, 7 días o 30 días", "warn")
-    return
-  }
-
-  mostrarMensaje("📊 Cargando datos...", "ok")
-
-  let query = supabaseClient
-    .from('asistencias')
-    .select('*')
-    .order('fecha', { ascending: true })
-
-  query = query
-    .gte('fecha', window.fechaInicio)
-    .lte('fecha', window.fechaFin)
-
-  const { data, error } = await query
-
-  if (error) {
-    console.log(error)
-    mostrarMensaje("❌ Error al cargar datos", "error")
-    return
-  }
-
-  const tbody = document.getElementById("tablaBody")
-  tbody.innerHTML = ""
-
-  if (!data || data.length === 0) {
-    document.getElementById("indicadores").innerHTML = "<p>No hay datos</p>"
-    return
-  }
-
-  let alumnos = {}
-
-  data.forEach(row => {
-
-    if (!alumnos[row.dni]) {
-      alumnos[row.dni] = {
-        nombre: row.nombre,
-        ubo: row.ubo,
-        asistencias: 0
-      }
+    if(code){
+      detenerCamara()
+      vistaMovil.style.display="none"
+      formulario.style.display="block"
+      return
     }
+  }
+  requestAnimationFrame(scanQR)
+}
 
-    alumnos[row.dni].asistencias++
+function detenerCamara(){
+  if(stream) stream.getTracks().forEach(t=>t.stop())
+}
 
-    tbody.innerHTML += `
+function volverInicio(){
+  formulario.style.display="none"
+  vistaMovil.style.display="block"
+}
+
+function setSeccion(s){seccion=s}
+
+function getDeviceId(){
+  let id=localStorage.getItem("dev")
+  if(!id){
+    id="dev-"+Math.random()
+    localStorage.setItem("dev",id)
+  }
+  return id
+}
+
+async function guardarAsistencia(){
+  const now=new Date()
+
+  const {error}=await supabaseClient.from("asistencias").insert([{
+    dni:dni.value,
+    nombre:nombre.value,
+    ubo:ubo.value,
+    seccion:seccion,
+    fecha:now.toISOString().slice(0,10),
+    hora:now.toTimeString().slice(0,8),
+    device_id:getDeviceId()
+  }])
+
+  mensaje.innerText = error ? "⚠ Ya registraste hoy" : "✅ Registrado"
+}
+
+/* ADMIN */
+async function cargarDatos(){
+  const {data}=await supabaseClient.from("asistencias").select("*")
+  renderTabla(data)
+}
+
+function renderTabla(data){
+
+  let html = `
+  <table>
+    <thead>
       <tr>
-        <td>${row.dni}</td>
-        <td>${row.nombre}</td>
-        <td>${row.ubo}</td>
-        <td>${row.fecha}</td>
-        <td>${row.hora}</td>
+        <th>DNI</th>
+        <th>Nombre</th>
+        <th>UBO</th>
+        <th>Fecha</th>
+        <th>Hora</th>
+      </tr>
+    </thead>
+    <tbody>
+  `
+
+  data.forEach(r=>{
+    html+=`
+      <tr>
+        <td>${r.dni}</td>
+        <td>${r.nombre}</td>
+        <td>${r.ubo}</td>
+        <td>${r.fecha}</td>
+        <td>${r.hora}</td>
       </tr>
     `
   })
 
-  let html = "<h3>Indicadores</h3>"
+  html += `
+    </tbody>
+  </table>
 
-  for (let dni in alumnos) {
+  <div style="margin-top:10px;font-weight:bold;">
+    Total registros: ${data.length}
+  </div>
+  `
 
-    let asistencias = alumnos[dni].asistencias
+  tabla.innerHTML = html
+}
 
-    html += `
-      <div style="
-        background:#1a1a1a;
-        margin:12px 0;
-        padding:14px;
-        border-radius:12px;
-        border-left:6px solid green;
-      ">
-        <strong>${alumnos[dni].nombre}</strong><br>
-        DNI: ${dni} | UBO: ${alumnos[dni].ubo}<br>
-        ✔ Asistencias: ${asistencias}
-      </div>
-    `
+async function aplicarFiltros(){
+
+  let q = supabaseClient.from("asistencias").select("*")
+
+  if(filtroUbo.value){
+    q = q.ilike("ubo","%"+filtroUbo.value+"%")
   }
 
-document.getElementById("indicadores").innerHTML = html
-}
+  if(fechaDesde.value){
+    q = q.gte("fecha",fechaDesde.value)
+  }
 
+  if(fechaHasta.value){
+    q = q.lte("fecha",fechaHasta.value)
+  }
 
+  const { data, error } = await q
 
-
-
-// 📥 EXPORTAR EXCEL
-function exportarExcel() {
-
-  let contenido = "DNI,Nombre,UBO,Fecha,Hora\n"
-
-  document.querySelectorAll("#tablaBody tr").forEach(row => {
-    let cols = row.querySelectorAll("td")
-
-    contenido += `${cols[0].innerText},${cols[1].innerText},${cols[2].innerText},${cols[3].innerText},${cols[4].innerText}\n`
-  })
-
-  let blob = new Blob([contenido], { type: "text/csv;charset=utf-8;" })
-
-  let url = URL.createObjectURL(blob)
-
-  let a = document.createElement("a")
-  a.href = url
-  a.download = "reporte_esbas.csv"
-  a.click()
-}
-
-function mostrarLoader() {
-  document.getElementById("loader").style.display = "flex"
-}
-
-function ocultarLoader() {
-  document.getElementById("loader").style.display = "none"
-}
-
-async function guardarAsistencia() {
-
-  const dni = document.getElementById("dni").value
-  const nombre = document.getElementById("nombre").value
-  const ubo = document.getElementById("ubo").value
-  const seccion = seccionSeleccionada
-
-  if (!dni || !nombre || !ubo || !seccion) {
-    mostrarMensaje("⚠ Completa todos los campos", "warn")
+  if(error){
+    console.error(error)
+    alert("Error al filtrar")
     return
   }
 
-  mostrarLoader()
+  renderTabla(data)
 
-  const deviceId = getDeviceId()
+}
 
-  navigator.geolocation.getCurrentPosition(async function(position) {
+function limpiarFiltros(){
 
-    const lat = position.coords.latitude
-    const lng = position.coords.longitude
+  filtroUbo.value = ""
+  fechaDesde.value = ""
+  fechaHasta.value = ""
 
-    const ahora = new Date()
+  tabla.innerHTML = ""
 
-    const fechaLocal =
-      ahora.getFullYear() + "-" +
-      String(ahora.getMonth() + 1).padStart(2, "0") + "-" +
-      String(ahora.getDate()).padStart(2, "0")
+}
 
-    const horaLocal =
-      String(ahora.getHours()).padStart(2, "0") + ":" +
-      String(ahora.getMinutes()).padStart(2, "0") + ":" +
-      String(ahora.getSeconds()).padStart(2, "0")
+async function cargarDashboard(){
 
-    const { error } = await supabaseClient
-      .from('asistencias')
-      .insert([
-        {
-          dni,
-          nombre,
-          ubo,
-          seccion,
-          latitud: lat,
-          longitud: lng,
-          device_id: deviceId,
-          fecha: fechaLocal,
-          hora: horaLocal,
-          timestamp_local: ahora.toString()
-        }
-      ])
+  let q = supabaseClient.from("asistencias").select("*")
 
-    ocultarLoader()
+  if(dashDesde.value){
+    q = q.gte("fecha", dashDesde.value)
+  }
 
-    if (error) {
+  if(dashHasta.value){
+    q = q.lte("fecha", dashHasta.value)
+  }
 
-      if (error.message.includes("duplicate")) {
-        mostrarMensaje("⚠ Ya registraste hoy", "warn")
-      } else {
-        mostrarMensaje("❌ Error al registrar", "error")
-      }
+  const { data } = await q
 
-    } else {
-      mostrarMensaje("✅ Asistencia registrada", "ok")
+  let alumnos = {}
 
-      document.getElementById("formulario").style.display = "none"
-      document.getElementById("dni").value = ""
-      document.getElementById("nombre").value = ""
-      document.getElementById("ubo").value = ""
-      seccionSeleccionada = ""
+  data.forEach(r=>{
+    if(!alumnos[r.dni]){
+      alumnos[r.dni]={ nombre:r.nombre, ubo:r.ubo, total:0 }
+    }
+    alumnos[r.dni].total++
+  })
+
+  let total = Object.keys(alumnos).length
+
+  let verde=0, amarillo=0, rojo=0
+
+  // 🔥 GUARDAMOS DETALLE GLOBAL
+  window.detalleSemaforo = {
+    verde:[],
+    amarillo:[],
+    rojo:[]
+  }
+
+  let uboMap={}
+
+  for(let dni in alumnos){
+
+    let a = alumnos[dni]
+    let estado="rojo"
+
+    // 🔥 evaluar por hora
+    let registros = data.filter(x=>x.dni==dni)
+
+    let asistio = registros.length > 0
+
+    if(asistio){
+
+      let hora = registros[0].hora
+
+      if(hora <= "19:10:00") estado="verde"
+      else if(hora <= "19:30:00") estado="amarillo"
+      else estado="rojo"
+
     }
 
-  }, function() {
-    ocultarLoader()
-    mostrarMensaje("⚠ Activa GPS", "warn")
+    if(estado==="verde") verde++
+    if(estado==="amarillo") amarillo++
+    if(estado==="rojo") rojo++
+
+    window.detalleSemaforo[estado].push({
+      dni,
+      nombre:a.nombre,
+      ubo:a.ubo,
+      total:a.total
+    })
+
+    if(estado==="rojo"){
+      if(!uboMap[a.ubo]) uboMap[a.ubo]=0
+      uboMap[a.ubo]++
+    }
+  }
+
+  kpiTotal.innerText = total
+  kpiAsistencia.innerText = total 
+    ? Math.round((verde/total)*100)+"%" 
+    : "0%"
+
+  verdeCount.innerText = verde
+  amarilloCount.innerText = amarillo
+  rojoCount.innerText = rojo
+
+  let html=""
+  Object.entries(uboMap)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,5)
+    .forEach(([ubo,val])=>{
+      html += `<p onclick="verUbo('${ubo}')" style="cursor:pointer;">
+      ⚠ ${ubo} - ${val} casos
+      </p>`
+    })
+
+  topUbo.innerHTML = html
+}
+
+function verUbo(ubo){
+
+  let data = window.detalleSemaforo["rojo"]
+    .filter(x=>x.ubo == ubo)
+
+  let html = `
+  <table>
+    <tr>
+      <th>DNI</th>
+      <th>Nombre</th>
+      <th>UBO</th>
+      <th>Asistencias</th>
+    </tr>
+  `
+
+  data.forEach(r=>{
+    html += `
+      <tr>
+        <td>${r.dni}</td>
+        <td>${r.nombre}</td>
+        <td>${r.ubo}</td>
+        <td>${r.total}</td>
+      </tr>
+    `
   })
+
+  html += "</table>"
+
+  modalTitulo.innerText = "UBO " + ubo
+  modalContenido.innerHTML = html
+
+  modal.style.display="flex"
 }
 
-let seccionSeleccionada = ""
+async function buscarAspirantes(){
 
-function seleccionarSeccion(btn, valor) {
+  const ubo = filtroUboConfig.value
 
-  seccionSeleccionada = valor
+  const { data } = await supabaseClient
+    .from("asistencias")
+    .select("dni,nombre,ubo")
+    .ilike("ubo","%"+ubo+"%")
 
-  document.querySelectorAll(".btn-seccion").forEach(b => {
-    b.classList.remove("activo")
+  let html=""
+
+  data.forEach(a=>{
+    html+=`
+      <p onclick="seleccionarAspirante('${a.dni}','${a.nombre}')">
+        ${a.nombre} (${a.dni})
+      </p>
+    `
   })
 
-  btn.classList.add("activo")
+  listaAspirantes.innerHTML = html
 }
 
-function filtrarHoy() {
-  const hoy = new Date()
-  aplicarRango(hoy, hoy)
+async function retirarAspirante(dni){
+
+  alert("Aspirante marcado como retirado (pendiente columna estado en BD)")
+
 }
 
-function filtrar7() {
-  const fin = new Date()
-  const inicio = new Date()
-  inicio.setDate(fin.getDate() - 7)
-  aplicarRango(inicio, fin)
-}
+function mostrarVista(vista){
 
-function filtrar30() {
-  const fin = new Date()
-  const inicio = new Date()
-  inicio.setDate(fin.getDate() - 30)
-  aplicarRango(inicio, fin)
-}
+  vistaReportes.style.display="none"
+  document.getElementById("vistaDashboard").style.display="none"
+  document.getElementById("vistaConfig").style.display="none"
 
-function aplicarRango(inicio, fin) {
-  window.fechaInicio = formatearFecha(inicio)
-  window.fechaFin = formatearFecha(fin)
-
-  mostrarMensaje("📅 Filtro seleccionado, presiona Aplicar", "ok")
-}
-
-function limpiarFiltros() {
-  window.fechaInicio = null
-  window.fechaFin = null
-
-  document.getElementById("tablaBody").innerHTML = ""
-  document.getElementById("indicadores").innerHTML = ""
-
-  mostrarMensaje("🧹 Datos limpiados", "ok")
-}
-
-function formatearFecha(fecha) {
-  return fecha.getFullYear() + "-" +
-    String(fecha.getMonth() + 1).padStart(2, "0") + "-" +
-    String(fecha.getDate()).padStart(2, "0")
-}
-
-function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar")
-
-  if (sidebar.style.width === "60px") {
-    sidebar.style.width = "220px"
-
-    sidebar.querySelectorAll("p").forEach(el => el.style.display = "block")
-
-  } else {
-    sidebar.style.width = "60px"
-
-    sidebar.querySelectorAll("p").forEach(el => el.style.display = "none")
-  }
-}
-
-function mostrarVista(vista) {
-  document.getElementById("vistaInicio").style.display = "none"
-  document.getElementById("vistaReportes").style.display = "none"
-  document.getElementById("vistaConfig").style.display = "none"
-
-  if (vista === "reportes") {
-    document.getElementById("vistaReportes").style.display = "block"
+  if(vista==="dashboard"){
+    document.getElementById("vistaDashboard").style.display="block"
+    cargarDashboard()
   }
 
-  if (vista === "config") {
-    document.getElementById("vistaConfig").style.display = "block"
+  if(vista==="reportes"){
+    vistaReportes.style.display="block"
   }
+
+  if(vista==="config"){
+    document.getElementById("vistaConfig").style.display="block"
+  }
+
 }
+
+function seleccionarAspirante(dni,nombre){
+
+  const confirmar = confirm("Retirar a "+nombre+" ?")
+
+  if(confirmar){
+    retirarAspirante(dni)
+  }
+
+}
+
+function verDetalle(color){
+
+  let data = window.detalleSemaforo[color] || []
+
+  let html = `
+  <table>
+    <tr>
+      <th>DNI</th>
+      <th>Nombre</th>
+      <th>UBO</th>
+      <th>Asistencias</th>
+    </tr>
+  `
+
+  data.forEach(x=>{
+    html += `
+      <tr>
+        <td>${x.dni}</td>
+        <td>${x.nombre}</td>
+        <td>${x.ubo}</td>
+        <td>${x.total}</td>
+      </tr>
+    `
+  })
+
+  html += "</table>"
+
+  modalTitulo.innerText = "Semáforo " + color.toUpperCase()
+  modalContenido.innerHTML = html
+
+  modal.style.display="flex"
+}
+
+async function cargarUbos(){
+
+  const { data } = await supabaseClient
+    .from("asistencias")
+    .select("ubo")
+
+  let ubos = [...new Set(data.map(x=>x.ubo))]
+      .sort((a,b)=>parseInt(a)-parseInt(b))
+
+  let html = '<option value="">Seleccionar UBO</option>'
+
+  ubos.forEach(u=>{
+    html += `<option value="${u}">${u}</option>`
+  })
+
+  filtroUboConfig.innerHTML = html
+  filtroUbo.innerHTML = html
+}
+
+function cerrarModal(){
+  modal.style.display="none"
+}
+
+// cerrar con ESC
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){
+    cerrarModal()
+  }
+})
+
+let secciones = []
+
+function guardarCurso(){
+  localStorage.setItem("cursoInicio", cursoInicio.value)
+  localStorage.setItem("cursoFin", cursoFin.value)
+  alert("Curso guardado")
+}
+
+function agregarSeccion(){
+
+  const diasSeleccionados = Array.from(secDias.selectedOptions).map(o=>o.value)
+
+  const sec = {
+    nombre: secNombre.value,
+    dias: diasSeleccionados.join(", "),
+    hora: secHora.value,
+    presencial: secPresencial.checked,
+    virtual: secVirtual.checked
+  }
+
+  secciones.push(sec)
+
+  renderSecciones()
+}
+
+function limpiarSecciones(){
+  secNombre.value="A"
+  secHora.value=""
+  secPresencial.checked=false
+  secVirtual.checked=false
+  secDias.selectedIndex=-1
+}
+
+function renderSecciones(){
+
+  let html = ""
+
+  secciones.forEach(s=>{
+    html += `
+      <div style="padding:6px;border-bottom:1px solid #ccc;">
+        ${s.nombre} | ${s.dias} | ${s.hora} | 
+        ${s.presencial ? "Presencial" : ""} 
+        ${s.virtual ? "Virtual" : ""}
+      </div>
+    `
+  })
+
+  listaSecciones.innerHTML = html
+}
+
+function limpiarDashboard(){
+
+  dashDesde.value=""
+  dashHasta.value=""
+
+  // 🔥 reset KPIs
+  kpiTotal.innerText = "0"
+  kpiAsistencia.innerText = "0%"
+
+  verdeCount.innerText = "0"
+  amarilloCount.innerText = "0"
+  rojoCount.innerText = "0"
+
+  topUbo.innerHTML = ""
+
+  // limpiar memoria
+  window.detalleSemaforo = {
+    verde:[],
+    amarillo:[],
+    rojo:[]
+  }
+
+}
+
+function limpiarRetiro(){
+  filtroUboConfig.value=""
+  listaAspirantes.innerHTML=""
+}
+
+function limpiarCurso(){
+  cursoInicio.value=""
+  cursoFin.value=""
+}
+
+
 
 </script>
+
+<div id="modal" style="
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.3);
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+">
+
+  <div style="
+    background:white;
+    width:70%;
+    max-height:80%;
+    border-radius:16px;
+    padding:20px;
+    overflow:auto;
+    box-shadow:
+      0 30px 60px rgba(0,0,0,0.25),
+      0 10px 20px rgba(0,0,0,0.15);
+  ">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h3 id="modalTitulo">Detalle</h3>
+      <button onclick="cerrarModal()">✖</button>
+    </div>
+
+    <div id="modalContenido"></div>
+
+  </div>
+
+</div>
 
 </body>
 </html>
