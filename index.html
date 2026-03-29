@@ -171,6 +171,14 @@ th{
   border:1px solid #e0e0e0;
 }
 
+<video id="video" style="
+  display:none;
+  width:100%;
+  max-width:400px;
+  border-radius:12px;
+  margin-top:20px;
+"></video>
+
 </style>
 </head>
 
@@ -572,12 +580,20 @@ function logout(){
 let stream,seccion=""
 
 function iniciarEscaneo(){
-  navigator.mediaDevices.getUserMedia({video:true})
+  video.style.display = "block" // 🔥 MOSTRAR VIDEO
+
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" }
+  })
   .then(s=>{
     stream=s
     video.srcObject=s
     video.play()
     scanQR()
+  })
+  .catch(err=>{
+    alert("Error cámara: "+err)
+    console.error(err)
   })
 }
 
@@ -594,8 +610,13 @@ function scanQR(){
 
     if(code){
       detenerCamara()
+      video.style.display = "none" // 🔥 ocultar cámara
+
       vistaMovil.style.display="none"
       formulario.style.display="block"
+
+      console.log("QR detectado:", code.data) // 🔥 debug
+
       return
     }
   }
