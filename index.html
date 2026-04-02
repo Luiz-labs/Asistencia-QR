@@ -1452,7 +1452,9 @@ input, select{
 const supabaseUrl = 'https://kcapmyovaigjntaqeqwn.supabase.co'
 const supabaseKey = 'sb_publishable_oObf3s5mQ4sfmJ03JKQrnQ__8Rmb63F'
 
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey)
+const supabaseClient = window.supabase?.createClient
+  ? window.supabase.createClient(supabaseUrl, supabaseKey)
+  : null
 let adminAutenticado = false
 let dniMovil = ""
 let resizeTimer
@@ -1479,6 +1481,20 @@ const SECTION_TO_UBO_FIELD = {
   B: "seccion_b_ubo",
   C: "seccion_c_ubo"
 }
+
+function enlazarIdsGlobales(){
+  document.querySelectorAll("[id]").forEach(el=>{
+    if(!(el.id in window)){
+      window[el.id] = el
+    }
+  })
+}
+
+function haySupabase(){
+  return !!supabaseClient
+}
+
+enlazarIdsGlobales()
 
 function esTablaNoExiste(error){
   return /does not exist|42P01/i.test(String(error?.message || ""))
@@ -1516,12 +1532,14 @@ function getVistaActiva(){
 
 function actualizarBotonesVista(){
   const mode = getVistaManual()
+  const btnAutoDesktop = document.getElementById("btnVistaAutoDesktop")
+  const btnAutoMovil = document.getElementById("btnVistaAutoMovil")
   const setAutoLabel = (el)=>{
     if(!el) return
     el.innerText = mode === "auto" ? "Automático ✓" : "Automático"
   }
-  setAutoLabel(btnVistaAutoDesktop)
-  setAutoLabel(btnVistaAutoMovil)
+  setAutoLabel(btnAutoDesktop)
+  setAutoLabel(btnAutoMovil)
 }
 
 function setVistaManual(mode){
@@ -1534,12 +1552,16 @@ function setVistaManual(mode){
 }
 
 function irEscritorioAdmin(){
+  const elLogin = document.getElementById("loginScreen")
+  const elDesktop = document.getElementById("vistaDesktop")
+  const elFormulario = document.getElementById("formulario")
+  const elMovil = document.getElementById("vistaMovil")
   setVistaManual("desktop")
   if(!adminAutenticado){
-    loginScreen.style.display = "flex"
-    vistaDesktop.style.display = "none"
-    formulario.style.display = "none"
-    vistaMovil.style.display = "none"
+    if(elLogin) elLogin.style.display = "flex"
+    if(elDesktop) elDesktop.style.display = "none"
+    if(elFormulario) elFormulario.style.display = "none"
+    if(elMovil) elMovil.style.display = "none"
     mostrarPasoMovil("ingreso")
   }
 }
@@ -1556,15 +1578,21 @@ function obtenerRangoMesActual(){
 
 function aplicarRangoMesActualEnFiltros(){
   const { from, to } = obtenerRangoMesActual()
-  fechaDesde.value = from
-  fechaHasta.value = to
-  dashDesde.value = from
-  dashHasta.value = to
+  const elFechaDesde = document.getElementById("fechaDesde")
+  const elFechaHasta = document.getElementById("fechaHasta")
+  const elDashDesde = document.getElementById("dashDesde")
+  const elDashHasta = document.getElementById("dashHasta")
+  if(elFechaDesde) elFechaDesde.value = from
+  if(elFechaHasta) elFechaHasta.value = to
+  if(elDashDesde) elDashDesde.value = from
+  if(elDashHasta) elDashHasta.value = to
 }
 
 function mostrarPasoMovil(paso){
-  mobileStepIngreso.style.display = paso === "ingreso" ? "block" : "none"
-  mobileStepScan.style.display = paso === "scan" ? "block" : "none"
+  const elIngreso = document.getElementById("mobileStepIngreso")
+  const elScan = document.getElementById("mobileStepScan")
+  if(elIngreso) elIngreso.style.display = paso === "ingreso" ? "block" : "none"
+  if(elScan) elScan.style.display = paso === "scan" ? "block" : "none"
 }
 
 function seleccionarBotonSeccion(valor){
@@ -1583,22 +1611,24 @@ function setMensaje(texto, tipo = ""){
 function obtenerValoresMultiSelect(selectId){
   const select = document.getElementById(selectId)
   if(!select) return []
-  return [...select.selectedOptions].map(opt=>opt.value)
+  return Array.from(select.selectedOptions || []).map(opt=>opt.value)
 }
 
 function marcarValoresMultiSelect(selectId, valores = []){
   const select = document.getElementById(selectId)
   if(!select) return
   const setVals = new Set((valores || []).map(String))
-  [...select.options].forEach(opt=>{
+  Array.from(select.options || []).forEach(opt=>{
     opt.selected = setVals.has(opt.value)
   })
 }
 
 function actualizarEstadoDiasSede(){
-  const todos = !!uboSecTodosDias?.checked
-  if(uboSecDiasSelect){
-    uboSecDiasSelect.disabled = todos
+  const elTodos = document.getElementById("uboSecTodosDias")
+  const elDias = document.getElementById("uboSecDiasSelect")
+  const todos = !!elTodos?.checked
+  if(elDias){
+    elDias.disabled = todos
     if(todos){
       marcarValoresMultiSelect("uboSecDiasSelect", [])
     }
@@ -1624,7 +1654,7 @@ function distanciaMetros(lat1, lon1, lat2, lon2){
 }
 
 function obtenerUbosUnicosDesdeAsistencias(data){
-  return [...new Set((data || []).map(x => (x.ubo || "").trim()).filter(Boolean))]
+  return Array.from(new Set((data || []).map(x => (x.ubo || "").trim()).filter(Boolean)))
     .sort((a,b)=>parseInt(a)-parseInt(b))
 }
 
@@ -1725,7 +1755,7 @@ function cargarUsuariosAdminLocal(){
 
 function renderUsuariosAdmin(){
   if(!tablaUsuariosAdmin) return
-  const data = [...SYSTEM_USERS, ...usuariosAdmin.filter(u => !SYSTEM_USERS.some(s => s.usuario === u.usuario))]
+  const data = SYSTEM_USERS.concat(usuariosAdmin.filter(u => !SYSTEM_USERS.some(s => s.usuario === u.usuario)))
 
   if(!data.length){
     tablaUsuariosAdmin.innerHTML = `<tr><td colspan="4">Sin usuarios creados.</td></tr>`
@@ -2156,7 +2186,7 @@ async function registrarAlerta(payload){
 
 function obtenerClavesAlertaDispositivo(data){
   const claves = new Set()
-  const historial = [...(data || [])].sort((a,b)=>{
+  const historial = (data || []).slice().sort((a,b)=>{
     const aKey = `${a.fecha || ""} ${a.hora || ""}`
     const bKey = `${b.fecha || ""} ${b.hora || ""}`
     return aKey.localeCompare(bKey)
@@ -2198,27 +2228,31 @@ function cerrarScanner(){
 }
 
 function aplicarLayout(){
+  const elLogin = document.getElementById("loginScreen")
+  const elDesktop = document.getElementById("vistaDesktop")
+  const elMovil = document.getElementById("vistaMovil")
+  const elFormulario = document.getElementById("formulario")
   const vista = getVistaActiva()
 
   if(vista === "mobile"){
-    loginScreen.style.display="none"
-    vistaDesktop.style.display="none"
-    vistaMovil.style.display="block"
+    if(elLogin) elLogin.style.display="none"
+    if(elDesktop) elDesktop.style.display="none"
+    if(elMovil) elMovil.style.display="block"
 
-    if(formulario.style.display !== "block"){
+    if(elFormulario && elFormulario.style.display !== "block"){
       mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
     }
   }else{
     cerrarScanner()
-    vistaMovil.style.display="none"
-    formulario.style.display="none"
+    if(elMovil) elMovil.style.display="none"
+    if(elFormulario) elFormulario.style.display="none"
 
     if(adminAutenticado){
-      loginScreen.style.display="none"
-      vistaDesktop.style.display="block"
+      if(elLogin) elLogin.style.display="none"
+      if(elDesktop) elDesktop.style.display="block"
     }else{
-      vistaDesktop.style.display="none"
-      loginScreen.style.display="flex"
+      if(elDesktop) elDesktop.style.display="none"
+      if(elLogin) elLogin.style.display="flex"
     }
   }
 
@@ -2238,14 +2272,57 @@ function actualizarEstadoChecks(){
 }
 
 window.onload = async ()=>{
-  aplicarRangoMesActualEnFiltros()
-  await cargarUbos()
-  await cargarConfigCurso()
-  cargarUsuariosAdminLocal()
-  await cargarAspirantesCargados()
-  actualizarEstadoChecks()
-  actualizarEstadoDiasSede()
-  aplicarLayout()
+  enlazarIdsGlobales()
+  try{
+    aplicarLayout()
+  }catch(e){
+    console.error("Error aplicando layout inicial:", e)
+  }
+
+  try{
+    aplicarRangoMesActualEnFiltros()
+  }catch(e){
+    console.error("Error aplicando rango de fechas:", e)
+  }
+
+  if(haySupabase()){
+    try{
+      await cargarUbos()
+    }catch(e){
+      console.error("Error cargando UBOs:", e)
+    }
+    try{
+      await cargarConfigCurso()
+    }catch(e){
+      console.error("Error cargando config curso:", e)
+    }
+    try{
+      await cargarAspirantesCargados()
+    }catch(e){
+      console.error("Error cargando aspirantes:", e)
+    }
+  }else{
+    console.error("Supabase no cargó. Verifica conexión/CDN.")
+  }
+
+  try{
+    cargarUsuariosAdminLocal()
+  }catch(e){
+    console.error("Error cargando usuarios locales:", e)
+  }
+
+  try{
+    actualizarEstadoChecks()
+    actualizarEstadoDiasSede()
+  }catch(e){
+    console.error("Error actualizando estado visual:", e)
+  }
+
+  try{
+    aplicarLayout()
+  }catch(e){
+    console.error("Error aplicando layout final:", e)
+  }
 
 }
 
@@ -3129,7 +3206,7 @@ async function cargarUbos(){
 
   await cargarSedesUbo()
   const ubosSedes = obtenerUbosUnicosDesdeAsistencias(ubosSedeCache)
-  const ubos = [...new Set([...ubosAsistencia, ...ubosSedes])]
+  const ubos = Array.from(new Set(ubosAsistencia.concat(ubosSedes)))
     .sort((a,b)=>parseInt(a)-parseInt(b))
 
   let html = construirOptionsUbo(ubos, true, "Seleccionar UBO")
@@ -3198,7 +3275,7 @@ async function guardarCurso(){
 }
 
 function actualizarOpcionesSeccionSede(){
-  const base = [...new Set((cursoSecciones || []).map(x=>String(x.seccion || "").trim()).filter(Boolean))]
+  const base = Array.from(new Set((cursoSecciones || []).map(x=>String(x.seccion || "").trim()).filter(Boolean)))
 
   let html = `<option value="">Seleccionar sección</option>`
   base.forEach(code=>{
