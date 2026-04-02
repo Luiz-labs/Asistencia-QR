@@ -332,8 +332,12 @@ input, select{
 
 .days-select{
   min-height:42px;
-  height:auto;
-  padding:8px 10px;
+  height:42px;
+  padding:6px 10px;
+}
+
+.days-select[multiple]{
+  overflow-y:auto;
 }
 
 .days-select[multiple] option{
@@ -537,6 +541,43 @@ input, select{
   display:flex;
   flex-direction:column;
   justify-content:center;
+}
+
+#vistaMovilInicio{
+  max-width:420px;
+  margin:0 auto;
+  min-height:100dvh;
+  padding:14px 16px !important;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+}
+
+#vistaMovilInicio .mobile-step{
+  background:var(--surface);
+  border:1px solid rgba(164, 179, 211, 0.25);
+  box-shadow:var(--shadow);
+  border-radius:16px;
+  padding:16px;
+  margin-top:12px;
+}
+
+#vistaMovilInicio p{
+  color:var(--muted);
+}
+
+#vistaMovilInicio input{
+  width:100%;
+  margin:10px 0;
+}
+
+#vistaMovilInicio button{
+  width:min(100%, 320px);
+  min-height:48px;
+  border-radius:14px;
+  font-size:15px;
+  font-weight:600;
 }
 
 #vistaMovil h2{
@@ -803,6 +844,112 @@ input, select{
   font-size:13px;
 }
 
+.tenant-screen{
+  position:fixed;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  background:radial-gradient(circle at 20% 0%, #f7fbff 0%, #eff2f7 55%);
+}
+
+.tenant-title{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.tenant-title h1{
+  margin:0;
+  font-size:1.85rem;
+  letter-spacing:0.2px;
+}
+
+.tenant-title p{
+  margin-top:8px;
+  color:#5b6c8a;
+}
+
+.tenant-grid{
+  width:min(980px, 100%);
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+  gap:16px;
+}
+
+.tenant-card{
+  background:rgba(255,255,255,0.88);
+  backdrop-filter:blur(8px);
+  border:1px solid #dbe4f4;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 22px 40px rgba(24, 46, 80, 0.12), 0 8px 18px rgba(24, 46, 80, 0.08);
+}
+
+.tenant-brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.tenant-logo{
+  width:52px;
+  height:52px;
+  border-radius:14px;
+  object-fit:cover;
+  border:1px solid #d5e0f4;
+  background:#fff;
+  padding:6px;
+}
+
+.tenant-logo-fake{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:17px;
+  font-weight:800;
+  color:#153b7a;
+  background:linear-gradient(180deg, #f4f8ff 0%, #e4edff 100%);
+}
+
+.tenant-meta strong{
+  display:block;
+  line-height:1.3;
+}
+
+.tenant-meta small{
+  color:#5b6c8a;
+}
+
+.tenant-tag{
+  margin-top:12px;
+  display:inline-block;
+  font-size:12px;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#e9f2ff;
+  color:#1f4e9f;
+}
+
+.tenant-tag.disabled{
+  background:#f1f4fb;
+  color:#627394;
+}
+
+.tenant-card button{
+  margin-top:12px;
+  width:100%;
+}
+
+.tenant-note{
+  margin-top:14px;
+  color:#637595;
+  font-size:12px;
+  text-align:center;
+}
+
 @media (max-width: 1024px){
   .sidebar{
     width:190px;
@@ -847,6 +994,14 @@ input, select{
 }
 
 @media (max-width: 640px){
+  .tenant-grid{
+    grid-template-columns:1fr;
+  }
+
+  .tenant-title h1{
+    font-size:1.45rem;
+  }
+
   #loginScreen > div:nth-child(2){
     width:94% !important;
     padding:20px !important;
@@ -862,6 +1017,19 @@ input, select{
 
 <body>
 
+<!-- SELECCIÓN INSTITUCIONAL -->
+<div id="tenantScreen" class="tenant-screen">
+  <div class="tenant-title">
+    <h1>Panel ESBAS</h1>
+    <p>Selecciona la institución para continuar</p>
+  </div>
+  <div id="tenantGrid" class="tenant-grid"></div>
+  <p class="tenant-note">Puedes cambiar de institución más adelante desde esta misma pantalla.</p>
+  <div style="position:absolute;bottom:15px;font-size:12px;color:#777;">
+    Desarrollado por Luiz-Labs @ 2026
+  </div>
+</div>
+
 <!-- LOGIN -->
 <div id="loginScreen" style="
   position:fixed;
@@ -876,9 +1044,9 @@ input, select{
 
   <!-- TITULO FUERA -->
   <div style="text-align:center;margin-bottom:30px;">
-    <h1 style="margin:0;">XXIV Comandancia Departamental Lima Sur</h1>
-    <h2 style="margin:5px 0;">Incorporación y ESBAS</h2>
-    <p style="color:#666;">Instrucción ESBAS 2026</p>
+    <h1 id="tenantTituloLogin" style="margin:0;">XXIV Comandancia Departamental Lima Sur</h1>
+    <h2 id="tenantSubtituloLogin" style="margin:5px 0;">Incorporación y ESBAS</h2>
+    <p id="tenantCursoLogin" style="color:#666;">Instrucción ESBAS 2026</p>
   </div>
 
   <!-- CARD LOGIN -->
@@ -932,11 +1100,24 @@ input, select{
 </div>
 
 <!-- 📱 VISTA MOVIL -->
+<div id="vistaMovilInicio" style="display:none;">
+  <h2>Asistencia Aspirantes</h2>
+  <p>Escaneo QR</p>
+  <div class="mobile-step">
+    <p>Ingresa tu DNI para continuar</p>
+    <input id="mobileDniInicio" placeholder="Ingrese DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+    <button onclick="ingresarMovilInicio()">INGRESAR</button>
+  </div>
+  <footer style="margin-top:20px;font-size:12px;color:#97a4bf;">
+    Desarrollado por Luiz-Labs @ 2026
+  </footer>
+</div>
+
 <div id="vistaMovil" style="display:none;text-align:center;padding:20px;">
 
-  <h2>XXIV Comandancia Departamental Lima Sur</h2>
-  <h2>Incorporación y ESBAS</h2>
-  <p>Instrucción ESBAS 2026</p>
+  <h2 id="tenantTituloMovil">XXIV Comandancia Departamental Lima Sur</h2>
+  <h2 id="tenantSubtituloMovil">Incorporación y ESBAS</h2>
+  <p id="tenantCursoMovil">Instrucción ESBAS 2026</p>
 
   <div class="view-switch-wrap">
     <button id="btnForzarDesktop" class="secondary view-switch" onclick="irEscritorioAdmin()">Ver escritorio</button>
@@ -1000,9 +1181,10 @@ input, select{
   <div class="header">
     <div style="display:flex;align-items:center;gap:10px;">
       <img src="logo.png" style="width:28px;">
-      <strong>ESBAS Panel Administrativo</strong>
+      <strong id="tenantPanelTitulo">ESBAS Panel Administrativo</strong>
     </div>
     <div class="header-actions">
+      <button onclick="volverSeleccionCliente()" class="secondary">Institución</button>
       <button id="btnForzarMovil" onclick="setVistaManual('mobile')" class="secondary view-switch">Ver móvil</button>
       <button id="btnVistaAutoDesktop" onclick="setVistaManual('auto')" class="secondary view-switch" title="Automático: usa detección de dispositivo para decidir vista móvil o escritorio.">Automático</button>
       <button onclick="logout()" class="secondary">Salir</button>
@@ -1042,6 +1224,10 @@ input, select{
               <option value="">Todas las UBO</option>
             </select>
 
+            <select id="dashSeccion" style="width:170px;">
+              <option value="">Todas las Secciones</option>
+            </select>
+
             <button onclick="cargarDashboard()">Filtrar</button>
             <button class="secondary" onclick="limpiarDashboard()">Limpiar</button>
             <button onclick="exportarDashboardPDF()">EXPORTAR PDF</button>
@@ -1063,6 +1249,16 @@ input, select{
           <div class="card" style="flex:1; text-align:center;">
             <h3 id="kpiAsistencia">0%</h3>
             <p>% Asistencia</p>
+          </div>
+
+          <div class="card" style="flex:1; text-align:center;">
+            <h3 id="kpiInasistencia">0</h3>
+            <p>Inasistencias</p>
+          </div>
+
+          <div class="card" style="flex:1; text-align:center;">
+            <h3 id="kpiCobertura">0%</h3>
+            <p>% Cobertura</p>
           </div>
 
           <div id="kpiDispCard" class="card" style="flex:1; text-align:center; cursor:pointer;" onclick="verAlertasDispositivo()">
@@ -1096,6 +1292,16 @@ input, select{
         <p id="semaforoInfo" style="margin:-6px 2px 14px;color:#5f6f8f;font-size:13px;">
           Semáforo: criterio de puntualidad por aspirante en el rango seleccionado.
         </p>
+        <div style="display:flex; gap:15px; margin:0 0 14px;">
+          <div class="card" style="flex:1; text-align:center;">
+            <h3 id="kpiRojoTardanza">0</h3>
+            <p>Rojo por tardanza</p>
+          </div>
+          <div class="card" style="flex:1; text-align:center;">
+            <h3 id="kpiRojoFueraDia">0</h3>
+            <p>Rojo por fuera de día</p>
+          </div>
+        </div>
         <button class="btn-link" onclick="verCriterio('semaforo')" style="margin:-8px 0 16px;">Ver criterio</button>
 
         <!-- TOP RIESGO UBO -->
@@ -1324,7 +1530,7 @@ input, select{
               </div>
               <div>
                 <label>Días</label>
-                <select id="secCursoDiasSelect" class="days-select" multiple size="4">
+                <select id="secCursoDiasSelect" class="days-select" multiple size="1" title="Haz clic para ver más días">
                   <option value="Lunes">Lunes</option>
                   <option value="Martes">Martes</option>
                   <option value="Miércoles">Miércoles</option>
@@ -1379,7 +1585,7 @@ input, select{
               </div>
               <div>
                 <label>Días</label>
-                <select id="uboSecDiasSelect" class="days-select" multiple size="4">
+                <select id="uboSecDiasSelect" class="days-select" multiple size="1" title="Haz clic para ver más días">
                   <option value="Lunes">Lunes</option>
                   <option value="Martes">Martes</option>
                   <option value="Miércoles">Miércoles</option>
@@ -1471,6 +1677,28 @@ let cacheReportes = []
 let cacheDashboard = []
 let cacheRiesgoUbo = []
 const VISTA_MODO_KEY = "vistaModoManual"
+const MULTITENANT_MODE = false
+const TENANTS = [
+  {
+    id: "cd-lima-sur-24",
+    nombre: "XXIV Comandancia Departamental Lima Sur",
+    linea: "Incorporación y ESBAS",
+    curso: "Instrucción ESBAS 2026",
+    logo: "logo.png",
+    habilitado: true,
+    usuariosSistema: ["llecaros", "admin"]
+  },
+  {
+    id: "lurin-129",
+    nombre: "Bomberos Lurín 129",
+    linea: "Módulo institucional",
+    curso: "Próximamente",
+    logo: "B129logo.png",
+    habilitado: false,
+    usuariosSistema: []
+  }
+]
+let tenantActivoId = ""
 const SYSTEM_USERS = [
   { nombre: "Administrador Principal", usuario: "llecaros", rol: "administrador", system: true },
   { nombre: "Super Usuario", usuario: "admin", rol: "administrador", system: true }
@@ -1495,6 +1723,99 @@ function haySupabase(){
 }
 
 enlazarIdsGlobales()
+
+function obtenerTenantActivo(){
+  return TENANTS.find(t=>t.id === tenantActivoId) || null
+}
+
+function asignarTenantActivo(id){
+  tenantActivoId = String(id || "")
+  aplicarTenantEnUI()
+}
+
+function aplicarTenantEnUI(){
+  const tenant = obtenerTenantActivo() || TENANTS[0]
+  const titulo = tenant?.nombre || "Panel ESBAS"
+  const linea = tenant?.linea || "Incorporación y ESBAS"
+  const curso = tenant?.curso || "Instrucción ESBAS"
+
+  if(tenantTituloLogin) tenantTituloLogin.innerText = titulo
+  if(tenantSubtituloLogin) tenantSubtituloLogin.innerText = linea
+  if(tenantCursoLogin) tenantCursoLogin.innerText = curso
+
+  if(tenantTituloMovil) tenantTituloMovil.innerText = titulo
+  if(tenantSubtituloMovil) tenantSubtituloMovil.innerText = linea
+  if(tenantCursoMovil) tenantCursoMovil.innerText = curso
+
+  if(tenantPanelTitulo) tenantPanelTitulo.innerText = `ESBAS Panel Administrativo - ${titulo}`
+}
+
+function renderTenantSelector(){
+  if(!tenantGrid) return
+  let html = ""
+  TENANTS.forEach(t=>{
+    const disabled = !t.habilitado
+    const btnClass = disabled ? "secondary" : ""
+    const btnText = disabled ? "Próximamente" : "Ingresar"
+    const logoHtml = t.logo
+      ? `<img src="${t.logo}" alt="${t.nombre}" class="tenant-logo">`
+      : `<div class="tenant-logo tenant-logo-fake">129</div>`
+
+    html += `
+      <div class="tenant-card">
+        <div class="tenant-brand">
+          ${logoHtml}
+          <div class="tenant-meta">
+            <strong>${t.nombre}</strong>
+            <small>${t.linea}</small>
+          </div>
+        </div>
+        <span class="tenant-tag ${disabled ? "disabled" : ""}">
+          ${disabled ? "No habilitado" : "Activo"}
+        </span>
+        <button class="${btnClass}" onclick="seleccionarCliente('${t.id}')">${btnText}</button>
+      </div>
+    `
+  })
+  tenantGrid.innerHTML = html
+}
+
+function seleccionarCliente(id){
+  const tenant = TENANTS.find(t=>t.id === id)
+  if(!tenant){
+    alert("Cliente no válido")
+    return
+  }
+  if(!tenant.habilitado){
+    alert("Esta institución aún no está habilitada para ingreso.")
+    return
+  }
+  asignarTenantActivo(id)
+  loginMsg.innerText = ""
+  loginUser.value = ""
+  loginPass.value = ""
+  aplicarLayout()
+}
+
+function volverSeleccionCliente(){
+  adminAutenticado = false
+  asignarTenantActivo("")
+  aplicarLayout()
+}
+
+function withTenantScope(query){
+  if(!MULTITENANT_MODE || !tenantActivoId) return query
+  return query.eq("tenant_id", tenantActivoId)
+}
+
+function withTenantPayload(payload){
+  if(!MULTITENANT_MODE || !tenantActivoId) return payload
+  return Object.assign({}, payload, { tenant_id: tenantActivoId })
+}
+
+function withTenantPayloadList(items){
+  return (items || []).map(withTenantPayload)
+}
 
 function esTablaNoExiste(error){
   return /does not exist|42P01/i.test(String(error?.message || ""))
@@ -1552,15 +1873,20 @@ function setVistaManual(mode){
 }
 
 function irEscritorioAdmin(){
+  const elTenant = document.getElementById("tenantScreen")
   const elLogin = document.getElementById("loginScreen")
   const elDesktop = document.getElementById("vistaDesktop")
   const elFormulario = document.getElementById("formulario")
+  const elMovilInicio = document.getElementById("vistaMovilInicio")
   const elMovil = document.getElementById("vistaMovil")
   setVistaManual("desktop")
   if(!adminAutenticado){
+    if(elTenant) elTenant.style.display = tenantActivoId ? "none" : "flex"
     if(elLogin) elLogin.style.display = "flex"
+    if(!tenantActivoId && elLogin) elLogin.style.display = "none"
     if(elDesktop) elDesktop.style.display = "none"
     if(elFormulario) elFormulario.style.display = "none"
+    if(elMovilInicio) elMovilInicio.style.display = "none"
     if(elMovil) elMovil.style.display = "none"
     mostrarPasoMovil("ingreso")
   }
@@ -1631,13 +1957,123 @@ function actualizarEstadoDiasSede(){
     elDias.disabled = todos
     if(todos){
       marcarValoresMultiSelect("uboSecDiasSelect", [])
+      elDias.size = 1
+      elDias.style.height = "42px"
     }
   }
+}
+
+function activarSelectDiasCompacto(selectId, expandedSize = 7){
+  const select = document.getElementById(selectId)
+  if(!select) return
+  if(select.dataset.compactoInit === "1") return
+  select.dataset.compactoInit = "1"
+
+  const expandir = ()=>{
+    if(select.disabled) return
+    select.size = expandedSize
+    select.style.height = "auto"
+  }
+
+  const contraer = ()=>{
+    select.size = 1
+    select.style.height = "42px"
+  }
+
+  contraer()
+
+  select.addEventListener("focus", expandir)
+  select.addEventListener("mousedown", ()=> setTimeout(expandir, 0))
+  select.addEventListener("blur", ()=> setTimeout(contraer, 120))
+  select.addEventListener("keydown", (e)=>{
+    if(e.key === "Escape" || e.key === "Tab"){
+      contraer()
+    }
+  })
 }
 
 function diasTexto(dias){
   const arr = (dias || []).filter(Boolean)
   return arr.length ? arr.join(", ") : "-"
+}
+
+function normalizarTextoDia(txt){
+  return String(txt || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+}
+
+function obtenerDiaSemanaEs(fechaISO){
+  if(!fechaISO) return ""
+  const d = new Date(`${fechaISO}T00:00:00`)
+  if(Number.isNaN(d.getTime())) return ""
+  const dias = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
+  return dias[d.getDay()] || ""
+}
+
+function horaATotalMinutos(hora){
+  const h = String(hora || "").slice(0,5)
+  const [hh, mm] = h.split(":")
+  const H = Number(hh)
+  const M = Number(mm)
+  if(!Number.isFinite(H) || !Number.isFinite(M)) return null
+  return H * 60 + M
+}
+
+function obtenerReglaSeccion(seccion){
+  const sec = String(seccion || "").trim().toUpperCase()
+  if(!sec) return null
+  const regla = (cursoSecciones || []).find(x=>String(x.seccion || "").trim().toUpperCase() === sec)
+  if(!regla) return null
+  return {
+    seccion: sec,
+    horaInicioMin: horaATotalMinutos(regla.hora_inicio),
+    dias: (regla.dias || []).map(normalizarTextoDia).filter(Boolean)
+  }
+}
+
+function evaluarSemaforoPorRegla(registrosAlumno){
+  const registros = (registrosAlumno || []).slice().sort((a,b)=>{
+    const f = String(a.fecha || "").localeCompare(String(b.fecha || ""))
+    return f !== 0 ? f : String(a.hora || "").localeCompare(String(b.hora || ""))
+  })
+
+  if(!registros.length){
+    return { estado: "rojo", motivo: "sin_registro" }
+  }
+
+  const ultimo = registros[registros.length - 1]
+  const regla = obtenerReglaSeccion(ultimo.seccion)
+  const ultimaFecha = ultimo.fecha || ""
+  const primerMarcadoUltimoDia = registros
+    .filter(x => x.fecha === ultimaFecha)
+    .sort((a,b)=>(a.hora || "").localeCompare(b.hora || ""))[0]
+  const horaMarcadaMin = horaATotalMinutos(primerMarcadoUltimoDia?.hora || "")
+
+  if(!regla || regla.horaInicioMin == null){
+    return { estado: "verde", motivo: "sin_hora_configurada" }
+  }
+
+  if(regla.dias.length){
+    const dia = obtenerDiaSemanaEs(ultimaFecha)
+    if(!regla.dias.includes(dia)){
+      return { estado: "rojo", motivo: "fuera_de_dia_configurado" }
+    }
+  }
+
+  if(horaMarcadaMin == null){
+    return { estado: "rojo", motivo: "sin_hora_marcada" }
+  }
+
+  if(horaMarcadaMin <= regla.horaInicioMin + 10){
+    return { estado: "verde", motivo: "a_tiempo" }
+  }
+  if(horaMarcadaMin <= regla.horaInicioMin + 30){
+    return { estado: "amarillo", motivo: "tardanza_moderada" }
+  }
+  return { estado: "rojo", motivo: "tardanza_alta" }
 }
 
 function distanciaMetros(lat1, lon1, lat2, lon2){
@@ -1664,6 +2100,29 @@ function construirOptionsUbo(ubos, includeEmpty = true, emptyText = "Seleccionar
     html += `<option value="${u}">${u}</option>`
   })
   return html
+}
+
+function cargarFiltroSeccionDashboard(){
+  const el = document.getElementById("dashSeccion")
+  if(!el) return
+  const previo = el.value || ""
+  let secciones = (cursoSecciones || [])
+    .map(x=>String(x.seccion || "").trim().toUpperCase())
+    .filter(Boolean)
+
+  if(!secciones.length){
+    secciones = ["A","B","C"]
+  }
+
+  const unicas = Array.from(new Set(secciones)).sort()
+  let html = `<option value="">Todas las Secciones</option>`
+  unicas.forEach(s=>{
+    html += `<option value="${s}">Sección ${s}</option>`
+  })
+  el.innerHTML = html
+  if(previo && unicas.includes(previo)){
+    el.value = previo
+  }
 }
 
 function descargarExcelDesdeJSON(filename, rows){
@@ -2140,6 +2599,7 @@ async function aplicarCursoEnUI(cfg){
 
   renderSeccionesCurso()
   actualizarOpcionesSeccionSede()
+  cargarFiltroSeccionDashboard()
   renderSedesUbo()
 }
 
@@ -2178,7 +2638,7 @@ function obtenerGeoActual(){
 
 async function registrarAlerta(payload){
   try{
-    await supabaseClient.from("asistencia_alertas").insert([payload])
+    await supabaseClient.from("asistencia_alertas").insert(withTenantPayloadList([payload]))
   }catch(e){
     console.warn("No se pudo registrar alerta:", e)
   }
@@ -2228,31 +2688,38 @@ function cerrarScanner(){
 }
 
 function aplicarLayout(){
+  const elTenant = document.getElementById("tenantScreen")
   const elLogin = document.getElementById("loginScreen")
   const elDesktop = document.getElementById("vistaDesktop")
+  const elMovilInicio = document.getElementById("vistaMovilInicio")
   const elMovil = document.getElementById("vistaMovil")
   const elFormulario = document.getElementById("formulario")
   const vista = getVistaActiva()
 
   if(vista === "mobile"){
+    if(elTenant) elTenant.style.display="none"
     if(elLogin) elLogin.style.display="none"
     if(elDesktop) elDesktop.style.display="none"
-    if(elMovil) elMovil.style.display="block"
+    if(elMovilInicio) elMovilInicio.style.display = dniMovil ? "none" : "flex"
+    if(elMovil) elMovil.style.display = dniMovil ? "block" : "none"
 
     if(elFormulario && elFormulario.style.display !== "block"){
       mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
     }
   }else{
     cerrarScanner()
+    if(elMovilInicio) elMovilInicio.style.display="none"
     if(elMovil) elMovil.style.display="none"
     if(elFormulario) elFormulario.style.display="none"
 
     if(adminAutenticado){
+      if(elTenant) elTenant.style.display="none"
       if(elLogin) elLogin.style.display="none"
       if(elDesktop) elDesktop.style.display="block"
     }else{
+      if(elTenant) elTenant.style.display = tenantActivoId ? "none" : "flex"
       if(elDesktop) elDesktop.style.display="none"
-      if(elLogin) elLogin.style.display="flex"
+      if(elLogin) elLogin.style.display = tenantActivoId ? "flex" : "none"
     }
   }
 
@@ -2273,6 +2740,9 @@ function actualizarEstadoChecks(){
 
 window.onload = async ()=>{
   enlazarIdsGlobales()
+  renderTenantSelector()
+  aplicarTenantEnUI()
+
   try{
     aplicarLayout()
   }catch(e){
@@ -2314,6 +2784,9 @@ window.onload = async ()=>{
   try{
     actualizarEstadoChecks()
     actualizarEstadoDiasSede()
+    activarSelectDiasCompacto("secCursoDiasSelect")
+    activarSelectDiasCompacto("uboSecDiasSelect")
+    cargarFiltroSeccionDashboard()
   }catch(e){
     console.error("Error actualizando estado visual:", e)
   }
@@ -2327,11 +2800,15 @@ window.onload = async ()=>{
 }
 
 function login(){
+  const tenant = obtenerTenantActivo()
+  if(!tenant || !tenant.habilitado){
+    loginMsg.innerText = "Selecciona primero una institución."
+    return
+  }
+
   const usuario = (loginUser.value || "").trim().toLowerCase()
   const clave = (loginPass.value || "").trim()
-  const valido =
-    (usuario === "llecaros" && clave === "1234") ||
-    (usuario === "admin" && clave === "1234")
+  const valido = (tenant.usuariosSistema || []).includes(usuario) && clave === "1234"
 
   if(valido){
     adminAutenticado = true
@@ -2379,6 +2856,24 @@ function logout(){
 
 /* QR */
 let stream,seccion=""
+
+function ingresarMovilInicio(){
+  const input = document.getElementById("mobileDniInicio")
+  const dniLimpio = (input?.value || "").replace(/\D/g, "").slice(0, 8)
+  if(input) input.value = dniLimpio
+
+  if(!dniLimpio){
+    alert("Ingresa tu DNI para continuar")
+    return
+  }
+
+  dniMovil = dniLimpio
+  if(mobileDni) mobileDni.value = dniLimpio
+
+  vistaMovilInicio.style.display = "none"
+  vistaMovil.style.display = "block"
+  mostrarPasoMovil("scan")
+}
 
 function ingresarMovil(){
   const dniLimpio = (mobileDni.value || "").replace(/\D/g, "").slice(0, 8)
@@ -2487,7 +2982,7 @@ async function guardarAsistencia(){
     return
   }
 
-  if(!nombresValor || !apellidosValor){
+    if(!nombresValor || !apellidosValor){
     setMensaje("⚠ Completa nombres y apellidos", "error")
     return
   }
@@ -2507,12 +3002,14 @@ async function guardarAsistencia(){
   let dispositivoHabitual = ""
 
   try{
-    const { data: historialDevice } = await supabaseClient
+    const { data: historialDevice } = await withTenantScope(
+      supabaseClient
       .from("asistencias")
       .select("dni,fecha,hora")
       .eq("device_id", deviceId)
       .order("fecha", { ascending: true })
       .order("hora", { ascending: true })
+    )
 
     const dniVistos = new Set((historialDevice || []).map(x => (x.dni || "").trim()).filter(Boolean))
     alertaDniDispositivo = dniVistos.size > 0 && !dniVistos.has(dniRegistro)
@@ -2521,12 +3018,14 @@ async function guardarAsistencia(){
   }
 
   try{
-    const { data: historialDni } = await supabaseClient
+    const { data: historialDni } = await withTenantScope(
+      supabaseClient
       .from("asistencias")
       .select("device_id,fecha,hora")
       .eq("dni", dniRegistro)
       .order("fecha", { ascending: true })
       .order("hora", { ascending: true })
+    )
 
     const historial = (historialDni || []).filter(x => (x.device_id || "").trim())
     if(historial.length){
@@ -2599,7 +3098,7 @@ async function guardarAsistencia(){
     }
   }
 
-  const {error}=await supabaseClient.from("asistencias").insert([{
+  const payloadAsistencia = withTenantPayload({
     dni:dniRegistro,
     nombre:nombreCompleto,
     ubo:uboValor,
@@ -2607,7 +3106,8 @@ async function guardarAsistencia(){
     fecha:fechaHoy,
     hora:horaHoy,
     device_id:deviceId
-  }])
+  })
+  const {error}=await supabaseClient.from("asistencias").insert([payloadAsistencia])
 
   if(error){
     setMensaje("⚠ Ya registraste hoy", "error")
@@ -2659,7 +3159,7 @@ async function guardarAsistencia(){
 
 /* ADMIN */
 async function cargarDatos(){
-  let q = supabaseClient.from("asistencias").select("*")
+  let q = withTenantScope(supabaseClient.from("asistencias").select("*"))
 
   if(fechaDesde.value){
     q = q.gte("fecha", fechaDesde.value)
@@ -2737,12 +3237,12 @@ function renderTabla(data){
 }
 
 async function cargarAlertasReporte(){
-  let q = supabaseClient
+  let q = withTenantScope(supabaseClient
     .from("asistencia_alertas")
     .select("*")
     .order("fecha", { ascending: false })
     .order("hora", { ascending: false })
-    .limit(120)
+    .limit(120))
 
   if(filtroUbo.value){
     q = q.eq("ubo", filtroUbo.value)
@@ -2807,7 +3307,7 @@ async function cargarAlertasReporte(){
 
 async function aplicarFiltros(){
 
-  let q = supabaseClient.from("asistencias").select("*")
+  let q = withTenantScope(supabaseClient.from("asistencias").select("*"))
 
   if(filtroUbo.value){
     q = q.ilike("ubo","%"+filtroUbo.value+"%")
@@ -2847,7 +3347,7 @@ function limpiarFiltros(){
 
 async function cargarDashboard(){
 
-  let q = supabaseClient.from("asistencias").select("*")
+  let q = withTenantScope(supabaseClient.from("asistencias").select("*"))
 
   if(dashDesde.value){
     q = q.gte("fecha", dashDesde.value)
@@ -2860,15 +3360,32 @@ async function cargarDashboard(){
   if(dashUbo.value){
     q = q.eq("ubo", dashUbo.value)
   }
+  if(dashSeccion.value){
+    q = q.eq("seccion", dashSeccion.value)
+  }
 
   const { data } = await q
   const dataActivos = (data || []).filter(r => r.estado !== "retirado")
   cacheDashboard = dataActivos
 
-  let alertasQ = supabaseClient
+  let padronTotal = 0
+  try{
+    let padronQ = withTenantScope(supabaseClient
+      .from("aspirantes")
+      .select("dni", { count: "exact", head: true }))
+    if(dashUbo.value){
+      padronQ = padronQ.eq("ubo", dashUbo.value)
+    }
+    const { count } = await padronQ
+    padronTotal = Number(count || 0)
+  }catch(e){
+    console.warn("No se pudo calcular padrón total:", e)
+  }
+
+  let alertasQ = withTenantScope(supabaseClient
     .from("asistencia_alertas")
     .select("id", { count: "exact", head: true })
-    .eq("tipo", "dni_en_otro_dispositivo")
+    .eq("tipo", "dni_en_otro_dispositivo"))
 
   if(dashDesde.value){
     alertasQ = alertasQ.gte("fecha", dashDesde.value)
@@ -2879,16 +3396,19 @@ async function cargarDashboard(){
   if(dashUbo.value){
     alertasQ = alertasQ.eq("ubo", dashUbo.value)
   }
+  if(dashSeccion.value){
+    alertasQ = alertasQ.eq("seccion", dashSeccion.value)
+  }
 
   const { count: alertasDispNoHabitual } = await alertasQ
 
-  let alertasDetalleQ = supabaseClient
+  let alertasDetalleQ = withTenantScope(supabaseClient
     .from("asistencia_alertas")
     .select("fecha,hora,dni,nombre,ubo,seccion,detalle,device_id")
     .eq("tipo", "dni_en_otro_dispositivo")
     .order("fecha", { ascending: false })
     .order("hora", { ascending: false })
-    .limit(120)
+    .limit(120))
 
   if(dashDesde.value){
     alertasDetalleQ = alertasDetalleQ.gte("fecha", dashDesde.value)
@@ -2898,6 +3418,9 @@ async function cargarDashboard(){
   }
   if(dashUbo.value){
     alertasDetalleQ = alertasDetalleQ.eq("ubo", dashUbo.value)
+  }
+  if(dashSeccion.value){
+    alertasDetalleQ = alertasDetalleQ.eq("seccion", dashSeccion.value)
   }
 
   const { data: alertasDetalle } = await alertasDetalleQ
@@ -2915,6 +3438,8 @@ async function cargarDashboard(){
   let total = Object.keys(alumnos).length
 
   let verde=0, amarillo=0, rojo=0
+  let rojoTardanza = 0
+  let rojoFueraDia = 0
 
   // 🔥 GUARDAMOS DETALLE GLOBAL
   window.detalleSemaforo = {
@@ -2930,29 +3455,9 @@ async function cargarDashboard(){
     let a = alumnos[dni]
     let estado="rojo"
 
-    // 🔥 evaluar por hora
-    let registros = dataActivos
-      .filter(x=>x.dni==dni)
-      .sort((a,b)=>{
-        const f = (a.fecha || "").localeCompare(b.fecha || "")
-        return f !== 0 ? f : (a.hora || "").localeCompare(b.hora || "")
-      })
-
-    let asistio = registros.length > 0
-
-    if(asistio){
-
-      const ultimaFecha = registros[registros.length - 1].fecha
-      const primerMarcadoUltimoDia = registros
-        .filter(x => x.fecha === ultimaFecha)
-        .sort((a,b)=>(a.hora || "").localeCompare(b.hora || ""))[0]
-      const hora = primerMarcadoUltimoDia?.hora || ""
-
-      if(hora && hora <= "19:10:00") estado="verde"
-      else if(hora && hora <= "19:30:00") estado="amarillo"
-      else estado="rojo"
-
-    }
+    const registros = dataActivos.filter(x=>x.dni==dni)
+    const evaluacion = evaluarSemaforoPorRegla(registros)
+    estado = evaluacion.estado
 
     if(estado==="verde") verde++
     if(estado==="amarillo") amarillo++
@@ -2962,12 +3467,25 @@ async function cargarDashboard(){
       dni,
       nombre:a.nombre,
       ubo:a.ubo,
-      total:a.total
+      total:a.total,
+      criterio: evaluacion.motivo || ""
     })
 
     if(estado==="rojo"){
-      if(!uboMap[a.ubo]) uboMap[a.ubo]=0
-      uboMap[a.ubo]++
+      if(evaluacion.motivo === "tardanza_alta") rojoTardanza++
+      if(evaluacion.motivo === "fuera_de_dia_configurado") rojoFueraDia++
+
+      if(!uboMap[a.ubo]){
+        uboMap[a.ubo] = { total:0, tardanza:0, fueraDia:0, otros:0 }
+      }
+      uboMap[a.ubo].total++
+      if(evaluacion.motivo === "tardanza_alta"){
+        uboMap[a.ubo].tardanza++
+      }else if(evaluacion.motivo === "fuera_de_dia_configurado"){
+        uboMap[a.ubo].fueraDia++
+      }else{
+        uboMap[a.ubo].otros++
+      }
     }
   }
 
@@ -2975,28 +3493,33 @@ async function cargarDashboard(){
   kpiAsistencia.innerText = total 
     ? Math.round((verde/total)*100)+"%" 
     : "0%"
+  const inasistencias = Math.max(0, padronTotal - total)
+  kpiInasistencia.innerText = inasistencias
+  kpiCobertura.innerText = padronTotal ? Math.round((total / padronTotal) * 100) + "%" : "0%"
 
   verdeCount.innerText = verde
   amarilloCount.innerText = amarillo
   rojoCount.innerText = rojo
+  kpiRojoTardanza.innerText = rojoTardanza
+  kpiRojoFueraDia.innerText = rojoFueraDia
   kpiDispNoHabitual.innerText = alertasDispNoHabitual || 0
   kpiDispCard.style.opacity = (alertasDispNoHabitual || 0) > 0 ? "1" : "0.75"
 
   cacheRiesgoUbo = Object.entries(uboMap)
-    .sort((a,b)=>b[1]-a[1])
+    .sort((a,b)=>b[1].total-a[1].total)
 
   let html=""
   cacheRiesgoUbo
     .slice(0,5)
     .forEach(([ubo,val])=>{
       html += `<p onclick="verUbo('${ubo}')" style="cursor:pointer;">
-      ⚠ ${ubo} - ${val} casos
+      ⚠ ${ubo} - ${val.total} casos (tardanza: ${val.tardanza}, fuera día: ${val.fueraDia})
       </p>`
     })
 
   topUbo.innerHTML = html
-  semaforoInfo.innerText = "Semáforo: se calcula por la primera marcación del último día registrado por cada aspirante (Verde ≤ 19:10, Amarillo 19:11–19:30, Rojo > 19:30)."
-  riesgoInfo.innerText = "Riesgo por UBO: muestra cuántos aspirantes están en Rojo según ese mismo criterio dentro del rango filtrado."
+  semaforoInfo.innerText = "Semáforo: usa la primera marcación del último día del aspirante contra la hora de su sección (Verde: hasta +10m, Amarillo: +11 a +30m, Rojo: >+30m o fuera de día configurado). Si la sección no tiene hora, no penaliza."
+  riesgoInfo.innerText = "Riesgo por UBO: cantidad de aspirantes en Rojo según la configuración de horario/días y el rango filtrado."
 }
 
 function verAlertasDispositivo(){
@@ -3054,6 +3577,7 @@ function verUbo(ubo){
       <th>Nombre</th>
       <th>UBO</th>
       <th>Asistencias</th>
+      <th>Criterio</th>
     </tr>
   `
 
@@ -3064,6 +3588,7 @@ function verUbo(ubo){
         <td>${r.nombre}</td>
         <td>${r.ubo}</td>
         <td>${r.total}</td>
+        <td>${r.criterio || "-"}</td>
       </tr>
     `
   })
@@ -3175,6 +3700,7 @@ function verDetalle(color){
       <th>Nombre</th>
       <th>UBO</th>
       <th>Asistencias</th>
+      <th>Criterio</th>
     </tr>
   `
 
@@ -3185,6 +3711,7 @@ function verDetalle(color){
         <td>${x.nombre}</td>
         <td>${x.ubo}</td>
         <td>${x.total}</td>
+        <td>${x.criterio || "-"}</td>
       </tr>
     `
   })
@@ -3314,6 +3841,11 @@ async function guardarSeccionCurso(){
 
   if(!secCursoHora.value){
     alert("Define una hora de inicio para la sección")
+    return
+  }
+
+  if(!dias.length){
+    alert("Selecciona al menos un día para la sección")
     return
   }
 
@@ -3482,6 +4014,11 @@ async function guardarSedeUbo(){
     return
   }
 
+  if(!todosDias && !dias.length){
+    alert("Selecciona al menos un día o activa la opción 'Todos'")
+    return
+  }
+
   const item = {
     seccion: seccionValor,
     ubo: uboSecUbo.value,
@@ -3636,20 +4173,25 @@ function limpiarDashboard(){
   dashDesde.value = from
   dashHasta.value = to
   dashUbo.value = ""
+  if(dashSeccion) dashSeccion.value = ""
 
   // 🔥 reset KPIs
   kpiTotal.innerText = "0"
   kpiAsistencia.innerText = "0%"
+  kpiInasistencia.innerText = "0"
+  kpiCobertura.innerText = "0%"
 
   verdeCount.innerText = "0"
   amarilloCount.innerText = "0"
   rojoCount.innerText = "0"
+  kpiRojoTardanza.innerText = "0"
+  kpiRojoFueraDia.innerText = "0"
   kpiDispNoHabitual.innerText = "0"
   kpiDispCard.style.opacity = "0.75"
 
   topUbo.innerHTML = ""
-  semaforoInfo.innerText = "Semáforo: criterio de puntualidad por aspirante en el rango seleccionado."
-  riesgoInfo.innerText = "Riesgo UBO: cantidad de aspirantes en estado rojo por UBO."
+  semaforoInfo.innerText = "Semáforo: compara cada aspirante contra hora/días configurados de su sección."
+  riesgoInfo.innerText = "Riesgo UBO: cantidad de aspirantes en rojo por UBO según horario/días."
 
   // limpiar memoria
   window.detalleSemaforo = {
@@ -3757,9 +4299,19 @@ mobileDni?.addEventListener("input", ()=>{
   mobileDni.value = mobileDni.value.replace(/\D/g, "").slice(0, 8)
 })
 
+mobileDniInicio?.addEventListener("input", ()=>{
+  mobileDniInicio.value = mobileDniInicio.value.replace(/\D/g, "").slice(0, 8)
+})
+
 mobileDni?.addEventListener("keydown", (e)=>{
   if(e.key === "Enter"){
     ingresarMovil()
+  }
+})
+
+mobileDniInicio?.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter"){
+    ingresarMovilInicio()
   }
 })
 
