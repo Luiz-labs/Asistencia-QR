@@ -266,6 +266,90 @@ input, select{
   margin-top:14px;
 }
 
+.config-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:10px;
+}
+
+.config-grid > div{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.config-grid label{
+  font-size:13px;
+  color:var(--muted);
+  font-weight:600;
+}
+
+.course-module{
+  margin-top:14px;
+  border:1px solid #e0e7f4;
+  border-radius:14px;
+  padding:14px;
+  background:#fafcff;
+}
+
+.course-module h4{
+  margin-bottom:10px;
+  font-size:16px;
+}
+
+.course-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.table-wrap{
+  overflow:auto;
+  margin-top:10px;
+}
+
+.table-wrap table{
+  min-width:680px;
+}
+
+.table-actions{
+  display:flex;
+  gap:8px;
+}
+
+.table-actions button{
+  min-width:auto;
+  height:32px;
+  padding:0 10px;
+  font-size:12px;
+}
+
+.hint{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+.btn-link{
+  background:transparent !important;
+  color:#0f6bfd !important;
+  border:none !important;
+  box-shadow:none !important;
+  min-width:auto !important;
+  height:auto !important;
+  padding:0 !important;
+  font-size:13px;
+  font-weight:700;
+  text-decoration:underline;
+}
+
+.btn-link:hover{
+  transform:none !important;
+  filter:none !important;
+  color:#0b56c8 !important;
+}
+
 .config-subtitle{
   display:block;
   margin-bottom:10px;
@@ -371,27 +455,24 @@ input, select{
   background:#f8fbff;
 }
 
-#listaSecciones{
-  margin-top:15px;
-  display:grid;
-  gap:8px;
-}
-
-.section-item{
-  padding:10px 12px;
-  border:1px solid #dbe4f5;
-  border-radius:10px;
-  background:#f8fbff;
-  line-height:1.5;
+#tablaAlertas{
+  margin-top:20px;
 }
 
 #vistaMovil{
   max-width:420px;
   margin:0 auto;
+  min-height:100dvh;
+  padding:14px 16px !important;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
 }
 
 #vistaMovil h2{
-  margin-bottom:8px;
+  margin-bottom:6px;
+  font-size:1.35rem;
+  line-height:1.15;
 }
 
 #vistaMovil .mobile-step{
@@ -399,8 +480,8 @@ input, select{
   border:1px solid rgba(164, 179, 211, 0.25);
   box-shadow:var(--shadow);
   border-radius:16px;
-  padding:18px;
-  margin-top:16px;
+  padding:16px;
+  margin-top:12px;
 }
 
 #vistaMovil .mobile-step p{
@@ -415,15 +496,79 @@ input, select{
 
 #vistaMovil button{
   width:min(100%, 320px);
-  min-height:50px;
+  min-height:48px;
   border-radius:14px;
-  font-size:16px;
+  font-size:15px;
   font-weight:600;
+}
+
+#scanOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(11, 20, 38, 0.58);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1200;
+  padding:16px;
+}
+
+#scanCard{
+  width:min(100%, 420px);
+  background:var(--surface);
+  border:1px solid rgba(164, 179, 211, 0.35);
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  padding:14px;
+}
+
+#scanCardHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+#scanCardHeader strong{
+  font-size:14px;
+}
+
+#scanOverlay video{
+  width:100%;
+  max-height:52vh;
+  object-fit:cover;
+  border-radius:12px;
+  background:#111;
+}
+
+.scan-close{
+  min-width:auto !important;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  padding:0;
+  background:#eef3ff;
+  color:#21457f;
+  border:1px solid #cfdbf3;
+  box-shadow:none !important;
+  font-size:18px;
+  line-height:1;
+}
+
+.scan-close:hover{
+  background:#dfeaff;
+  transform:none;
+  filter:none;
 }
 
 #formulario{
   max-width:420px;
   margin:0 auto;
+  background:var(--surface);
+  border:1px solid rgba(164, 179, 211, 0.3);
+  box-shadow:var(--shadow);
+  border-radius:16px;
+  padding:16px !important;
 }
 
 #formulario input{
@@ -434,6 +579,117 @@ input, select{
 #formulario button{
   width:100%;
   margin-bottom:10px;
+}
+
+#formulario p{
+  margin:10px 0 12px;
+  color:var(--muted);
+}
+
+.mobile-section-btn{
+  background:#eef2f9 !important;
+  color:#243451 !important;
+  border:1px solid #d2deef !important;
+  box-shadow:none !important;
+  font-weight:600;
+  position:relative;
+  justify-content:flex-start;
+  text-align:left;
+  padding-left:14px;
+  padding-right:40px;
+  min-height:52px !important;
+  line-height:1.2;
+}
+
+.mobile-section-btn:hover{
+  background:#e5ecf8 !important;
+  transform:none;
+}
+
+.mobile-section-btn.active{
+  background:linear-gradient(180deg, #2783ff 0%, var(--brand) 100%) !important;
+  color:#fff !important;
+  border-color:#1e66de !important;
+  box-shadow:0 8px 18px rgba(23, 88, 210, 0.22) !important;
+}
+
+.mobile-section-btn.active::after{
+  content:"✓";
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:16px;
+  font-weight:800;
+  color:#fff;
+}
+
+.mobile-primary{
+  margin-top:4px;
+  font-size:15px !important;
+  letter-spacing:0.2px;
+}
+
+.mobile-exit{
+  background:#f0f3fa !important;
+  color:#243451 !important;
+  border:1px solid #d3deef !important;
+  box-shadow:none !important;
+}
+
+.mobile-exit:hover{
+  background:#e8eef9 !important;
+  transform:none;
+}
+
+#mensaje{
+  display:none;
+  margin-top:8px !important;
+  padding:10px 12px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:600;
+  border:1px solid transparent;
+}
+
+#mensaje.ok{
+  display:block;
+  background:#e9f9ef;
+  color:#186a3b;
+  border-color:#b6e7c7;
+}
+
+#mensaje.error{
+  display:block;
+  background:#fff1f0;
+  color:#a33a34;
+  border-color:#f3c7c4;
+}
+
+#mensaje.warning{
+  display:block;
+  background:#fff8e8;
+  color:#8a5a00;
+  border-color:#f2ddad;
+}
+
+.badge-alerta{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.badge-alerta.ok{
+  background:#edf2fb;
+  color:#5c6f92;
+}
+
+.badge-alerta.warn{
+  background:#fff3dc;
+  color:#8a5a00;
+  border:1px solid #f2ddad;
 }
 
 .modal-close{
@@ -504,6 +760,10 @@ input, select{
   #loginScreen > div:nth-child(2){
     width:94% !important;
     padding:20px !important;
+  }
+
+  #vistaMovil{
+    padding:12px !important;
   }
 }
 
@@ -588,7 +848,7 @@ input, select{
   <h2>Incorporación y ESBAS</h2>
   <p>Instrucción ESBAS 2026</p>
 
-  <img src="logo.png" style="width:120px;margin:14px auto;">
+  <img src="logo.png" style="width:108px;margin:10px auto;">
 
   <div id="mobileStepIngreso" class="mobile-step">
     <p>Ingresa tu DNI para iniciar</p>
@@ -601,7 +861,7 @@ input, select{
     <button onclick="iniciarEscaneo()">📷 Escanear QR</button>
   </div>
 
-  <footer style="margin-top:40px;font-size:12px;color:#aaa;">
+  <footer style="margin-top:20px;font-size:12px;color:#97a4bf;">
     Desarrollado por Luiz-Labs @ 2026
   </footer>
 
@@ -616,18 +876,27 @@ input, select{
 
   <p>Selecciona tu sección</p>
 
-  <button onclick="setSeccion('A')">Sección A (Martes y Jueves Presencial)</button>
-  <button onclick="setSeccion('B')">Sección B (Sábados Presencial)</button>
-  <button onclick="setSeccion('C')">Sección C (Sábados Virtual)</button>
+  <button class="mobile-section-btn" data-seccion="A" onclick="setSeccion('A')">Sección A (Martes y Jueves Presencial)</button>
+  <button class="mobile-section-btn" data-seccion="B" onclick="setSeccion('B')">Sección B (Sábados Presencial)</button>
+  <button class="mobile-section-btn" data-seccion="C" onclick="setSeccion('C')">Sección C (Sábados Virtual)</button>
 
-  <button onclick="guardarAsistencia()">REGISTRAR ASISTENCIA</button>
-  <button onclick="volverInicio()">Salir</button>
+  <button class="mobile-primary" onclick="guardarAsistencia()">REGISTRAR ASISTENCIA</button>
+  <button class="mobile-exit" onclick="volverInicio()">Salir</button>
 
   <p id="mensaje"></p>
 
 </div>
 
-<video id="video" style="display:none;"></video>
+<div id="scanOverlay">
+  <div id="scanCard">
+    <div id="scanCardHeader">
+      <strong>Escanear QR</strong>
+      <button class="scan-close" onclick="cerrarScanner()" aria-label="Cerrar escáner">×</button>
+    </div>
+    <video id="video" style="display:none;"></video>
+    <p style="margin-top:8px;font-size:12px;color:#657799;">Apunta la cámara al código QR</p>
+  </div>
+</div>
 <canvas id="canvas" style="display:none;"></canvas>
 
 <!-- 💻 ADMIN (TU PANEL ORIGINAL) -->
@@ -647,6 +916,7 @@ input, select{
       <p class="nav-item active" onclick="mostrarVista('reportes')">📄 Reportes</p>
       <p class="nav-item" onclick="mostrarVista('dashboard')">📊 Dashboard</p>
       <p class="nav-item" onclick="mostrarVista('config')">⚙️ Configuración</p>
+      <p class="nav-item" onclick="mostrarVista('usuarios')">👥 Usuarios</p>
     </div>
 
     <div style="flex:1;padding:20px;">
@@ -671,6 +941,8 @@ input, select{
 
             <button onclick="cargarDashboard()">Filtrar</button>
             <button class="secondary" onclick="limpiarDashboard()">Limpiar</button>
+            <button onclick="exportarDashboardPDF()">EXPORTAR PDF</button>
+            <button class="secondary" onclick="exportarRiesgoUboExcel()">Riesgo UBO Excel</button>
 
           </div>
 
@@ -687,6 +959,11 @@ input, select{
           <div class="card" style="flex:1; text-align:center;">
             <h3 id="kpiAsistencia">0%</h3>
             <p>% Asistencia</p>
+          </div>
+
+          <div id="kpiDispCard" class="card" style="flex:1; text-align:center; cursor:pointer;" onclick="verAlertasDispositivo()">
+            <h3 id="kpiDispNoHabitual">0</h3>
+            <p>Alertas Dispositivo</p>
           </div>
 
         </div>
@@ -711,10 +988,19 @@ input, select{
 
         </div>
 
+        <p id="semaforoInfo" style="margin:-6px 2px 14px;color:#5f6f8f;font-size:13px;">
+          Semáforo: criterio de puntualidad por aspirante en el rango seleccionado.
+        </p>
+        <button class="btn-link" onclick="verCriterio('semaforo')" style="margin:-8px 0 16px;">Ver criterio</button>
+
         <!-- TOP RIESGO UBO -->
         <div class="card">
           <h3>⚠ Riesgo por UBO</h3>
           <div id="topUbo"></div>
+          <p id="riesgoInfo" style="margin-top:10px;color:#5f6f8f;font-size:13px;">
+            Riesgo UBO: cantidad de aspirantes en estado rojo por UBO.
+          </p>
+          <button class="btn-link" onclick="verCriterio('riesgo')">Ver criterio</button>
         </div>
 
       </div>
@@ -742,6 +1028,7 @@ input, select{
             <button onclick="aplicarFiltros()">Aplicar</button>
             <button class="secondary" onclick="limpiarFiltros()">Limpiar</button>
             <button onclick="cargarDatos()">Todos</button>
+            <button onclick="exportarReportesExcel()">Exportar Excel</button>
 
           </div>
 
@@ -750,7 +1037,69 @@ input, select{
           <!-- 🔥 TABLA RESULTADOS (AQUI VA) -->
         <div id="tabla" class="card"></div>
 
+        <div id="tablaAlertas" class="card">
+          <h3 style="margin-bottom:10px;">Alertas de Marcación</h3>
+          <div id="tablaAlertasContenido" style="color:#607092;">Sin alertas registradas.</div>
+        </div>
 
+
+      </div>
+
+      <div id="vistaUsuarios" style="display:none;">
+        <h2>Usuarios</h2>
+
+        <div class="card config-card">
+          <h3>Perfiles de Acceso</h3>
+          <div class="config-grid">
+            <div>
+              <label for="userNombre">Nombre</label>
+              <input id="userNombre" placeholder="Nombre completo">
+            </div>
+            <div>
+              <label for="userLogin">Usuario</label>
+              <input id="userLogin" placeholder="usuario">
+            </div>
+            <div>
+              <label for="userPass">Clave</label>
+              <input id="userPass" type="password" placeholder="clave">
+            </div>
+            <div>
+              <label for="userRol">Rol</label>
+              <select id="userRol">
+                <option value="editor">Editor</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="administrador">Administrador</option>
+              </select>
+            </div>
+          </div>
+          <div class="config-actions">
+            <button onclick="guardarUsuarioAdmin()">Guardar Usuario</button>
+            <button class="secondary" onclick="limpiarUsuarioAdmin()">Limpiar</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaUsuariosAdmin"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card config-card">
+          <h3>Carga de Aspirantes (Excel)</h3>
+          <div class="hint">Archivo requerido con columnas: <strong>apellidos, nombres, dni, ubo</strong>.</div>
+          <div class="config-row" style="margin-top:10px;">
+            <input type="file" id="archivoAspirantes" accept=".xlsx,.xls,.csv">
+            <button onclick="cargarExcelAspirantes()">Subir Archivo</button>
+          </div>
+          <p id="msgCargaAspirantes" class="hint"></p>
+        </div>
       </div>
 
       <div id="vistaConfig" style="display:none;">
@@ -801,64 +1150,127 @@ input, select{
 
           <h3>Configuración de Curso</h3>
 
-          <div class="config-row">
-            <input type="date" id="cursoInicio">
-            <input type="date" id="cursoFin">
+          <div class="course-module">
+            <h4>Nombre de Curso</h4>
+            <div class="config-grid">
+              <div>
+                <label for="cursoNombre">Nombre</label>
+                <input id="cursoNombre" placeholder="ESBAS 2026 - I" style="text-transform:uppercase;">
+              </div>
+            </div>
+          </div>
+
+          <div class="course-module">
+            <h4>Rango de Duración</h4>
+            <div class="config-grid">
+              <div>
+                <label for="cursoInicio">Fecha inicio</label>
+                <input type="date" id="cursoInicio">
+              </div>
+              <div>
+                <label for="cursoFin">Fecha término</label>
+                <input type="date" id="cursoFin">
+              </div>
+              <div>
+                <label for="cursoRadio">Radio GPS (metros)</label>
+                <input type="number" id="cursoRadio" min="10" max="500" step="5" placeholder="50">
+              </div>
+            </div>
+          </div>
+
+          <div class="course-module">
+            <h4>Crear Secciones</h4>
+            <div class="config-grid">
+              <div>
+                <label for="secCursoNombre">Sección</label>
+                <select id="secCursoNombre">
+                  <option value="A">Sección A</option>
+                  <option value="B">Sección B</option>
+                  <option value="C">Sección C</option>
+                </select>
+              </div>
+              <div>
+                <label for="secCursoModalidad">Modalidad</label>
+                <select id="secCursoModalidad">
+                  <option value="Presencial">Presencial</option>
+                  <option value="Virtual">Virtual</option>
+                </select>
+              </div>
+              <div>
+                <label for="secCursoHora">Hora inicio</label>
+                <input type="time" id="secCursoHora">
+              </div>
+            </div>
+            <div class="course-actions">
+              <button onclick="guardarSeccionCurso()">CREAR SECCIÓN</button>
+              <button class="secondary" onclick="limpiarFormSeccionCurso()">Limpiar</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Sección</th>
+                    <th>Modalidad</th>
+                    <th>Hora Inicio</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaSeccionesCurso"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="course-module">
+            <h4>UBOs Sede Por Sección</h4>
+            <div class="config-grid">
+              <div>
+                <label for="uboSecNombre">Sección</label>
+                <select id="uboSecNombre">
+                  <option value="A">Sección A</option>
+                  <option value="B">Sección B</option>
+                  <option value="C">Sección C</option>
+                </select>
+              </div>
+              <div>
+                <label for="uboSecUbo">UBO</label>
+                <select id="uboSecUbo"></select>
+              </div>
+              <div>
+                <label for="uboSecHora">Hora inicio</label>
+                <input type="time" id="uboSecHora">
+              </div>
+              <div>
+                <label for="uboSecModalidad">Modalidad</label>
+                <select id="uboSecModalidad">
+                  <option value="Presencial">Presencial</option>
+                  <option value="Virtual">Virtual</option>
+                </select>
+              </div>
+            </div>
+            <div class="course-actions">
+              <button onclick="guardarSedeUbo()">CREAR SEDE UBO</button>
+              <button class="secondary" onclick="limpiarFormSedeUbo()">Limpiar</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Sección</th>
+                    <th>UBO</th>
+                    <th>Modalidad</th>
+                    <th>Hora Inicio</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaSedesUbo"></tbody>
+              </table>
+            </div>
           </div>
 
           <div class="config-actions">
             <button onclick="guardarCurso()">Guardar Curso</button>
-            <button class="secondary" onclick="limpiarCurso()">Limpiar</button>
+            <button class="secondary" onclick="limpiarCurso()">Limpiar Todo</button>
           </div>
-
-        </div>
-
-        <!-- SECCIONES -->
-        <div class="card config-card">
-
-          <h3>Secciones</h3>
-
-          <!-- FILA 1 -->
-          <div class="section-top">
-            <select id="secNombre">
-              <option>Sección A</option>
-              <option>Sección B</option>
-              <option>Sección C</option>
-              <option>Sección D</option>
-            </select>
-
-            <input type="time" id="secHora">
-          </div>
-
-          <!-- FILA 2 -->
-          <div class="dias">
-            <label><input type="checkbox"> Lunes</label>
-            <label><input type="checkbox"> Martes</label>
-            <label><input type="checkbox"> Miércoles</label>
-            <label><input type="checkbox"> Jueves</label>
-            <label><input type="checkbox"> Viernes</label>
-            <label><input type="checkbox"> Sábado</label>
-            <label><input type="checkbox"> Domingo</label>
-          </div>
-
-          <!-- MODALIDAD -->
-          <div class="section-mode">
-            <strong class="config-subtitle">Modalidad</strong>
-
-            <div class="mode-options">
-              <label><input type="checkbox" id="secPresencial"> Presencial</label>
-              <label><input type="checkbox" id="secVirtual"> Virtual</label>
-            </div>
-          </div>
-
-          <!-- BOTONES -->
-          <div class="config-actions">
-            <button onclick="agregarSeccion()">Agregar</button>
-            <button class="secondary" onclick="limpiarSecciones()">Limpiar</button>
-          </div>
-
-          <!-- LISTADO -->
-          <div id="listaSecciones"></div>
 
         </div>
 
@@ -880,6 +1292,8 @@ input, select{
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
 <script>
 const supabaseUrl = 'https://kcapmyovaigjntaqeqwn.supabase.co'
@@ -889,6 +1303,24 @@ const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey)
 let adminAutenticado = false
 let dniMovil = ""
 let resizeTimer
+let scanningActivo = false
+let cursoConfigCache = null
+let ubosSedeCache = []
+let cursoSecciones = []
+let cursoSedesUbo = []
+let editSeccionCursoIndex = -1
+let editSedeUboIndex = -1
+let editUsuarioIndex = -1
+let usuariosAdmin = []
+let cacheReportes = []
+let cacheDashboard = []
+let cacheRiesgoUbo = []
+
+const SECTION_TO_UBO_FIELD = {
+  A: "seccion_a_ubo",
+  B: "seccion_b_ubo",
+  C: "seccion_c_ubo"
+}
 
 function esMovil(){
   const touchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0
@@ -898,6 +1330,412 @@ function esMovil(){
 function mostrarPasoMovil(paso){
   mobileStepIngreso.style.display = paso === "ingreso" ? "block" : "none"
   mobileStepScan.style.display = paso === "scan" ? "block" : "none"
+}
+
+function seleccionarBotonSeccion(valor){
+  document.querySelectorAll(".mobile-section-btn").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.seccion === valor)
+  })
+}
+
+function setMensaje(texto, tipo = ""){
+  mensaje.className = ""
+  mensaje.innerText = texto || ""
+  if(!texto) return
+  if(tipo) mensaje.classList.add(tipo)
+}
+
+function distanciaMetros(lat1, lon1, lat2, lon2){
+  const toRad = (deg)=>deg * Math.PI / 180
+  const R = 6371000
+  const dLat = toRad(lat2 - lat1)
+  const dLon = toRad(lon2 - lon1)
+  const a =
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  return R * c
+}
+
+function obtenerUbosUnicosDesdeAsistencias(data){
+  return [...new Set((data || []).map(x => (x.ubo || "").trim()).filter(Boolean))]
+    .sort((a,b)=>parseInt(a)-parseInt(b))
+}
+
+function construirOptionsUbo(ubos, includeEmpty = true, emptyText = "Seleccionar UBO"){
+  let html = includeEmpty ? `<option value="">${emptyText}</option>` : ""
+  ubos.forEach(u=>{
+    html += `<option value="${u}">${u}</option>`
+  })
+  return html
+}
+
+function descargarExcelDesdeJSON(filename, rows){
+  if(!window.XLSX){
+    alert("Librería XLSX no disponible")
+    return
+  }
+  const ws = XLSX.utils.json_to_sheet(rows)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, "Datos")
+  XLSX.writeFile(wb, filename)
+}
+
+function exportarReportesExcel(){
+  if(!cacheReportes.length){
+    alert("No hay datos para exportar")
+    return
+  }
+
+  const rows = cacheReportes.map(r=>({
+    DNI: r.dni || "",
+    Nombre: r.nombre || "",
+    UBO: r.ubo || "",
+    Fecha: r.fecha || "",
+    Hora: r.hora || "",
+    Alerta: r.alerta || ""
+  }))
+
+  descargarExcelDesdeJSON("reportes_asistencia.xlsx", rows)
+}
+
+function exportarRiesgoUboExcel(){
+  if(!cacheRiesgoUbo.length){
+    alert("No hay datos de riesgo UBO para exportar")
+    return
+  }
+
+  const rows = cacheRiesgoUbo.map(([ubo, casos])=>({
+    UBO: ubo,
+    Casos: casos
+  }))
+
+  descargarExcelDesdeJSON("dashboard_riesgo_ubo.xlsx", rows)
+}
+
+function exportarDashboardPDF(){
+  if(!window.jspdf?.jsPDF){
+    alert("Librería jsPDF no disponible")
+    return
+  }
+
+  const { jsPDF } = window.jspdf
+  const doc = new jsPDF()
+  const fecha = new Date().toLocaleString()
+  let y = 14
+
+  doc.setFontSize(14)
+  doc.text("Dashboard ESBAS", 14, y)
+  y += 8
+  doc.setFontSize(10)
+  doc.text(`Generado: ${fecha}`, 14, y)
+  y += 10
+
+  doc.text(`Total Activos: ${kpiTotal.innerText || "0"}`, 14, y); y += 6
+  doc.text(`% Asistencia: ${kpiAsistencia.innerText || "0%"}`, 14, y); y += 6
+  doc.text(`Semáforo Verde: ${verdeCount.innerText || "0"}`, 14, y); y += 6
+  doc.text(`Semáforo Amarillo: ${amarilloCount.innerText || "0"}`, 14, y); y += 6
+  doc.text(`Semáforo Rojo: ${rojoCount.innerText || "0"}`, 14, y); y += 10
+
+  doc.setFontSize(11)
+  doc.text("Top Riesgo UBO", 14, y); y += 7
+  doc.setFontSize(10)
+
+  if(!cacheRiesgoUbo.length){
+    doc.text("Sin datos.", 14, y)
+  }else{
+    cacheRiesgoUbo.slice(0, 10).forEach(([ubo, casos])=>{
+      doc.text(`UBO ${ubo}: ${casos} casos`, 14, y)
+      y += 6
+      if(y > 280){
+        doc.addPage()
+        y = 14
+      }
+    })
+  }
+
+  doc.save("dashboard_esbas.pdf")
+}
+
+function cargarUsuariosAdminLocal(){
+  try{
+    usuariosAdmin = JSON.parse(localStorage.getItem("usuariosAdmin") || "[]")
+  }catch{
+    usuariosAdmin = []
+  }
+  renderUsuariosAdmin()
+}
+
+function renderUsuariosAdmin(){
+  if(!tablaUsuariosAdmin) return
+  if(!usuariosAdmin.length){
+    tablaUsuariosAdmin.innerHTML = `<tr><td colspan="4">Sin usuarios creados.</td></tr>`
+    return
+  }
+
+  let html = ""
+  usuariosAdmin.forEach((u, idx)=>{
+    html += `
+      <tr>
+        <td>${u.nombre || ""}</td>
+        <td>${u.usuario || ""}</td>
+        <td>${u.rol || ""}</td>
+        <td>
+          <div class="table-actions">
+            <button onclick="editarUsuarioAdmin(${idx})">Modificar</button>
+            <button class="secondary" onclick="eliminarUsuarioAdmin(${idx})">Eliminar</button>
+          </div>
+        </td>
+      </tr>
+    `
+  })
+  tablaUsuariosAdmin.innerHTML = html
+}
+
+function limpiarUsuarioAdmin(){
+  userNombre.value = ""
+  userLogin.value = ""
+  userPass.value = ""
+  userRol.value = "editor"
+  editUsuarioIndex = -1
+}
+
+function guardarUsuarioAdmin(){
+  const nombre = (userNombre.value || "").trim()
+  const usuario = (userLogin.value || "").trim().toLowerCase()
+  const clave = (userPass.value || "").trim()
+  const rol = userRol.value
+
+  if(!nombre || !usuario || !clave){
+    alert("Completa nombre, usuario y clave")
+    return
+  }
+
+  const item = { nombre, usuario, clave, rol }
+  if(editUsuarioIndex >= 0){
+    usuariosAdmin[editUsuarioIndex] = item
+  }else{
+    const exists = usuariosAdmin.find(x=>x.usuario === usuario)
+    if(exists){
+      alert("Ese usuario ya existe")
+      return
+    }
+    usuariosAdmin.push(item)
+  }
+
+  localStorage.setItem("usuariosAdmin", JSON.stringify(usuariosAdmin))
+  renderUsuariosAdmin()
+  limpiarUsuarioAdmin()
+}
+
+function editarUsuarioAdmin(idx){
+  const u = usuariosAdmin[idx]
+  if(!u) return
+  userNombre.value = u.nombre || ""
+  userLogin.value = u.usuario || ""
+  userPass.value = u.clave || ""
+  userRol.value = u.rol || "editor"
+  editUsuarioIndex = idx
+}
+
+function eliminarUsuarioAdmin(idx){
+  if(!confirm("¿Eliminar usuario?")) return
+  usuariosAdmin.splice(idx, 1)
+  localStorage.setItem("usuariosAdmin", JSON.stringify(usuariosAdmin))
+  renderUsuariosAdmin()
+}
+
+async function cargarExcelAspirantes(){
+  const file = archivoAspirantes.files?.[0]
+  if(!file){
+    msgCargaAspirantes.innerText = "Selecciona un archivo primero."
+    return
+  }
+  if(!window.XLSX){
+    msgCargaAspirantes.innerText = "No está disponible la librería XLSX."
+    return
+  }
+
+  const buffer = await file.arrayBuffer()
+  const wb = XLSX.read(buffer, { type: "array" })
+  const ws = wb.Sheets[wb.SheetNames[0]]
+  const rows = XLSX.utils.sheet_to_json(ws, { defval: "" })
+
+  if(!rows.length){
+    msgCargaAspirantes.innerText = "El archivo no tiene filas."
+    return
+  }
+
+  const keys = Object.keys(rows[0]).map(k=>k.toLowerCase().trim())
+  const required = ["apellidos", "nombres", "dni", "ubo"]
+  const faltantes = required.filter(k=>!keys.includes(k))
+  if(faltantes.length){
+    msgCargaAspirantes.innerText = `Faltan columnas requeridas: ${faltantes.join(", ")}.`
+    return
+  }
+
+  const parsed = rows
+    .map(r=>({
+      apellidos: String(r.apellidos ?? r.Apellidos ?? "").trim(),
+      nombres: String(r.nombres ?? r.Nombres ?? "").trim(),
+      dni: String(r.dni ?? r.DNI ?? "").replace(/\D/g, ""),
+      ubo: String(r.ubo ?? r.UBO ?? "").trim()
+    }))
+    .filter(r=>r.apellidos && r.nombres && r.dni && r.ubo)
+
+  if(!parsed.length){
+    msgCargaAspirantes.innerText = "No se encontraron filas válidas."
+    return
+  }
+
+  const payload = parsed.map(r=>({
+    dni: r.dni,
+    nombres: r.nombres,
+    apellidos: r.apellidos,
+    ubo: r.ubo
+  }))
+
+  const { error } = await supabaseClient
+    .from("aspirantes")
+    .upsert(payload, { onConflict: "dni" })
+
+  if(error){
+    msgCargaAspirantes.innerText = `No se pudo cargar en Supabase: ${error.message}`
+    return
+  }
+
+  msgCargaAspirantes.innerText = `Carga exitosa: ${payload.length} aspirantes procesados.`
+}
+
+async function cargarSedesUbo(){
+  const { data, error } = await supabaseClient
+    .from("ubos_sedes")
+    .select("ubo,nombre,lat,lng,activo")
+    .eq("activo", true)
+
+  if(error){
+    console.warn("No se pudo cargar ubos_sedes:", error.message)
+    ubosSedeCache = []
+    return
+  }
+
+  ubosSedeCache = data || []
+}
+
+function aplicarCursoEnUI(cfg){
+  const nombreLocal = localStorage.getItem("cursoNombre") || ""
+
+  if(cfg){
+    cursoNombre.value = (cfg.nombre_curso || nombreLocal || "").toUpperCase()
+    cursoInicio.value = cfg.fecha_inicio || ""
+    cursoFin.value = cfg.fecha_fin || ""
+    cursoRadio.value = cfg.radio_m || 50
+    toggleGPS.checked = !!cfg.gps_activo
+  }else{
+    cursoNombre.value = nombreLocal.toUpperCase()
+    cursoRadio.value = "50"
+  }
+
+  try{
+    cursoSecciones = JSON.parse(localStorage.getItem("cursoSecciones") || "[]")
+  }catch{
+    cursoSecciones = []
+  }
+
+  try{
+    cursoSedesUbo = JSON.parse(localStorage.getItem("cursoSedesUbo") || "[]")
+  }catch{
+    cursoSedesUbo = []
+  }
+
+  renderSeccionesCurso()
+  actualizarOpcionesSeccionSede()
+  renderSedesUbo()
+}
+
+async function cargarConfigCurso(){
+  const { data, error } = await supabaseClient
+    .from("curso_configuracion")
+    .select("*")
+    .eq("id", 1)
+    .maybeSingle()
+
+  if(error){
+    console.warn("No se pudo cargar curso_configuracion:", error.message)
+    cursoConfigCache = null
+    aplicarCursoEnUI(null)
+    return
+  }
+
+  cursoConfigCache = data || null
+  aplicarCursoEnUI(cursoConfigCache)
+}
+
+function obtenerGeoActual(){
+  return new Promise((resolve, reject)=>{
+    if(!navigator.geolocation){
+      reject(new Error("Geolocalización no disponible en este navegador"))
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos)=> resolve(pos.coords),
+      (err)=> reject(err),
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    )
+  })
+}
+
+async function registrarAlerta(payload){
+  try{
+    await supabaseClient.from("asistencia_alertas").insert([payload])
+  }catch(e){
+    console.warn("No se pudo registrar alerta:", e)
+  }
+}
+
+function obtenerClavesAlertaDispositivo(data){
+  const claves = new Set()
+  const historial = [...(data || [])].sort((a,b)=>{
+    const aKey = `${a.fecha || ""} ${a.hora || ""}`
+    const bKey = `${b.fecha || ""} ${b.hora || ""}`
+    return aKey.localeCompare(bKey)
+  })
+
+  const dniPorDispositivo = {}
+
+  historial.forEach(r=>{
+    const dev = r.device_id || ""
+    const dniVal = (r.dni || "").trim()
+    if(!dev || !dniVal) return
+
+    if(!dniPorDispositivo[dev]){
+      dniPorDispositivo[dev] = new Set()
+    }
+
+    if(dniPorDispositivo[dev].size > 0 && !dniPorDispositivo[dev].has(dniVal)){
+      claves.add(`${dev}|${dniVal}|${r.fecha || ""}|${r.hora || ""}`)
+    }
+
+    dniPorDispositivo[dev].add(dniVal)
+  })
+
+  return claves
+}
+
+function abrirScanner(){
+  if(scanningActivo) return
+  scanningActivo = true
+  scanOverlay.style.display = "flex"
+  video.style.display = "block"
+}
+
+function cerrarScanner(){
+  scanningActivo = false
+  detenerCamara()
+  scanOverlay.style.display = "none"
+  video.style.display = "none"
 }
 
 function aplicarLayout(){
@@ -910,8 +1748,7 @@ function aplicarLayout(){
       mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
     }
   }else{
-    detenerCamara()
-    video.style.display="none"
+    cerrarScanner()
     vistaMovil.style.display="none"
     formulario.style.display="none"
 
@@ -937,15 +1774,23 @@ function actualizarEstadoChecks(){
   })
 }
 
-window.onload = ()=>{
-  cargarUbos()
+window.onload = async ()=>{
+  await cargarUbos()
+  await cargarConfigCurso()
+  cargarUsuariosAdminLocal()
   actualizarEstadoChecks()
   aplicarLayout()
 
 }
 
 function login(){
-  if(loginUser.value==="12345678" && loginPass.value==="1234"){
+  const usuario = (loginUser.value || "").trim().toLowerCase()
+  const clave = (loginPass.value || "").trim()
+  const valido =
+    (usuario === "12345678" && clave === "1234") ||
+    (usuario === "admin" && clave === "1234")
+
+  if(valido){
     adminAutenticado = true
     loginScreen.style.display="none"
     vistaDesktop.style.display="block"
@@ -954,6 +1799,34 @@ function login(){
   } else {
     loginMsg.innerText="Usuario o clave incorrecta"
   }
+}
+
+function verCriterio(tipo){
+  let titulo = "Criterio"
+  let contenido = ""
+
+  if(tipo === "semaforo"){
+    titulo = "Criterio Semáforo"
+    contenido = `
+      <p><strong>Verde:</strong> primera marcación del último día <= 19:10.</p>
+      <p><strong>Amarillo:</strong> primera marcación del último día entre 19:11 y 19:30.</p>
+      <p><strong>Rojo:</strong> primera marcación del último día > 19:30.</p>
+      <p style="margin-top:10px;color:#5f6f8f;">El cálculo se hace por aspirante en el rango de fechas filtrado.</p>
+    `
+  }
+
+  if(tipo === "riesgo"){
+    titulo = "Criterio Riesgo UBO"
+    contenido = `
+      <p>Se cuenta cuántos aspirantes quedaron en <strong>Rojo</strong> y se agrupan por UBO.</p>
+      <p>El listado muestra las UBOs con más casos para priorizar seguimiento.</p>
+      <p style="margin-top:10px;color:#5f6f8f;">Usa el mismo criterio de semáforo y respeta el filtro de fechas.</p>
+    `
+  }
+
+  modalTitulo.innerText = titulo
+  modalContenido.innerHTML = contenido
+  modal.style.display = "flex"
 }
 
 function logout(){
@@ -984,7 +1857,7 @@ function iniciarEscaneo(){
     return
   }
 
-  video.style.display = "block" // 🔥 MOSTRAR VIDEO
+  abrirScanner()
 
   navigator.mediaDevices.getUserMedia({
     video: { facingMode: "environment" }
@@ -996,12 +1869,15 @@ function iniciarEscaneo(){
     scanQR()
   })
   .catch(err=>{
+    cerrarScanner()
     alert("Error cámara: "+err)
     console.error(err)
   })
 }
 
 function scanQR(){
+  if(!scanningActivo) return
+
   const ctx=canvas.getContext("2d")
 
   if(video.readyState===video.HAVE_ENOUGH_DATA){
@@ -1013,8 +1889,7 @@ function scanQR(){
     const code=jsQR(img.data,img.width,img.height)
 
     if(code){
-      detenerCamara()
-      video.style.display = "none" // 🔥 ocultar cámara
+      cerrarScanner()
 
       vistaMovil.style.display="none"
       formulario.style.display="block"
@@ -1032,14 +1907,17 @@ function detenerCamara(){
 }
 
 function volverInicio(){
-  detenerCamara()
-  video.style.display = "none"
+  cerrarScanner()
   formulario.style.display="none"
   vistaMovil.style.display="block"
   mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
+  setMensaje("")
 }
 
-function setSeccion(s){seccion=s}
+function setSeccion(s){
+  seccion=s
+  seleccionarBotonSeccion(s)
+}
 
 function getDeviceId(){
   let id=localStorage.getItem("dev")
@@ -1055,60 +1933,198 @@ async function guardarAsistencia(){
   const nombresValor = (nombres.value || "").trim()
   const apellidosValor = (apellidos.value || "").trim()
   const uboValor = (ubo.value || "").replace(/\D/g, "")
+  const deviceId = getDeviceId()
+  const nombreCompleto = `${nombresValor} ${apellidosValor}`.replace(/\s+/g, " ").trim()
+  const now=new Date()
+  const fechaHoy = now.toISOString().slice(0,10)
+  const horaHoy = now.toTimeString().slice(0,8)
 
   if(!dniRegistro){
-    mensaje.innerText = "⚠ DNI no válido"
+    setMensaje("⚠ DNI no válido", "error")
     return
   }
 
   if(!nombresValor || !apellidosValor){
-    mensaje.innerText = "⚠ Completa nombres y apellidos"
+    setMensaje("⚠ Completa nombres y apellidos", "error")
     return
   }
 
   if(!uboValor){
-    mensaje.innerText = "⚠ UBO debe ser numérico"
+    setMensaje("⚠ UBO debe ser numérico", "error")
     return
   }
 
   if(!seccion){
-    mensaje.innerText = "⚠ Selecciona una sección"
+    setMensaje("⚠ Selecciona una sección", "error")
     return
   }
 
-  const now=new Date()
-  const nombreCompleto = `${nombresValor} ${apellidosValor}`.replace(/\s+/g, " ").trim()
+  let alertaDniDispositivo = false
+  let alertaDispositivoNoHabitual = false
+  let dispositivoHabitual = ""
+
+  try{
+    const { data: historialDevice } = await supabaseClient
+      .from("asistencias")
+      .select("dni,fecha,hora")
+      .eq("device_id", deviceId)
+      .order("fecha", { ascending: true })
+      .order("hora", { ascending: true })
+
+    const dniVistos = new Set((historialDevice || []).map(x => (x.dni || "").trim()).filter(Boolean))
+    alertaDniDispositivo = dniVistos.size > 0 && !dniVistos.has(dniRegistro)
+  }catch(e){
+    console.warn("No se pudo validar DNI por dispositivo:", e)
+  }
+
+  try{
+    const { data: historialDni } = await supabaseClient
+      .from("asistencias")
+      .select("device_id,fecha,hora")
+      .eq("dni", dniRegistro)
+      .order("fecha", { ascending: true })
+      .order("hora", { ascending: true })
+
+    const historial = (historialDni || []).filter(x => (x.device_id || "").trim())
+    if(historial.length){
+      dispositivoHabitual = String(historial[0].device_id)
+      alertaDispositivoNoHabitual = dispositivoHabitual !== deviceId
+    }
+  }catch(e){
+    console.warn("No se pudo validar dispositivo habitual por DNI:", e)
+  }
+
+  if(cursoConfigCache?.gps_activo){
+    if(cursoConfigCache.fecha_inicio && fechaHoy < cursoConfigCache.fecha_inicio){
+      setMensaje("⚠ El curso aún no inicia para marcar asistencia", "error")
+      return
+    }
+
+    if(cursoConfigCache.fecha_fin && fechaHoy > cursoConfigCache.fecha_fin){
+      setMensaje("⚠ El curso ya finalizó para marcar asistencia", "error")
+      return
+    }
+
+    const uboSede = cursoConfigCache[SECTION_TO_UBO_FIELD[seccion]]
+    const radio = Number(cursoConfigCache?.radio_m || 50)
+
+    if(!uboSede){
+      setMensaje(`⚠ No hay UBO sede configurada para Sección ${seccion}`, "error")
+      return
+    }
+
+    const sede = ubosSedeCache.find(x => String(x.ubo) === String(uboSede))
+    if(!sede || sede.lat == null || sede.lng == null){
+      setMensaje(`⚠ La UBO sede ${uboSede} no tiene coordenadas`, "error")
+      return
+    }
+
+    let coords
+    try{
+      coords = await obtenerGeoActual()
+    }catch(err){
+      setMensaje("⚠ No se pudo obtener GPS del dispositivo", "error")
+      return
+    }
+
+    const dist = distanciaMetros(
+      Number(coords.latitude), Number(coords.longitude),
+      Number(sede.lat), Number(sede.lng)
+    )
+
+    if(dist > radio){
+      await registrarAlerta({
+        fecha: fechaHoy,
+        hora: horaHoy,
+        dni: dniRegistro,
+        nombre: nombreCompleto,
+        ubo: uboValor,
+        seccion,
+        tipo: "fuera_rango_gps",
+        detalle: `Fuera de rango (${Math.round(dist)}m de UBO ${uboSede}, radio ${radio}m)`,
+        device_id: deviceId,
+        lat: Number(coords.latitude),
+        lng: Number(coords.longitude),
+        ubo_sede: String(uboSede),
+        distancia_m: Math.round(dist),
+        radio_m: radio
+      })
+
+      alert("⚠ Usted se encuentra fuera del rango de la UBO sede. No se permite marcar asistencia.")
+      setMensaje("⚠ Fuera de rango GPS. Registro bloqueado.", "error")
+      return
+    }
+  }
 
   const {error}=await supabaseClient.from("asistencias").insert([{
     dni:dniRegistro,
     nombre:nombreCompleto,
     ubo:uboValor,
     seccion:seccion,
-    fecha:now.toISOString().slice(0,10),
-    hora:now.toTimeString().slice(0,8),
-    device_id:getDeviceId()
+    fecha:fechaHoy,
+    hora:horaHoy,
+    device_id:deviceId
   }])
 
   if(error){
-    mensaje.innerText = "⚠ Ya registraste hoy"
+    setMensaje("⚠ Ya registraste hoy", "error")
     return
   }
 
-  mensaje.innerText = "✅ Registrado"
+  if(alertaDniDispositivo){
+    await registrarAlerta({
+      fecha: fechaHoy,
+      hora: horaHoy,
+      dni: dniRegistro,
+      nombre: nombreCompleto,
+      ubo: uboValor,
+      seccion,
+      tipo: "dni_distinto_dispositivo",
+      detalle: "DNI no visto previamente en este dispositivo",
+      device_id: deviceId
+    })
+
+    alert("⚠ Este DNI no estaba previamente registrado en este dispositivo móvil.")
+    setMensaje("✅ Registrado con alerta: DNI nuevo para este dispositivo", "warning")
+  }else{
+    setMensaje("✅ Registrado", "ok")
+  }
+
+  if(alertaDispositivoNoHabitual){
+    await registrarAlerta({
+      fecha: fechaHoy,
+      hora: horaHoy,
+      dni: dniRegistro,
+      nombre: nombreCompleto,
+      ubo: uboValor,
+      seccion,
+      tipo: "dni_en_otro_dispositivo",
+      detalle: `Dispositivo no habitual. Habitual: ${dispositivoHabitual}`,
+      device_id: deviceId
+    })
+
+    alert("⚠ Está registrando su asistencia en otro dispositivo no habitual.")
+    setMensaje("✅ Registrado con alerta: dispositivo no habitual", "warning")
+  }
+
   nombres.value = ""
   apellidos.value = ""
   ubo.value = ""
   seccion = ""
+  seleccionarBotonSeccion("")
 }
 
 /* ADMIN */
 async function cargarDatos(){
   const {data}=await supabaseClient.from("asistencias").select("*")
   renderTabla(data)
+  await cargarAlertasReporte()
 }
 
 function renderTabla(data){
   const activos = (data || []).filter(r => r.estado !== "retirado")
+  const clavesAlerta = obtenerClavesAlertaDispositivo(activos)
+  cacheReportes = []
 
   let html = `
   <table>
@@ -1119,12 +2135,24 @@ function renderTabla(data){
         <th>UBO</th>
         <th>Fecha</th>
         <th>Hora</th>
+        <th>Alerta</th>
       </tr>
     </thead>
     <tbody>
   `
 
   activos.forEach(r=>{
+    const clave = `${r.device_id || ""}|${(r.dni || "").trim()}|${r.fecha || ""}|${r.hora || ""}`
+    const hayAlerta = clavesAlerta.has(clave)
+    cacheReportes.push({
+      dni: r.dni || "",
+      nombre: r.nombre || "",
+      ubo: r.ubo || "",
+      fecha: r.fecha || "",
+      hora: r.hora || "",
+      alerta: hayAlerta ? "DNI distinto en dispositivo" : "Sin alerta"
+    })
+
     html+=`
       <tr>
         <td>${r.dni}</td>
@@ -1132,6 +2160,11 @@ function renderTabla(data){
         <td>${r.ubo}</td>
         <td>${r.fecha}</td>
         <td>${r.hora}</td>
+        <td>
+          <span class="badge-alerta ${hayAlerta ? "warn" : "ok"}">
+            ${hayAlerta ? "DNI distinto en dispositivo" : "Sin alerta"}
+          </span>
+        </td>
       </tr>
     `
   })
@@ -1146,6 +2179,75 @@ function renderTabla(data){
   `
 
   tabla.innerHTML = html
+}
+
+async function cargarAlertasReporte(){
+  let q = supabaseClient
+    .from("asistencia_alertas")
+    .select("*")
+    .order("fecha", { ascending: false })
+    .order("hora", { ascending: false })
+    .limit(120)
+
+  if(filtroUbo.value){
+    q = q.eq("ubo", filtroUbo.value)
+  }
+
+  if(fechaDesde.value){
+    q = q.gte("fecha", fechaDesde.value)
+  }
+
+  if(fechaHasta.value){
+    q = q.lte("fecha", fechaHasta.value)
+  }
+
+  const { data, error } = await q
+
+  if(error){
+    console.warn("No se pudo cargar asistencia_alertas:", error.message)
+    tablaAlertasContenido.innerHTML = "No se pudieron cargar alertas."
+    return
+  }
+
+  if(!data || data.length===0){
+    tablaAlertasContenido.innerHTML = "Sin alertas registradas."
+    return
+  }
+
+  let html = `
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>DNI</th>
+        <th>Nombre</th>
+        <th>UBO</th>
+        <th>Sección</th>
+        <th>Tipo</th>
+        <th>Detalle</th>
+      </tr>
+    </thead>
+    <tbody>
+  `
+
+  data.forEach(r=>{
+    html += `
+      <tr>
+        <td>${r.fecha || ""}</td>
+        <td>${r.hora || ""}</td>
+        <td>${r.dni || ""}</td>
+        <td>${r.nombre || ""}</td>
+        <td>${r.ubo || ""}</td>
+        <td>${r.seccion || ""}</td>
+        <td>${r.tipo || ""}</td>
+        <td>${r.detalle || ""}</td>
+      </tr>
+    `
+  })
+
+  html += "</tbody></table>"
+  tablaAlertasContenido.innerHTML = html
 }
 
 async function aplicarFiltros(){
@@ -1173,6 +2275,7 @@ async function aplicarFiltros(){
   }
 
   renderTabla(data.filter(d => d.estado !== "retirado"))
+  await cargarAlertasReporte()
 
 }
 
@@ -1183,6 +2286,7 @@ function limpiarFiltros(){
   fechaHasta.value = ""
 
   tabla.innerHTML = ""
+  tablaAlertasContenido.innerHTML = "Sin alertas registradas."
 
 }
 
@@ -1199,12 +2303,44 @@ async function cargarDashboard(){
   }
 
   const { data } = await q
+  const dataActivos = (data || []).filter(r => r.estado !== "retirado")
+  cacheDashboard = dataActivos
+
+  let alertasQ = supabaseClient
+    .from("asistencia_alertas")
+    .select("id", { count: "exact", head: true })
+    .eq("tipo", "dni_en_otro_dispositivo")
+
+  if(dashDesde.value){
+    alertasQ = alertasQ.gte("fecha", dashDesde.value)
+  }
+  if(dashHasta.value){
+    alertasQ = alertasQ.lte("fecha", dashHasta.value)
+  }
+
+  const { count: alertasDispNoHabitual } = await alertasQ
+
+  let alertasDetalleQ = supabaseClient
+    .from("asistencia_alertas")
+    .select("fecha,hora,dni,nombre,ubo,seccion,detalle,device_id")
+    .eq("tipo", "dni_en_otro_dispositivo")
+    .order("fecha", { ascending: false })
+    .order("hora", { ascending: false })
+    .limit(120)
+
+  if(dashDesde.value){
+    alertasDetalleQ = alertasDetalleQ.gte("fecha", dashDesde.value)
+  }
+  if(dashHasta.value){
+    alertasDetalleQ = alertasDetalleQ.lte("fecha", dashHasta.value)
+  }
+
+  const { data: alertasDetalle } = await alertasDetalleQ
+  window.detalleAlertasDispositivo = alertasDetalle || []
 
   let alumnos = {}
 
-  data
-  .filter(r => r.estado !== "retirado")
-  .forEach(r=>{
+  dataActivos.forEach(r=>{
     if(!alumnos[r.dni]){
       alumnos[r.dni]={ nombre:r.nombre, ubo:r.ubo, total:0 }
     }
@@ -1230,21 +2366,25 @@ async function cargarDashboard(){
     let estado="rojo"
 
     // 🔥 evaluar por hora
-    let registros = data
+    let registros = dataActivos
       .filter(x=>x.dni==dni)
-      .sort((a,b)=> a.hora.localeCompare(b.hora))
+      .sort((a,b)=>{
+        const f = (a.fecha || "").localeCompare(b.fecha || "")
+        return f !== 0 ? f : (a.hora || "").localeCompare(b.hora || "")
+      })
 
     let asistio = registros.length > 0
 
     if(asistio){
 
-      let hora = registros[0].hora // 🔥 primera marcación del día
+      const ultimaFecha = registros[registros.length - 1].fecha
+      const primerMarcadoUltimoDia = registros
+        .filter(x => x.fecha === ultimaFecha)
+        .sort((a,b)=>(a.hora || "").localeCompare(b.hora || ""))[0]
+      const hora = primerMarcadoUltimoDia?.hora || ""
 
-
-
-
-      if(hora <= "19:10:00") estado="verde"
-      else if(hora <= "19:30:00") estado="amarillo"
+      if(hora && hora <= "19:10:00") estado="verde"
+      else if(hora && hora <= "19:30:00") estado="amarillo"
       else estado="rojo"
 
     }
@@ -1274,10 +2414,14 @@ async function cargarDashboard(){
   verdeCount.innerText = verde
   amarilloCount.innerText = amarillo
   rojoCount.innerText = rojo
+  kpiDispNoHabitual.innerText = alertasDispNoHabitual || 0
+  kpiDispCard.style.opacity = (alertasDispNoHabitual || 0) > 0 ? "1" : "0.75"
+
+  cacheRiesgoUbo = Object.entries(uboMap)
+    .sort((a,b)=>b[1]-a[1])
 
   let html=""
-  Object.entries(uboMap)
-    .sort((a,b)=>b[1]-a[1])
+  cacheRiesgoUbo
     .slice(0,5)
     .forEach(([ubo,val])=>{
       html += `<p onclick="verUbo('${ubo}')" style="cursor:pointer;">
@@ -1286,6 +2430,51 @@ async function cargarDashboard(){
     })
 
   topUbo.innerHTML = html
+  semaforoInfo.innerText = "Semáforo: se calcula por la primera marcación del último día registrado por cada aspirante (Verde ≤ 19:10, Amarillo 19:11–19:30, Rojo > 19:30)."
+  riesgoInfo.innerText = "Riesgo por UBO: muestra cuántos aspirantes están en Rojo según ese mismo criterio dentro del rango filtrado."
+}
+
+function verAlertasDispositivo(){
+  const data = window.detalleAlertasDispositivo || []
+
+  if(!data.length){
+    modalTitulo.innerText = "Alertas de Dispositivo"
+    modalContenido.innerHTML = "<p>No hay alertas en el rango seleccionado.</p>"
+    modal.style.display="flex"
+    return
+  }
+
+  let html = `
+  <table>
+    <tr>
+      <th>Fecha</th>
+      <th>Hora</th>
+      <th>DNI</th>
+      <th>Nombre</th>
+      <th>UBO</th>
+      <th>Sección</th>
+      <th>Detalle</th>
+    </tr>
+  `
+
+  data.forEach(r=>{
+    html += `
+      <tr>
+        <td>${r.fecha || ""}</td>
+        <td>${r.hora || ""}</td>
+        <td>${r.dni || ""}</td>
+        <td>${r.nombre || ""}</td>
+        <td>${r.ubo || ""}</td>
+        <td>${r.seccion || ""}</td>
+        <td>${r.detalle || ""}</td>
+      </tr>
+    `
+  })
+  html += "</table>"
+
+  modalTitulo.innerText = "Alertas: Dispositivo No Habitual"
+  modalContenido.innerHTML = html
+  modal.style.display="flex"
 }
 
 function verUbo(ubo){
@@ -1366,6 +2555,7 @@ function mostrarVista(vista){
   vistaReportes.style.display="none"
   document.getElementById("vistaDashboard").style.display="none"
   document.getElementById("vistaConfig").style.display="none"
+  document.getElementById("vistaUsuarios").style.display="none"
   document.querySelectorAll(".nav-item")
     .forEach(el => el.classList.remove("active"))
 
@@ -1387,6 +2577,13 @@ function mostrarVista(vista){
   if(vista==="config"){
     document.querySelector(".nav-item:nth-child(3)")?.classList.add("active")
     document.getElementById("vistaConfig").style.display="block"
+    cargarConfigCurso()
+  }
+
+  if(vista==="usuarios"){
+    document.querySelector(".nav-item:nth-child(4)")?.classList.add("active")
+    document.getElementById("vistaUsuarios").style.display="block"
+    renderUsuariosAdmin()
   }
 
 }
@@ -1435,23 +2632,24 @@ function verDetalle(color){
 }
 
 async function cargarUbos(){
-
   const { data } = await supabaseClient
     .from("asistencias")
     .select("ubo")
+  const ubosAsistencia = obtenerUbosUnicosDesdeAsistencias(data)
 
-  let ubos = [...new Set(data.map(x=>x.ubo))]
-      .sort((a,b)=>parseInt(a)-parseInt(b))
+  await cargarSedesUbo()
+  const ubosSedes = obtenerUbosUnicosDesdeAsistencias(ubosSedeCache)
+  const ubos = [...new Set([...ubosAsistencia, ...ubosSedes])]
+    .sort((a,b)=>parseInt(a)-parseInt(b))
 
-  let html = '<option value="">Seleccionar UBO</option>'
-
-  ubos.forEach(u=>{
-    html += `<option value="${u}">${u}</option>`
-  })
+  let html = construirOptionsUbo(ubos, true, "Seleccionar UBO")
 
   filtroUboConfig.innerHTML = html
   filtroUbo.innerHTML = html
   filtroRetirados.innerHTML = html
+
+  const htmlSede = construirOptionsUbo(ubos, true, "Seleccionar UBO sede")
+  uboSecUbo.innerHTML = htmlSede
 }
 
 function cerrarModal(){
@@ -1465,63 +2663,224 @@ document.addEventListener("keydown", e=>{
   }
 })
 
-let secciones = []
+async function guardarCurso(){
+  const mapSedes = {}
+  cursoSedesUbo.forEach(x=>{
+    mapSedes[x.seccion] = x.ubo
+  })
 
-function guardarCurso(){
-  localStorage.setItem("cursoInicio", cursoInicio.value)
-  localStorage.setItem("cursoFin", cursoFin.value)
+  localStorage.setItem("cursoNombre", (cursoNombre.value || "").toUpperCase())
+  localStorage.setItem("cursoSecciones", JSON.stringify(cursoSecciones))
+  localStorage.setItem("cursoSedesUbo", JSON.stringify(cursoSedesUbo))
+
+  const payload = {
+    id: 1,
+    fecha_inicio: cursoInicio.value || null,
+    fecha_fin: cursoFin.value || null,
+    seccion_a_ubo: mapSedes["A"] || null,
+    seccion_b_ubo: mapSedes["B"] || null,
+    seccion_c_ubo: mapSedes["C"] || null,
+    radio_m: Number(cursoRadio.value || 50),
+    gps_activo: !!toggleGPS.checked
+  }
+
+  const { error, data } = await supabaseClient
+    .from("curso_configuracion")
+    .upsert(payload)
+    .select()
+    .single()
+
+  if(error){
+    alert("Error al guardar configuración de curso")
+    console.error(error)
+    return
+  }
+
+  cursoConfigCache = {
+    ...(data || {}),
+    nombre_curso: (cursoNombre.value || "").toUpperCase()
+  }
   alert("Curso guardado")
 }
 
-function agregarSeccion(){
+function actualizarOpcionesSeccionSede(){
+  const base = cursoSecciones.length
+    ? [...new Set(cursoSecciones.map(x=>x.seccion))]
+    : ["A", "B", "C"]
 
-  const dias = Array.from(document.querySelectorAll(".dias input:checked"))
-    .map(d => d.parentElement.textContent.trim())
+  let html = ""
+  base.forEach(code=>{
+    html += `<option value="${code}">Sección ${code}</option>`
+  })
+  uboSecNombre.innerHTML = html
+}
 
-  const sec = {
-    nombre: secNombre.value,
-    dias: dias.join(", "),
-    hora: secHora.value,
-    presencial: secPresencial.checked,
-    virtual: secVirtual.checked
+function limpiarFormSeccionCurso(){
+  secCursoNombre.value = "A"
+  secCursoModalidad.value = "Presencial"
+  secCursoHora.value = ""
+  editSeccionCursoIndex = -1
+}
+
+function limpiarFormSedeUbo(){
+  uboSecNombre.value = "A"
+  uboSecUbo.value = ""
+  uboSecHora.value = ""
+  uboSecModalidad.value = "Presencial"
+  editSedeUboIndex = -1
+}
+
+function guardarSeccionCurso(){
+  if(!secCursoHora.value){
+    alert("Define una hora de inicio para la sección")
+    return
   }
 
-  secciones.push(sec)
+  const item = {
+    seccion: secCursoNombre.value,
+    modalidad: secCursoModalidad.value,
+    hora_inicio: secCursoHora.value
+  }
 
-  renderSecciones()
+  if(editSeccionCursoIndex >= 0){
+    cursoSecciones[editSeccionCursoIndex] = item
+  }else{
+    const existing = cursoSecciones.findIndex(x=>x.seccion === item.seccion)
+    if(existing >= 0){
+      if(!confirm(`La Sección ${item.seccion} ya existe. ¿Deseas reemplazarla?`)) return
+      cursoSecciones[existing] = item
+    }else{
+      cursoSecciones.push(item)
+    }
+  }
+
+  localStorage.setItem("cursoSecciones", JSON.stringify(cursoSecciones))
+  renderSeccionesCurso()
+  actualizarOpcionesSeccionSede()
+  limpiarFormSeccionCurso()
 }
 
-function limpiarSecciones(){
-
-  secNombre.value = "Sección A"
-  secHora.value = ""
-
-  secPresencial.checked = false
-  secVirtual.checked = false
-
-  document.querySelectorAll(".dias input")
-    .forEach(d => d.checked = false)
-
-  actualizarEstadoChecks()
+function editarSeccionCurso(idx){
+  const item = cursoSecciones[idx]
+  if(!item) return
+  secCursoNombre.value = item.seccion
+  secCursoModalidad.value = item.modalidad
+  secCursoHora.value = item.hora_inicio
+  editSeccionCursoIndex = idx
 }
 
-function renderSecciones(){
+function eliminarSeccionCurso(idx){
+  if(!confirm("¿Eliminar esta sección?")) return
+  cursoSecciones.splice(idx, 1)
+  localStorage.setItem("cursoSecciones", JSON.stringify(cursoSecciones))
+  renderSeccionesCurso()
+  actualizarOpcionesSeccionSede()
+}
+
+function renderSeccionesCurso(){
+  if(!cursoSecciones.length){
+    tablaSeccionesCurso.innerHTML = `<tr><td colspan="4">Sin secciones creadas.</td></tr>`
+    return
+  }
 
   let html = ""
 
-  secciones.forEach(s=>{
-    const modalidades = [s.presencial ? "Presencial" : "", s.virtual ? "Virtual" : ""]
-      .filter(Boolean)
-      .join(" / ") || "Sin modalidad"
-
+  cursoSecciones.forEach((s, idx)=>{
     html += `
-      <div class="section-item">
-        <strong>${s.nombre}</strong> | ${s.dias || "Sin días"} | ${s.hora || "Sin hora"} | ${modalidades}
-      </div>
+      <tr>
+        <td>Sección ${s.seccion}</td>
+        <td>${s.modalidad}</td>
+        <td>${s.hora_inicio || "-"}</td>
+        <td>
+          <div class="table-actions">
+            <button onclick="editarSeccionCurso(${idx})">Modificar</button>
+            <button class="secondary" onclick="eliminarSeccionCurso(${idx})">Eliminar</button>
+          </div>
+        </td>
+      </tr>
     `
   })
 
-  listaSecciones.innerHTML = html
+  tablaSeccionesCurso.innerHTML = html
+}
+
+function guardarSedeUbo(){
+  if(!uboSecUbo.value){
+    alert("Selecciona una UBO sede")
+    return
+  }
+
+  if(!uboSecHora.value){
+    alert("Define una hora de inicio para la sede UBO")
+    return
+  }
+
+  const item = {
+    seccion: uboSecNombre.value,
+    ubo: uboSecUbo.value,
+    modalidad: uboSecModalidad.value,
+    hora_inicio: uboSecHora.value
+  }
+
+  if(editSedeUboIndex >= 0){
+    cursoSedesUbo[editSedeUboIndex] = item
+  }else{
+    const existing = cursoSedesUbo.findIndex(x=>x.seccion === item.seccion)
+    if(existing >= 0){
+      if(!confirm(`La Sección ${item.seccion} ya tiene UBO sede. ¿Deseas reemplazarla?`)) return
+      cursoSedesUbo[existing] = item
+    }else{
+      cursoSedesUbo.push(item)
+    }
+  }
+
+  localStorage.setItem("cursoSedesUbo", JSON.stringify(cursoSedesUbo))
+  renderSedesUbo()
+  limpiarFormSedeUbo()
+}
+
+function editarSedeUbo(idx){
+  const item = cursoSedesUbo[idx]
+  if(!item) return
+  uboSecNombre.value = item.seccion
+  uboSecUbo.value = item.ubo
+  uboSecModalidad.value = item.modalidad
+  uboSecHora.value = item.hora_inicio
+  editSedeUboIndex = idx
+}
+
+function eliminarSedeUbo(idx){
+  if(!confirm("¿Eliminar esta sede UBO?")) return
+  cursoSedesUbo.splice(idx, 1)
+  localStorage.setItem("cursoSedesUbo", JSON.stringify(cursoSedesUbo))
+  renderSedesUbo()
+}
+
+function renderSedesUbo(){
+  if(!cursoSedesUbo.length){
+    tablaSedesUbo.innerHTML = `<tr><td colspan="5">Sin UBOs sede creadas.</td></tr>`
+    return
+  }
+
+  let html = ""
+  cursoSedesUbo.forEach((s, idx)=>{
+    html += `
+      <tr>
+        <td>Sección ${s.seccion}</td>
+        <td>${s.ubo}</td>
+        <td>${s.modalidad}</td>
+        <td>${s.hora_inicio || "-"}</td>
+        <td>
+          <div class="table-actions">
+            <button onclick="editarSedeUbo(${idx})">Modificar</button>
+            <button class="secondary" onclick="eliminarSedeUbo(${idx})">Eliminar</button>
+          </div>
+        </td>
+      </tr>
+    `
+  })
+
+  tablaSedesUbo.innerHTML = html
 }
 
 function limpiarDashboard(){
@@ -1536,8 +2895,12 @@ function limpiarDashboard(){
   verdeCount.innerText = "0"
   amarilloCount.innerText = "0"
   rojoCount.innerText = "0"
+  kpiDispNoHabitual.innerText = "0"
+  kpiDispCard.style.opacity = "0.75"
 
   topUbo.innerHTML = ""
+  semaforoInfo.innerText = "Semáforo: criterio de puntualidad por aspirante en el rango seleccionado."
+  riesgoInfo.innerText = "Riesgo UBO: cantidad de aspirantes en estado rojo por UBO."
 
   // limpiar memoria
   window.detalleSemaforo = {
@@ -1545,6 +2908,7 @@ function limpiarDashboard(){
     amarillo:[],
     rojo:[]
   }
+  window.detalleAlertasDispositivo = []
 
 }
 
@@ -1554,8 +2918,21 @@ function limpiarRetiro(){
 }
 
 function limpiarCurso(){
+  cursoNombre.value=""
   cursoInicio.value=""
   cursoFin.value=""
+  cursoRadio.value="50"
+  toggleGPS.checked=false
+  cursoSecciones = []
+  cursoSedesUbo = []
+  localStorage.removeItem("cursoNombre")
+  localStorage.removeItem("cursoSecciones")
+  localStorage.removeItem("cursoSedesUbo")
+  renderSeccionesCurso()
+  renderSedesUbo()
+  actualizarOpcionesSeccionSede()
+  limpiarFormSeccionCurso()
+  limpiarFormSedeUbo()
 }
 
 async function cargarRetirados(){
@@ -1622,6 +2999,10 @@ ubo?.addEventListener("input", ()=>{
   ubo.value = ubo.value.replace(/\D/g, "")
 })
 
+cursoNombre?.addEventListener("input", ()=>{
+  cursoNombre.value = cursoNombre.value.toUpperCase()
+})
+
 window.addEventListener("resize", ()=>{
   clearTimeout(resizeTimer)
   resizeTimer = setTimeout(aplicarLayout, 160)
@@ -1632,6 +3013,8 @@ window.detalleSemaforo = {
   amarillo:[],
   rojo:[]
 }
+
+window.detalleAlertasDispositivo = []
 
 document.addEventListener("change", (e)=>{
   if(e.target.matches(".dias input, .mode-options input")){
