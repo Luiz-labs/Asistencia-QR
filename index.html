@@ -330,6 +330,33 @@ input, select{
   min-width:680px;
 }
 
+.days-select{
+  min-height:42px;
+  height:auto;
+  padding:8px 10px;
+}
+
+.days-select[multiple] option{
+  padding:6px 8px;
+}
+
+.toggle-wrap{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:42px;
+  padding:8px 10px;
+  border:1px solid #ced7e8;
+  border-radius:10px;
+  background:#fff;
+}
+
+.toggle-wrap input[type="checkbox"]{
+  width:18px;
+  height:18px;
+  margin:0;
+}
+
 #vistaUsuarios .config-card + .config-card{
   margin-top:26px;
 }
@@ -912,8 +939,8 @@ input, select{
   <p>Instrucción ESBAS 2026</p>
 
   <div class="view-switch-wrap">
-    <button id="btnForzarDesktop" class="secondary view-switch" onclick="setVistaManual('desktop')">Ver escritorio</button>
-    <button id="btnVistaAutoMovil" class="secondary view-switch" onclick="setVistaManual('auto')">Automático</button>
+    <button id="btnForzarDesktop" class="secondary view-switch" onclick="irEscritorioAdmin()">Ver escritorio</button>
+    <button id="btnVistaAutoMovil" class="secondary view-switch" onclick="setVistaManual('auto')" title="Automático: usa detección de dispositivo para decidir vista móvil o escritorio.">Automático</button>
   </div>
 
   <img src="logo.png" style="width:108px;margin:10px auto;">
@@ -977,7 +1004,7 @@ input, select{
     </div>
     <div class="header-actions">
       <button id="btnForzarMovil" onclick="setVistaManual('mobile')" class="secondary view-switch">Ver móvil</button>
-      <button id="btnVistaAutoDesktop" onclick="setVistaManual('auto')" class="secondary view-switch">Automático</button>
+      <button id="btnVistaAutoDesktop" onclick="setVistaManual('auto')" class="secondary view-switch" title="Automático: usa detección de dispositivo para decidir vista móvil o escritorio.">Automático</button>
       <button onclick="logout()" class="secondary">Salir</button>
     </div>
   </div>
@@ -1011,6 +1038,10 @@ input, select{
               <input type="date" id="dashHasta">
             </div>
 
+            <select id="dashUbo" style="width:170px;">
+              <option value="">Todas las UBO</option>
+            </select>
+
             <button onclick="cargarDashboard()">Filtrar</button>
             <button class="secondary" onclick="limpiarDashboard()">Limpiar</button>
             <button onclick="exportarDashboardPDF()">EXPORTAR PDF</button>
@@ -1020,6 +1051,7 @@ input, select{
 
         </div>
 
+        <div id="dashboardKpiCapture">
         <!-- KPIs -->
         <div style="display:flex; gap:15px; margin-bottom:20px;">
 
@@ -1058,6 +1090,7 @@ input, select{
             <p>🔴 Rojo</p>
           </div>
 
+        </div>
         </div>
 
         <p id="semaforoInfo" style="margin:-6px 2px 14px;color:#5f6f8f;font-size:13px;">
@@ -1199,6 +1232,13 @@ input, select{
             <input type="checkbox" id="toggleGPS">
             Activar validación GPS (Proximamente)
           </label>
+          <div class="hint" style="margin-top:12px;">Carga masiva de coordenadas UBO (columnas: <strong>UBO, LATITUD, LONGITUD</strong>. Opcional: <strong>NOMBRE</strong>).</div>
+          <div class="config-row" style="margin-top:10px;">
+            <input type="file" id="archivoUbosSedes" accept=".xlsx,.xls,.csv">
+            <button onclick="cargarExcelUbosSedes()">Subir Coordenadas</button>
+            <button class="secondary" onclick="cargarUbos()">Refrescar UBOs</button>
+          </div>
+          <p id="msgCargaUbosSedes" class="hint"></p>
         </div>
 
         <!-- RETIRAR ASPIRANTE -->
@@ -1269,11 +1309,7 @@ input, select{
             <div class="config-grid">
               <div>
                 <label for="secCursoNombre">Sección</label>
-                <select id="secCursoNombre">
-                  <option value="A">Sección A</option>
-                  <option value="B">Sección B</option>
-                  <option value="C">Sección C</option>
-                </select>
+                <input id="secCursoNombre" placeholder="Ejemplo: A" maxlength="20">
               </div>
               <div>
                 <label for="secCursoModalidad">Modalidad</label>
@@ -1285,6 +1321,18 @@ input, select{
               <div>
                 <label for="secCursoHora">Hora inicio</label>
                 <input type="time" id="secCursoHora">
+              </div>
+              <div>
+                <label>Días</label>
+                <select id="secCursoDiasSelect" class="days-select" multiple size="4">
+                  <option value="Lunes">Lunes</option>
+                  <option value="Martes">Martes</option>
+                  <option value="Miércoles">Miércoles</option>
+                  <option value="Jueves">Jueves</option>
+                  <option value="Viernes">Viernes</option>
+                  <option value="Sábado">Sábado</option>
+                  <option value="Domingo">Domingo</option>
+                </select>
               </div>
             </div>
             <div class="course-actions">
@@ -1298,6 +1346,7 @@ input, select{
                     <th>Sección</th>
                     <th>Modalidad</th>
                     <th>Hora Inicio</th>
+                    <th>Días</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -1311,11 +1360,7 @@ input, select{
             <div class="config-grid">
               <div>
                 <label for="uboSecNombre">Sección</label>
-                <select id="uboSecNombre">
-                  <option value="A">Sección A</option>
-                  <option value="B">Sección B</option>
-                  <option value="C">Sección C</option>
-                </select>
+                <select id="uboSecNombre"></select>
               </div>
               <div>
                 <label for="uboSecUbo">UBO</label>
@@ -1332,6 +1377,25 @@ input, select{
                   <option value="Virtual">Virtual</option>
                 </select>
               </div>
+              <div>
+                <label>Días</label>
+                <select id="uboSecDiasSelect" class="days-select" multiple size="4">
+                  <option value="Lunes">Lunes</option>
+                  <option value="Martes">Martes</option>
+                  <option value="Miércoles">Miércoles</option>
+                  <option value="Jueves">Jueves</option>
+                  <option value="Viernes">Viernes</option>
+                  <option value="Sábado">Sábado</option>
+                  <option value="Domingo">Domingo</option>
+                </select>
+              </div>
+              <div>
+                <label>Días de sesión</label>
+                <div class="toggle-wrap">
+                  <input type="checkbox" id="uboSecTodosDias">
+                  <span>Todos</span>
+                </div>
+              </div>
             </div>
             <div class="course-actions">
               <button onclick="guardarSedeUbo()">CREAR SEDE UBO</button>
@@ -1345,6 +1409,7 @@ input, select{
                     <th>UBO</th>
                     <th>Modalidad</th>
                     <th>Hora Inicio</th>
+                    <th>Días</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -1381,6 +1446,7 @@ input, select{
 <script src="https://cdn.jsdelivr.net/npm/jsqr"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
 const supabaseUrl = 'https://kcapmyovaigjntaqeqwn.supabase.co'
@@ -1404,7 +1470,7 @@ let cacheDashboard = []
 let cacheRiesgoUbo = []
 const VISTA_MODO_KEY = "vistaModoManual"
 const SYSTEM_USERS = [
-  { nombre: "Administrador Principal", usuario: "12345678", rol: "administrador", system: true },
+  { nombre: "Administrador Principal", usuario: "llecaros", rol: "administrador", system: true },
   { nombre: "Super Usuario", usuario: "admin", rol: "administrador", system: true }
 ]
 
@@ -1467,6 +1533,17 @@ function setVistaManual(mode){
   aplicarLayout()
 }
 
+function irEscritorioAdmin(){
+  setVistaManual("desktop")
+  if(!adminAutenticado){
+    loginScreen.style.display = "flex"
+    vistaDesktop.style.display = "none"
+    formulario.style.display = "none"
+    vistaMovil.style.display = "none"
+    mostrarPasoMovil("ingreso")
+  }
+}
+
 function obtenerRangoMesActual(){
   const now = new Date()
   const year = now.getFullYear()
@@ -1501,6 +1578,36 @@ function setMensaje(texto, tipo = ""){
   mensaje.innerText = texto || ""
   if(!texto) return
   if(tipo) mensaje.classList.add(tipo)
+}
+
+function obtenerValoresMultiSelect(selectId){
+  const select = document.getElementById(selectId)
+  if(!select) return []
+  return [...select.selectedOptions].map(opt=>opt.value)
+}
+
+function marcarValoresMultiSelect(selectId, valores = []){
+  const select = document.getElementById(selectId)
+  if(!select) return
+  const setVals = new Set((valores || []).map(String))
+  [...select.options].forEach(opt=>{
+    opt.selected = setVals.has(opt.value)
+  })
+}
+
+function actualizarEstadoDiasSede(){
+  const todos = !!uboSecTodosDias?.checked
+  if(uboSecDiasSelect){
+    uboSecDiasSelect.disabled = todos
+    if(todos){
+      marcarValoresMultiSelect("uboSecDiasSelect", [])
+    }
+  }
+}
+
+function diasTexto(dias){
+  const arr = (dias || []).filter(Boolean)
+  return arr.length ? arr.join(", ") : "-"
 }
 
 function distanciaMetros(lat1, lon1, lat2, lon2){
@@ -1573,47 +1680,38 @@ function exportarRiesgoUboExcel(){
 }
 
 function exportarDashboardPDF(){
-  if(!window.jspdf?.jsPDF){
-    alert("Librería jsPDF no disponible")
+  if(!window.jspdf?.jsPDF || !window.html2canvas){
+    alert("Librerías para exportación no disponibles")
     return
   }
 
-  const { jsPDF } = window.jspdf
-  const doc = new jsPDF()
-  const fecha = new Date().toLocaleString()
-  let y = 14
-
-  doc.setFontSize(14)
-  doc.text("Dashboard ESBAS", 14, y)
-  y += 8
-  doc.setFontSize(10)
-  doc.text(`Generado: ${fecha}`, 14, y)
-  y += 10
-
-  doc.text(`Total Activos: ${kpiTotal.innerText || "0"}`, 14, y); y += 6
-  doc.text(`% Asistencia: ${kpiAsistencia.innerText || "0%"}`, 14, y); y += 6
-  doc.text(`Semáforo Verde: ${verdeCount.innerText || "0"}`, 14, y); y += 6
-  doc.text(`Semáforo Amarillo: ${amarilloCount.innerText || "0"}`, 14, y); y += 6
-  doc.text(`Semáforo Rojo: ${rojoCount.innerText || "0"}`, 14, y); y += 10
-
-  doc.setFontSize(11)
-  doc.text("Top Riesgo UBO", 14, y); y += 7
-  doc.setFontSize(10)
-
-  if(!cacheRiesgoUbo.length){
-    doc.text("Sin datos.", 14, y)
-  }else{
-    cacheRiesgoUbo.slice(0, 10).forEach(([ubo, casos])=>{
-      doc.text(`UBO ${ubo}: ${casos} casos`, 14, y)
-      y += 6
-      if(y > 280){
-        doc.addPage()
-        y = 14
-      }
-    })
+  const objetivo = document.getElementById("dashboardKpiCapture")
+  if(!objetivo){
+    alert("No se encontró el bloque de KPIs para exportar")
+    return
   }
 
-  doc.save("dashboard_esbas.pdf")
+  html2canvas(objetivo, { scale: 2, backgroundColor: "#eff2f7" })
+    .then(canvas=>{
+      const imgData = canvas.toDataURL("image/png")
+      const { jsPDF } = window.jspdf
+      const doc = new jsPDF("p", "mm", "a4")
+      const pageW = doc.internal.pageSize.getWidth()
+      const margin = 10
+      const maxW = pageW - margin * 2
+      const imgW = canvas.width
+      const imgH = canvas.height
+      const pdfH = (imgH * maxW) / imgW
+
+      doc.setFontSize(13)
+      doc.text("Dashboard ESBAS - KPIs", margin, 10)
+      doc.addImage(imgData, "PNG", margin, 14, maxW, pdfH)
+      doc.save("dashboard_kpis_esbas.pdf")
+    })
+    .catch(err=>{
+      console.error(err)
+      alert("No se pudo exportar la imagen del dashboard")
+    })
 }
 
 function cargarUsuariosAdminLocal(){
@@ -1811,6 +1909,83 @@ async function cargarAspirantesCargados(){
   tablaAspirantesCargados.innerHTML = html
 }
 
+async function cargarExcelUbosSedes(){
+  const file = archivoUbosSedes.files?.[0]
+  if(!file){
+    msgCargaUbosSedes.innerText = "Selecciona un archivo primero."
+    return
+  }
+  if(!window.XLSX){
+    msgCargaUbosSedes.innerText = "No está disponible la librería XLSX."
+    return
+  }
+
+  const buffer = await file.arrayBuffer()
+  const wb = XLSX.read(buffer, { type: "array" })
+  const ws = wb.Sheets[wb.SheetNames[0]]
+  const rows = XLSX.utils.sheet_to_json(ws, { defval: "" })
+
+  if(!rows.length){
+    msgCargaUbosSedes.innerText = "El archivo no tiene filas."
+    return
+  }
+
+  const normalize = (s)=>String(s || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+
+  const keyMap = {}
+  Object.keys(rows[0]).forEach(k=>{
+    keyMap[normalize(k)] = k
+  })
+
+  const kUbo = keyMap.ubo
+  const kLat = keyMap.latitud || keyMap.ltitud
+  const kLng = keyMap.longitud || keyMap.longtitud || keyMap.longitug
+  const kNombre = keyMap.nombre
+
+  if(!kUbo || !kLat || !kLng){
+    msgCargaUbosSedes.innerText = "Columnas requeridas: UBO, LATITUD y LONGITUD."
+    return
+  }
+
+  const parsed = rows
+    .map(r=>({
+      ubo: String(r[kUbo] || "").trim(),
+      lat: Number(String(r[kLat] || "").replace(",", ".")),
+      lng: Number(String(r[kLng] || "").replace(",", ".")),
+      nombre: kNombre ? String(r[kNombre] || "").trim() : ""
+    }))
+    .filter(r=>r.ubo && Number.isFinite(r.lat) && Number.isFinite(r.lng))
+
+  if(!parsed.length){
+    msgCargaUbosSedes.innerText = "No se encontraron filas válidas."
+    return
+  }
+
+  const payload = parsed.map(r=>({
+    ubo: r.ubo,
+    nombre: r.nombre || `UBO ${r.ubo}`,
+    lat: r.lat,
+    lng: r.lng,
+    activo: true
+  }))
+
+  const { error } = await supabaseClient
+    .from("ubos_sedes")
+    .upsert(payload, { onConflict: "ubo" })
+
+  if(error){
+    msgCargaUbosSedes.innerText = `No se pudo cargar en Supabase: ${error.message}`
+    return
+  }
+
+  msgCargaUbosSedes.innerText = `Carga exitosa: ${payload.length} UBO(s) procesadas.`
+  await cargarUbos()
+}
+
 async function cargarSedesUbo(){
   const { data, error } = await supabaseClient
     .from("ubos_sedes")
@@ -1842,7 +2017,8 @@ async function cargarSeccionesCursoDesdeSupabase(){
   return (data || []).map(x=>({
     seccion: String(x.seccion || "").trim(),
     modalidad: x.modalidad || "Presencial",
-    hora_inicio: x.hora_inicio || ""
+    hora_inicio: x.hora_inicio || "",
+    dias: []
   })).filter(x=>x.seccion)
 }
 
@@ -1863,7 +2039,8 @@ async function cargarSedesCursoDesdeSupabase(){
     seccion: String(x.seccion || "").trim(),
     ubo: String(x.ubo || "").trim(),
     modalidad: x.modalidad || "Presencial",
-    hora_inicio: x.hora_inicio || ""
+    hora_inicio: x.hora_inicio || "",
+    dias: []
   })).filter(x=>x.seccion)
 }
 
@@ -1874,6 +2051,8 @@ function guardarEstructuraCursoLocal(){
 
 async function aplicarCursoEnUI(cfg){
   const nombreLocal = localStorage.getItem("cursoNombre") || ""
+  const seccionesLocalesMap = {}
+  const sedesLocalesMap = {}
 
   if(cfg){
     cursoNombre.value = (cfg.nombre_curso || nombreLocal || "").toUpperCase()
@@ -1891,21 +2070,40 @@ async function aplicarCursoEnUI(cfg){
   }catch{
     cursoSecciones = []
   }
+  cursoSecciones.forEach(s=>{
+    if(s?.seccion) seccionesLocalesMap[String(s.seccion)] = s
+  })
 
   try{
     cursoSedesUbo = JSON.parse(localStorage.getItem("cursoSedesUbo") || "[]")
   }catch{
     cursoSedesUbo = []
   }
+  cursoSedesUbo.forEach(s=>{
+    if(s?.seccion) sedesLocalesMap[String(s.seccion)] = s
+  })
 
   const seccionesDb = await cargarSeccionesCursoDesdeSupabase()
   if(Array.isArray(seccionesDb)){
-    cursoSecciones = seccionesDb
+    cursoSecciones = seccionesDb.map(item=>{
+      const local = seccionesLocalesMap[item.seccion]
+      return {
+        ...item,
+        dias: Array.isArray(local?.dias) ? local.dias : []
+      }
+    })
   }
 
   const sedesDb = await cargarSedesCursoDesdeSupabase()
   if(Array.isArray(sedesDb)){
-    cursoSedesUbo = sedesDb
+    cursoSedesUbo = sedesDb.map(item=>{
+      const local = sedesLocalesMap[item.seccion]
+      return {
+        ...item,
+        dias: Array.isArray(local?.dias) ? local.dias : [],
+        todos_dias: !!local?.todos_dias
+      }
+    })
   }
 
   guardarEstructuraCursoLocal()
@@ -2046,6 +2244,7 @@ window.onload = async ()=>{
   cargarUsuariosAdminLocal()
   await cargarAspirantesCargados()
   actualizarEstadoChecks()
+  actualizarEstadoDiasSede()
   aplicarLayout()
 
 }
@@ -2054,7 +2253,7 @@ function login(){
   const usuario = (loginUser.value || "").trim().toLowerCase()
   const clave = (loginPass.value || "").trim()
   const valido =
-    (usuario === "12345678" && clave === "1234") ||
+    (usuario === "llecaros" && clave === "1234") ||
     (usuario === "admin" && clave === "1234")
 
   if(valido){
@@ -2581,6 +2780,10 @@ async function cargarDashboard(){
     q = q.lte("fecha", dashHasta.value)
   }
 
+  if(dashUbo.value){
+    q = q.eq("ubo", dashUbo.value)
+  }
+
   const { data } = await q
   const dataActivos = (data || []).filter(r => r.estado !== "retirado")
   cacheDashboard = dataActivos
@@ -2595,6 +2798,9 @@ async function cargarDashboard(){
   }
   if(dashHasta.value){
     alertasQ = alertasQ.lte("fecha", dashHasta.value)
+  }
+  if(dashUbo.value){
+    alertasQ = alertasQ.eq("ubo", dashUbo.value)
   }
 
   const { count: alertasDispNoHabitual } = await alertasQ
@@ -2612,6 +2818,9 @@ async function cargarDashboard(){
   }
   if(dashHasta.value){
     alertasDetalleQ = alertasDetalleQ.lte("fecha", dashHasta.value)
+  }
+  if(dashUbo.value){
+    alertasDetalleQ = alertasDetalleQ.eq("ubo", dashUbo.value)
   }
 
   const { data: alertasDetalle } = await alertasDetalleQ
@@ -2912,6 +3121,7 @@ function verDetalle(color){
 }
 
 async function cargarUbos(){
+  const dashUboPrevio = dashUbo?.value || ""
   const { data } = await supabaseClient
     .from("asistencias")
     .select("ubo")
@@ -2927,6 +3137,10 @@ async function cargarUbos(){
   filtroUboConfig.innerHTML = html
   filtroUbo.innerHTML = html
   filtroRetirados.innerHTML = html
+  dashUbo.innerHTML = construirOptionsUbo(ubos, true, "Todas las UBO")
+  if(dashUboPrevio && ubos.includes(dashUboPrevio)){
+    dashUbo.value = dashUboPrevio
+  }
 
   const htmlSede = construirOptionsUbo(ubos, true, "Seleccionar UBO sede")
   uboSecUbo.innerHTML = htmlSede
@@ -2984,11 +3198,9 @@ async function guardarCurso(){
 }
 
 function actualizarOpcionesSeccionSede(){
-  const base = cursoSecciones.length
-    ? [...new Set(cursoSecciones.map(x=>x.seccion))]
-    : ["A", "B", "C"]
+  const base = [...new Set((cursoSecciones || []).map(x=>String(x.seccion || "").trim()).filter(Boolean))]
 
-  let html = ""
+  let html = `<option value="">Seleccionar sección</option>`
   base.forEach(code=>{
     html += `<option value="${code}">Sección ${code}</option>`
   })
@@ -2996,30 +3208,43 @@ function actualizarOpcionesSeccionSede(){
 }
 
 function limpiarFormSeccionCurso(){
-  secCursoNombre.value = "A"
+  secCursoNombre.value = ""
   secCursoModalidad.value = "Presencial"
   secCursoHora.value = ""
+  marcarValoresMultiSelect("secCursoDiasSelect", [])
   editSeccionCursoIndex = -1
 }
 
 function limpiarFormSedeUbo(){
-  uboSecNombre.value = "A"
+  uboSecNombre.value = ""
   uboSecUbo.value = ""
   uboSecHora.value = ""
   uboSecModalidad.value = "Presencial"
+  uboSecTodosDias.checked = false
+  marcarValoresMultiSelect("uboSecDiasSelect", [])
+  actualizarEstadoDiasSede()
   editSedeUboIndex = -1
 }
 
 async function guardarSeccionCurso(){
+  const seccionValor = String(secCursoNombre.value || "").trim().toUpperCase()
+  const dias = obtenerValoresMultiSelect("secCursoDiasSelect")
+
+  if(!seccionValor){
+    alert("Define el nombre/código de la sección")
+    return
+  }
+
   if(!secCursoHora.value){
     alert("Define una hora de inicio para la sección")
     return
   }
 
   const item = {
-    seccion: secCursoNombre.value,
+    seccion: seccionValor,
     modalidad: secCursoModalidad.value,
-    hora_inicio: secCursoHora.value
+    hora_inicio: secCursoHora.value,
+    dias
   }
   const oldSeccion = editSeccionCursoIndex >= 0 ? cursoSecciones[editSeccionCursoIndex]?.seccion : null
 
@@ -3072,8 +3297,17 @@ async function guardarSeccionCurso(){
   }
 
   if(persistioEnDb){
+    const mapDias = {}
+    cursoSecciones.forEach(s=>{
+      if(s?.seccion) mapDias[s.seccion] = s.dias || []
+    })
     const seccionesDb = await cargarSeccionesCursoDesdeSupabase()
-    if(Array.isArray(seccionesDb)) cursoSecciones = seccionesDb
+    if(Array.isArray(seccionesDb)){
+      cursoSecciones = seccionesDb.map(s=>({
+        ...s,
+        dias: mapDias[s.seccion] || []
+      }))
+    }
   }
 
   guardarEstructuraCursoLocal()
@@ -3088,6 +3322,7 @@ function editarSeccionCurso(idx){
   secCursoNombre.value = item.seccion
   secCursoModalidad.value = item.modalidad
   secCursoHora.value = item.hora_inicio
+  marcarValoresMultiSelect("secCursoDiasSelect", item.dias || [])
   editSeccionCursoIndex = idx
 }
 
@@ -3119,7 +3354,7 @@ async function eliminarSeccionCurso(idx){
 
 function renderSeccionesCurso(){
   if(!cursoSecciones.length){
-    tablaSeccionesCurso.innerHTML = `<tr><td colspan="4">Sin secciones creadas.</td></tr>`
+    tablaSeccionesCurso.innerHTML = `<tr><td colspan="5">Sin secciones creadas.</td></tr>`
     return
   }
 
@@ -3131,6 +3366,7 @@ function renderSeccionesCurso(){
         <td>Sección ${s.seccion}</td>
         <td>${s.modalidad}</td>
         <td>${s.hora_inicio || "-"}</td>
+        <td>${diasTexto(s.dias)}</td>
         <td>
           <div class="table-actions">
             <button onclick="editarSeccionCurso(${idx})">Modificar</button>
@@ -3145,6 +3381,20 @@ function renderSeccionesCurso(){
 }
 
 async function guardarSedeUbo(){
+  const seccionValor = String(uboSecNombre.value || "").trim().toUpperCase()
+  const todosDias = !!uboSecTodosDias.checked
+  const dias = todosDias ? [] : obtenerValoresMultiSelect("uboSecDiasSelect")
+
+  if(!seccionValor){
+    alert("Selecciona una sección existente")
+    return
+  }
+
+  if(!cursoSecciones.some(x=>String(x.seccion) === seccionValor)){
+    alert("La sección seleccionada no existe. Créala primero.")
+    return
+  }
+
   if(!uboSecUbo.value){
     alert("Selecciona una UBO sede")
     return
@@ -3156,10 +3406,12 @@ async function guardarSedeUbo(){
   }
 
   const item = {
-    seccion: uboSecNombre.value,
+    seccion: seccionValor,
     ubo: uboSecUbo.value,
     modalidad: uboSecModalidad.value,
-    hora_inicio: uboSecHora.value
+    hora_inicio: uboSecHora.value,
+    dias,
+    todos_dias: todosDias
   }
   const oldSeccion = editSedeUboIndex >= 0 ? cursoSedesUbo[editSedeUboIndex]?.seccion : null
 
@@ -3213,8 +3465,22 @@ async function guardarSedeUbo(){
   }
 
   if(persistioEnDb){
+    const mapDias = {}
+    const mapTodos = {}
+    cursoSedesUbo.forEach(s=>{
+      if(s?.seccion){
+        mapDias[s.seccion] = s.dias || []
+        mapTodos[s.seccion] = !!s.todos_dias
+      }
+    })
     const sedesDb = await cargarSedesCursoDesdeSupabase()
-    if(Array.isArray(sedesDb)) cursoSedesUbo = sedesDb
+    if(Array.isArray(sedesDb)){
+      cursoSedesUbo = sedesDb.map(s=>({
+        ...s,
+        dias: mapDias[s.seccion] || [],
+        todos_dias: !!mapTodos[s.seccion]
+      }))
+    }
   }
 
   guardarEstructuraCursoLocal()
@@ -3229,6 +3495,9 @@ function editarSedeUbo(idx){
   uboSecUbo.value = item.ubo
   uboSecModalidad.value = item.modalidad
   uboSecHora.value = item.hora_inicio
+  uboSecTodosDias.checked = !!item.todos_dias
+  marcarValoresMultiSelect("uboSecDiasSelect", item.dias || [])
+  actualizarEstadoDiasSede()
   editSedeUboIndex = idx
 }
 
@@ -3259,7 +3528,7 @@ async function eliminarSedeUbo(idx){
 
 function renderSedesUbo(){
   if(!cursoSedesUbo.length){
-    tablaSedesUbo.innerHTML = `<tr><td colspan="5">Sin UBOs sede creadas.</td></tr>`
+    tablaSedesUbo.innerHTML = `<tr><td colspan="6">Sin UBOs sede creadas.</td></tr>`
     return
   }
 
@@ -3271,6 +3540,7 @@ function renderSedesUbo(){
         <td>${s.ubo}</td>
         <td>${s.modalidad}</td>
         <td>${s.hora_inicio || "-"}</td>
+        <td>${s.todos_dias ? "Todos" : diasTexto(s.dias)}</td>
         <td>
           <div class="table-actions">
             <button onclick="editarSedeUbo(${idx})">Modificar</button>
@@ -3288,6 +3558,7 @@ function limpiarDashboard(){
   const { from, to } = obtenerRangoMesActual()
   dashDesde.value = from
   dashHasta.value = to
+  dashUbo.value = ""
 
   // 🔥 reset KPIs
   kpiTotal.innerText = "0"
@@ -3423,6 +3694,10 @@ cursoNombre?.addEventListener("input", ()=>{
   cursoNombre.value = cursoNombre.value.toUpperCase()
 })
 
+secCursoNombre?.addEventListener("input", ()=>{
+  secCursoNombre.value = secCursoNombre.value.toUpperCase().replace(/\s+/g, "")
+})
+
 window.addEventListener("resize", ()=>{
   clearTimeout(resizeTimer)
   resizeTimer = setTimeout(aplicarLayout, 160)
@@ -3442,8 +3717,11 @@ window.detalleSemaforo = {
 window.detalleAlertasDispositivo = []
 
 document.addEventListener("change", (e)=>{
-  if(e.target.matches(".dias input, .mode-options input")){
+  if(e.target.matches(".mode-options input")){
     actualizarEstadoChecks()
+  }
+  if(e.target.id === "uboSecTodosDias"){
+    actualizarEstadoDiasSede()
   }
 })
 
