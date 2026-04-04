@@ -3794,11 +3794,23 @@ function esMovil(){
 
 function getVistaManual(){
   const modeSesion = sessionStorage.getItem(VISTA_MODO_KEY)
-  if(modeSesion === "mobile" || modeSesion === "desktop") return modeSesion
+  if(modeSesion === "mobile" || modeSesion === "desktop"){
+    // Protección anti-bloqueo: en laptop/tablet no mantener "mobile" manual persistido.
+    if(modeSesion === "mobile" && !esMovil()){
+      sessionStorage.removeItem(VISTA_MODO_KEY)
+      localStorage.removeItem(VISTA_MODO_KEY)
+      return "auto"
+    }
+    return modeSesion
+  }
 
   // Limpia preferencias heredadas de sesiones antiguas.
   const modeLegacy = localStorage.getItem(VISTA_MODO_KEY)
   if(modeLegacy === "mobile" || modeLegacy === "desktop"){
+    if(modeLegacy === "mobile" && !esMovil()){
+      localStorage.removeItem(VISTA_MODO_KEY)
+      return "auto"
+    }
     sessionStorage.setItem(VISTA_MODO_KEY, modeLegacy)
     localStorage.removeItem(VISTA_MODO_KEY)
     return modeLegacy
@@ -3808,7 +3820,7 @@ function getVistaManual(){
 
 function getVistaActiva(){
   const manual = getVistaManual()
-  if(manual === "mobile") return "mobile"
+  if(manual === "mobile") return esMovil() ? "mobile" : "desktop"
   if(manual === "desktop") return "desktop"
   return esMovil() ? "mobile" : "desktop"
 }
