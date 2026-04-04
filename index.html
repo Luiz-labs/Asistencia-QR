@@ -61,15 +61,15 @@ h2{
   display:none;
   min-width:0;
   max-width:460px;
-  height:38px;
+  height:42px;
   align-items:center;
   gap:8px;
-  background:#f7f9fe;
-  border:1px solid #dfe6f4;
+  background:#f3f6fb;
+  border:1px solid #d7e0ef;
   border-radius:12px;
   padding:0 12px;
-  color:#2a3a5d;
-  box-shadow:0 6px 14px rgba(23, 46, 90, 0.06);
+  color:#2b3a5c;
+  box-shadow:0 2px 8px rgba(20, 40, 80, 0.06);
 }
 
 .info-sesion-header .session-row{
@@ -82,12 +82,18 @@ h2{
   text-overflow:ellipsis;
   font-size:12px;
   font-weight:500;
-  color:#415174;
+  color:#44557a;
 }
 
 .info-sesion-header .session-row strong{
   font-weight:600;
-  color:#26375f;
+  color:#25365d;
+}
+
+.info-sesion-header .session-sep{
+  color:#98a8c8;
+  font-size:11px;
+  opacity:0.9;
 }
 
 @media (max-width: 760px){
@@ -104,6 +110,9 @@ h2{
     display:inline-flex;
     white-space:normal;
     max-width:none;
+  }
+  .info-sesion-header .session-sep{
+    display:none;
   }
 }
 
@@ -2447,12 +2456,14 @@ function renderInfoSesionHeader(){
     }else{
       el.innerHTML = `
         <span class="session-row" title="Usuario activo">👤 <strong>${usuario}</strong></span>
+        <span class="session-sep">|</span>
         <span class="session-row" title="Rol activo">🔐 <strong>${rolUI}</strong></span>
+        <span class="session-sep">|</span>
         <span class="session-row" title="Institución activa">🏢 <strong>${tenantLinea}</strong></span>
       `
       el.classList.remove("compact")
     }
-    el.style.display = "block"
+    el.style.display = "inline-flex"
   })
 }
 
