@@ -105,6 +105,9 @@ h2{
 }
 
 .info-sesion-sidebar{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
   width:100%;
   max-width:none;
   height:auto;
@@ -120,6 +123,9 @@ h2{
   display:flex;
   align-items:center;
   justify-content:space-between;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
   margin:2px 0;
 }
 
@@ -2501,9 +2507,11 @@ function renderInfoSesionHeader(){
         <span class="session-row"><span class="session-key">🏢 Entorno</span><strong>${tenantLinea}</strong></span>
       `
       el.classList.remove("compact")
+      el.style.display = "flex"
     }else if(compact){
       el.innerHTML = `<span class="session-row">👤 <strong>${usuario}</strong> · 🔐 <strong>${rolUI}</strong> · 🏢 <strong>${tenantLinea}</strong></span>`
       el.classList.add("compact")
+      el.style.display = "inline-flex"
     }else{
       el.innerHTML = `
         <span class="session-row" title="Usuario activo">👤 <strong>${usuario}</strong></span>
@@ -2513,8 +2521,8 @@ function renderInfoSesionHeader(){
         <span class="session-row" title="Institución activa">🏢 <strong>${tenantLinea}</strong></span>
       `
       el.classList.remove("compact")
+      el.style.display = "inline-flex"
     }
-    el.style.display = "inline-flex"
   })
 }
 
