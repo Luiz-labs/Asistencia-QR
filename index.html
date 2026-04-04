@@ -551,6 +551,19 @@ input, select{
   transform:translateX(16px);
 }
 
+.luiz-users-table th.actions-col{
+  text-align:center;
+}
+
+.luiz-users-table td{
+  vertical-align:middle;
+  white-space:nowrap;
+}
+
+.luiz-users-table td.actions-col{
+  text-align:center;
+}
+
 .hint{
   font-size:12px;
   color:var(--muted);
@@ -1946,13 +1959,15 @@ input, select{
       <div class="card">
         <h2 style="margin-bottom:10px;">Usuarios admin por institución</h2>
         <div class="table-wrap">
-          <table>
+          <table class="luiz-users-table">
             <thead>
               <tr>
                 <th>Usuario</th>
                 <th>Rol</th>
                 <th>Institución</th>
                 <th>Estado institución</th>
+                <th>Fecha</th>
+                <th class="actions-col">Acciones</th>
               </tr>
             </thead>
             <tbody id="tablaUsuariosAdminLuiz"></tbody>
@@ -2237,7 +2252,9 @@ function mapearUsuariosBaseDesdeTenants(){
       usuario: String(user).toLowerCase(),
       password: "",
       rol: ROLES_ADMIN.ADMINISTRADOR,
-      tenantId: t.id
+      tenantId: t.id,
+      estado: "activo",
+      fecha_creacion: new Date().toISOString()
     })
   })
   return items
@@ -2265,6 +2282,15 @@ function cargarLuizLabsDesdeStorage(){
   if(!usuariosAdminLuiz.length){
     usuariosAdminLuiz = mapearUsuariosBaseDesdeTenants()
   }
+
+  usuariosAdminLuiz = usuariosAdminLuiz.map(u=>({
+    usuario: String(u.usuario || "").toLowerCase(),
+    password: String(u.password || ""),
+    rol: normalizarRolUsuario(u.rol || ROLES_ADMIN.ADMINISTRADOR),
+    tenantId: String(u.tenantId || ""),
+    estado: String(u.estado || "activo") === "inactivo" ? "inactivo" : "activo",
+    fecha_creacion: u.fecha_creacion || new Date().toISOString()
+  }))
 
   sincronizarTenantsDesdeInstituciones()
   guardarLuizLabsEnStorage()
@@ -2351,20 +2377,36 @@ function renderPanelLuizLabs(){
   }
 
   if(!usuariosAdminLuiz.length){
-    tablaUsers.innerHTML = `<tr><td colspan="4">Sin usuarios admin.</td></tr>`
+    tablaUsers.innerHTML = `<tr><td colspan="6">Sin usuarios admin.</td></tr>`
     return
   }
 
   let usersHtml = ""
-  usuariosAdminLuiz.forEach(u=>{
+  usuariosAdminLuiz.forEach((u, idx)=>{
     const inst = obtenerInstitucionLuiz(u.tenantId)
     const estado = inst?.estado === "activo" ? "Activa" : "Inactiva"
+    const estadoUser = u.estado === "activo"
+    const fechaUser = String(u.fecha_creacion || "").slice(0,10)
     usersHtml += `
       <tr>
         <td>${u.usuario || ""}</td>
         <td>${u.rol || ""}</td>
         <td>${inst?.nombre || u.tenantId || ""}</td>
         <td>${estado}</td>
+        <td>${fechaUser}</td>
+        <td class="actions-col">
+          <div class="table-actions luiz-actions">
+            <button class="secondary" onclick="regenerarClaveUsuarioAdminLuiz(${idx})" title="Regenerar clave temporal">Clave</button>
+            <button
+              class="state-toggle ${estadoUser ? "active" : ""}"
+              onclick="toggleEstadoUsuarioAdminLuiz(${idx})"
+              title="${estadoUser ? "Desactivar usuario" : "Activar usuario"}"
+              aria-label="${estadoUser ? "Desactivar usuario" : "Activar usuario"}">
+              <span class="dot"></span>
+            </button>
+            <button class="secondary" onclick="eliminarUsuarioAdminLuiz(${idx})">Eliminar</button>
+          </div>
+        </td>
       </tr>
     `
   })
@@ -2396,7 +2438,9 @@ function crearInstitucionLuizLabs(){
     usuario,
     password,
     rol: ROLES_ADMIN.ADMINISTRADOR,
-    tenantId: slug
+    tenantId: slug,
+    estado: "activo",
+    fecha_creacion: new Date().toISOString()
   })
 
   sincronizarTenantsDesdeInstituciones()
@@ -2509,6 +2553,41 @@ function eliminarInstitucionLuizLabs(id){
 
   guardarLuizLabsEnStorage()
   renderTenantSelector()
+  renderPanelLuizLabs()
+}
+
+function regenerarClaveUsuarioAdminLuiz(idx){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const user = usuariosAdminLuiz[idx]
+  if(!user) return
+  const nuevaClave = generarClaveTemporal(8)
+  user.password = nuevaClave
+  guardarLuizLabsEnStorage()
+  renderPanelLuizLabs()
+  alert(
+    `Credencial actualizada.\n\n` +
+    `Usuario: ${user.usuario}\n` +
+    `Nueva clave temporal: ${nuevaClave}`
+  )
+}
+
+function toggleEstadoUsuarioAdminLuiz(idx){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const user = usuariosAdminLuiz[idx]
+  if(!user) return
+  user.estado = user.estado === "activo" ? "inactivo" : "activo"
+  guardarLuizLabsEnStorage()
+  renderPanelLuizLabs()
+}
+
+function eliminarUsuarioAdminLuiz(idx){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const user = usuariosAdminLuiz[idx]
+  if(!user) return
+  const ok = confirm(`¿Eliminar usuario admin "${user.usuario}"?`)
+  if(!ok) return
+  usuariosAdminLuiz.splice(idx, 1)
+  guardarLuizLabsEnStorage()
   renderPanelLuizLabs()
 }
 
@@ -3839,6 +3918,9 @@ function resolverCredencialesAdmin(usuario, clave){
   }
 
   if(userLuiz && String(userLuiz.password || "") === clave){
+    if(String(userLuiz.estado || "activo") !== "activo"){
+      return { valido: false }
+    }
     return {
       valido: true,
       usuario: userLuiz.usuario,
