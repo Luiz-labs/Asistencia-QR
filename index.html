@@ -410,8 +410,12 @@ input, select{
   height:42px;
   padding:8px 10px;
   line-height:24px;
-  min-width:260px;
+  min-width:320px;
   background:#fff;
+}
+
+.file-upload-row button{
+  min-width:230px;
 }
 
 .config-row select,
@@ -1912,7 +1916,7 @@ input, select{
             Activar validación GPS (Proximamente)
           </label>
           <div class="hint" style="margin-top:12px;">Carga masiva de coordenadas UBO (columnas: <strong>UBO, LATITUD, LONGITUD</strong>. Opcional: <strong>NOMBRE</strong>).</div>
-          <div class="config-row" style="margin-top:10px;">
+          <div class="config-row file-upload-row" style="margin-top:10px;">
             <input type="file" id="archivoUbosSedes" accept=".xlsx,.xls,.csv">
             <button onclick="cargarExcelUbosSedes()">Subir Coordenadas</button>
             <button class="secondary" onclick="cargarUbos()">Refrescar UBOs</button>
