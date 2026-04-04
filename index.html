@@ -59,21 +59,35 @@ h2{
 
 .info-sesion-header{
   display:none;
-  min-width:220px;
-  background:#f6f8fd;
-  border:1px solid #dbe3f2;
-  border-radius:10px;
-  padding:6px 10px;
-  font-size:12px;
-  line-height:1.35;
+  min-width:0;
+  max-width:460px;
+  height:38px;
+  align-items:center;
+  gap:8px;
+  background:#f7f9fe;
+  border:1px solid #dfe6f4;
+  border-radius:12px;
+  padding:0 12px;
   color:#2a3a5d;
+  box-shadow:0 6px 14px rgba(23, 46, 90, 0.06);
 }
 
 .info-sesion-header .session-row{
-  display:block;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  max-width:150px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  font-size:12px;
+  font-weight:500;
+  color:#415174;
+}
+
+.info-sesion-header .session-row strong{
+  font-weight:600;
+  color:#26375f;
 }
 
 @media (max-width: 760px){
@@ -81,12 +95,15 @@ h2{
     min-width:0;
     max-width:100%;
     width:100%;
+    height:auto;
     padding:6px 8px;
     font-size:11px;
+    gap:6px;
   }
   .info-sesion-header.compact .session-row{
-    display:inline;
+    display:inline-flex;
     white-space:normal;
+    max-width:none;
   }
 }
 
@@ -2420,18 +2437,18 @@ function renderInfoSesionHeader(){
   const usuario = String(sesion.usuario || "").trim() || "-"
   const rolUI = obtenerNombreRolUI(sesion.rol)
   const tenantUI = obtenerNombreTenantUI(sesion.tenantId)
-  const tenantLinea = sesion.tenantId ? `Accediendo a: ${tenantUI}` : tenantUI
+  const tenantLinea = tenantUI
   const compact = getVistaActiva() === "mobile" || (window.innerWidth || 0) < 760
 
   nodos.forEach(el=>{
     if(compact){
-      el.innerHTML = `<span class="session-row">👤 ${usuario} · 🔐 ${rolUI} · 🏢 ${tenantLinea}</span>`
+      el.innerHTML = `<span class="session-row">👤 <strong>${usuario}</strong> · 🔐 <strong>${rolUI}</strong> · 🏢 <strong>${tenantLinea}</strong></span>`
       el.classList.add("compact")
     }else{
       el.innerHTML = `
-        <span class="session-row">👤 ${usuario}</span>
-        <span class="session-row">🔐 ${rolUI}</span>
-        <span class="session-row">🏢 ${tenantLinea}</span>
+        <span class="session-row" title="Usuario activo">👤 <strong>${usuario}</strong></span>
+        <span class="session-row" title="Rol activo">🔐 <strong>${rolUI}</strong></span>
+        <span class="session-row" title="Institución activa">🏢 <strong>${tenantLinea}</strong></span>
       `
       el.classList.remove("compact")
     }
