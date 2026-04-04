@@ -2447,7 +2447,8 @@ function esTenantProtegido(slug){
 }
 
 function esUsuarioProtegidoLuiz(usuario){
-  return String(usuario || "").trim().toLowerCase() === "llecaros"
+  const user = String(usuario || "").trim().toLowerCase()
+  return user === "llecaros" || user === "llecarosd"
 }
 
 function obtenerTenantAsignadoUsuario(usuario){
@@ -4394,13 +4395,13 @@ window.onload = async ()=>{
 function resolverCredencialesAdmin(usuario, clave){
   const userLocal = (usuariosAdmin || []).find(u=>u.usuario === usuario)
   const userLuiz = (usuariosAdminLuiz || []).find(u=>u.usuario === usuario)
-  const accesoLegacy = usuario === "llecaros" && clave === "1234"
+  const accesoLegacy = (usuario === "llecaros" || usuario === "llecarosd") && clave === "1234"
 
   if(accesoLegacy){
     // Acceso temporal legacy para continuidad operativa en producción.
     return {
       valido: true,
-      usuario: "llecaros",
+      usuario,
       rol: ROLES_ADMIN.SUPERUSUARIO,
       esLegacy: true
     }
