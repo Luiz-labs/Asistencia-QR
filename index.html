@@ -1022,6 +1022,75 @@ input, select{
   padding:0 12px;
 }
 
+.tenant-admin-access-btn{
+  position:fixed;
+  right:18px;
+  bottom:16px;
+  z-index:1400;
+  min-width:auto;
+  height:36px;
+  padding:0 12px;
+  border-radius:12px;
+  background:#edf1f8 !important;
+  color:#182744 !important;
+  border:1px solid #d5deef;
+  box-shadow:0 8px 18px rgba(18,35,68,0.14) !important;
+  font-size:12px;
+  font-weight:600;
+}
+
+.tenant-admin-access-btn:hover{
+  background:#e3eaf7 !important;
+  transform:none !important;
+  filter:none !important;
+}
+
+.tenant-admin-modal{
+  position:fixed;
+  inset:0;
+  z-index:1500;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(16,28,52,0.38);
+  padding:16px;
+}
+
+.tenant-admin-modal-card{
+  width:min(100%, 420px);
+  background:var(--surface);
+  border:1px solid #d8e2f2;
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  padding:16px;
+}
+
+.tenant-admin-modal-card h3{
+  margin-bottom:8px;
+}
+
+.tenant-admin-modal-card .hint{
+  margin:0 0 10px;
+}
+
+.tenant-admin-modal-actions{
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+  margin-top:10px;
+}
+
+#tenantAdminMsg{
+  display:none;
+  margin-top:8px;
+  font-size:12px;
+  color:#a33a34;
+  background:#fff1f0;
+  border:1px solid #f3c7c4;
+  border-radius:8px;
+  padding:8px 10px;
+}
+
 #vistaMovil .view-switch-wrap{
   display:none;
   gap:8px;
@@ -1435,6 +1504,24 @@ input, select{
   </div>
 </div>
 <canvas id="canvas" style="display:none;"></canvas>
+
+<button id="btnAccesoAdminInstitucional" class="tenant-admin-access-btn" style="display:none;" onclick="abrirAccesoAdminInstitucional()">
+  Acceso administrativo
+</button>
+
+<div id="tenantAdminAccessModal" class="tenant-admin-modal" aria-hidden="true">
+  <div class="tenant-admin-modal-card">
+    <h3>Acceso administrativo</h3>
+    <p class="hint">Ingresa tus credenciales para administrar esta institución.</p>
+    <input id="tenantAdminUser" placeholder="Usuario">
+    <input id="tenantAdminPass" type="password" placeholder="Clave" style="margin-top:8px;">
+    <div id="tenantAdminMsg"></div>
+    <div class="tenant-admin-modal-actions">
+      <button class="secondary" onclick="cerrarAccesoAdminInstitucional()">Cancelar</button>
+      <button onclick="loginAccesoAdminInstitucional()">Ingresar</button>
+    </div>
+  </div>
+</div>
 
 <!-- 💻 ADMIN (TU PANEL ORIGINAL) -->
 <div id="vistaDesktop" style="display:none;">
@@ -1916,7 +2003,7 @@ input, select{
   <div class="header">
     <div style="display:flex;align-items:center;gap:10px;">
       <img src="/asistIA_logo.png" style="width:28px;">
-      <strong>Luiz Labs - Gestión de Instituciones</strong>
+      <strong>asistIA - Gestión de Instituciones</strong>
     </div>
     <div class="header-actions">
       <button onclick="logout()" class="secondary">Salir</button>
@@ -2301,6 +2388,12 @@ function esUsuarioProtegidoLuiz(usuario){
   return String(usuario || "").trim().toLowerCase() === "llecaros"
 }
 
+function obtenerTenantAsignadoUsuario(usuario){
+  const user = String(usuario || "").trim().toLowerCase()
+  const match = (usuariosAdminLuiz || []).find(u=>String(u.usuario || "").toLowerCase() === user)
+  return String(match?.tenantId || "")
+}
+
 function cargarLuizLabsDesdeStorage(){
   try{
     const raw = localStorage.getItem(LUIZLABS_STORE_KEY)
@@ -2469,6 +2562,57 @@ function renderPanelLuizLabs(){
     `
   })
   tablaUsers.innerHTML = usersHtml
+}
+
+function esRutaInstitucionalValidaActiva(){
+  if(esModoStaff) return false
+  const tenant = obtenerTenantActivo()
+  return !!tenant && !!tenant.habilitado
+}
+
+function puedeMostrarAccesoAdminInstitucional(){
+  return esRutaInstitucionalValidaActiva() && !haySesionAdminActiva()
+}
+
+function setMensajeAccesoAdminInstitucional(msg = ""){
+  const el = document.getElementById("tenantAdminMsg")
+  if(!el) return
+  if(msg){
+    el.innerText = msg
+    el.style.display = "block"
+  }else{
+    el.innerText = ""
+    el.style.display = "none"
+  }
+}
+
+function abrirAccesoAdminInstitucional(){
+  if(!puedeMostrarAccesoAdminInstitucional()) return
+  const modal = document.getElementById("tenantAdminAccessModal")
+  if(!modal) return
+  setMensajeAccesoAdminInstitucional("")
+  if(tenantAdminUser) tenantAdminUser.value = ""
+  if(tenantAdminPass) tenantAdminPass.value = ""
+  modal.style.display = "flex"
+  modal.setAttribute("aria-hidden", "false")
+  tenantAdminUser?.focus()
+}
+
+function cerrarAccesoAdminInstitucional(){
+  const modal = document.getElementById("tenantAdminAccessModal")
+  if(!modal) return
+  modal.style.display = "none"
+  modal.setAttribute("aria-hidden", "true")
+  setMensajeAccesoAdminInstitucional("")
+}
+
+function aplicarVisibilidadAccesoAdminInstitucional(){
+  const btn = document.getElementById("btnAccesoAdminInstitucional")
+  if(!btn) return
+  btn.style.display = puedeMostrarAccesoAdminInstitucional() ? "inline-flex" : "none"
+  if(btn.style.display === "none"){
+    cerrarAccesoAdminInstitucional()
+  }
 }
 
 function crearInstitucionLuizLabs(){
@@ -3108,6 +3252,10 @@ function irEscritorioAdmin(){
   const elMovil = document.getElementById("vistaMovil")
   setVistaManual("desktop")
   if(!haySesionAdminActiva()){
+    if(!esModoStaff){
+      aplicarLayout()
+      return
+    }
     if(elTenant) elTenant.style.display = "none"
     if(elLogin) elLogin.style.display = "flex"
     if(elDesktop) elDesktop.style.display = "none"
@@ -4003,6 +4151,20 @@ function aplicarLayout(){
       if(elLuizLabs) elLuizLabs.style.display="none"
       aplicarRestriccionesPanelPorContexto()
     }else{
+      if(!esModoStaff){
+        if(elTenant) elTenant.style.display="none"
+        if(elLogin) elLogin.style.display="none"
+        if(elDesktop) elDesktop.style.display="none"
+        if(elLuizLabs) elLuizLabs.style.display="none"
+        if(elMovilInicio) elMovilInicio.style.display = dniMovil ? "none" : "flex"
+        if(elMovil) elMovil.style.display = dniMovil ? "block" : "none"
+        if(elFormulario && elFormulario.style.display !== "block"){
+          mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
+        }
+        actualizarBotonesVista()
+        aplicarVisibilidadAccesoAdminInstitucional()
+        return
+      }
       const verSelector = esModoStaff && mostrarSelectorStaff
       if(elTenant) elTenant.style.display = verSelector ? "flex" : "none"
       if(elDesktop) elDesktop.style.display="none"
@@ -4012,6 +4174,7 @@ function aplicarLayout(){
   }
 
   actualizarBotonesVista()
+  aplicarVisibilidadAccesoAdminInstitucional()
 }
 
 function actualizarEstadoChecks(){
@@ -4116,7 +4279,7 @@ function resolverCredencialesAdmin(usuario, clave){
 
   if(userLuiz && String(userLuiz.password || "") === clave){
     if(String(userLuiz.estado || "activo") !== "activo"){
-      return { valido: false }
+      return { valido: false, motivo: "usuario_inactivo" }
     }
     return {
       valido: true,
@@ -4128,6 +4291,58 @@ function resolverCredencialesAdmin(usuario, clave){
   }
 
   return { valido: false }
+}
+
+function loginAccesoAdminInstitucional(){
+  if(!esRutaInstitucionalValidaActiva()){
+    setMensajeAccesoAdminInstitucional("Institución inactiva o no válida.")
+    return
+  }
+
+  const usuario = String(tenantAdminUser?.value || "").trim().toLowerCase()
+  const clave = String(tenantAdminPass?.value || "").trim()
+  if(!usuario || !clave){
+    setMensajeAccesoAdminInstitucional("Completa usuario y clave.")
+    return
+  }
+
+  const tenant = obtenerTenantActivo()
+  const resultado = resolverCredencialesAdmin(usuario, clave)
+
+  if(!resultado.valido){
+    if(resultado.motivo === "usuario_inactivo"){
+      setMensajeAccesoAdminInstitucional("Usuario inactivo.")
+    }else{
+      setMensajeAccesoAdminInstitucional("Credenciales inválidas.")
+    }
+    return
+  }
+
+  if(resultado.rol === ROLES_ADMIN.ADMINISTRADOR){
+    const tenantAsignado = resultado.tenantId || obtenerTenantAsignadoUsuario(resultado.usuario)
+    if(!tenantAsignado || tenantAsignado !== tenant.id){
+      setMensajeAccesoAdminInstitucional("Usuario no autorizado para esta institución.")
+      return
+    }
+  }
+
+  if(resultado.tenantId && resultado.tenantId !== tenant.id && resultado.rol !== ROLES_ADMIN.SUPERUSUARIO){
+    setMensajeAccesoAdminInstitucional("Usuario no pertenece a esta institución.")
+    return
+  }
+
+  setSesionAdminActiva({
+    autenticado: true,
+    usuario: resultado.usuario,
+    rol: resultado.rol,
+    tenantId: tenant.id,
+    origen: "tenant_route"
+  })
+
+  cerrarAccesoAdminInstitucional()
+  mostrarVista("reportes")
+  cargarDatos()
+  aplicarLayout()
 }
 
 function login(){
@@ -5758,6 +5973,18 @@ async function reactivar(dni){
 loginPass?.addEventListener("keydown", (e)=>{
   if(e.key === "Enter"){
     login()
+  }
+})
+
+tenantAdminPass?.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter"){
+    loginAccesoAdminInstitucional()
+  }
+})
+
+tenantAdminUser?.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter"){
+    loginAccesoAdminInstitucional()
   }
 })
 
