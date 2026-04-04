@@ -1976,8 +1976,16 @@ function esMovil(){
 }
 
 function getVistaManual(){
-  const mode = localStorage.getItem(VISTA_MODO_KEY)
-  if(mode === "mobile" || mode === "desktop") return mode
+  const modeSesion = sessionStorage.getItem(VISTA_MODO_KEY)
+  if(modeSesion === "mobile" || modeSesion === "desktop") return modeSesion
+
+  // Limpia preferencias heredadas de sesiones antiguas.
+  const modeLegacy = localStorage.getItem(VISTA_MODO_KEY)
+  if(modeLegacy === "mobile" || modeLegacy === "desktop"){
+    sessionStorage.setItem(VISTA_MODO_KEY, modeLegacy)
+    localStorage.removeItem(VISTA_MODO_KEY)
+    return modeLegacy
+  }
   return "auto"
 }
 
@@ -2002,8 +2010,9 @@ function actualizarBotonesVista(){
 
 function setVistaManual(mode){
   if(mode === "mobile" || mode === "desktop"){
-    localStorage.setItem(VISTA_MODO_KEY, mode)
+    sessionStorage.setItem(VISTA_MODO_KEY, mode)
   }else{
+    sessionStorage.removeItem(VISTA_MODO_KEY)
     localStorage.removeItem(VISTA_MODO_KEY)
   }
   aplicarLayout()
