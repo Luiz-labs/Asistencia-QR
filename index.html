@@ -67,7 +67,24 @@ h2{
 }
 
 #vistaDesktop .header .header-actions{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:8px;
+  min-width:0;
+}
+
+#vistaDesktop .header-session-row{
+  display:flex;
   justify-content:flex-end;
+  width:100%;
+}
+
+#vistaDesktop .header-cta-row{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
 }
 
 #vistaDesktop .header > div:first-child{
@@ -139,7 +156,13 @@ h2{
     align-items:stretch;
   }
   #vistaDesktop .header .header-actions{
-    justify-content:flex-end;
+    align-items:stretch;
+  }
+  #vistaDesktop .header-session-row{
+    justify-content:flex-start;
+  }
+  #vistaDesktop .header-cta-row{
+    justify-content:flex-start;
   }
 }
 
@@ -1623,12 +1646,16 @@ input, select{
       <strong id="tenantPanelTitulo">ESBAS Panel Administrativo</strong>
     </div>
     <div class="header-actions">
-      <div id="infoSesionHeader" class="info-sesion-header" data-session-info></div>
-      <button id="btnInstitucion" onclick="volverSeleccionCliente()" class="secondary">Institución</button>
-      <button id="btnVolverLuizLabs" onclick="irPanelPrincipalLuizLabs()" class="secondary" style="display:none;">Panel principal</button>
-      <button id="btnForzarMovil" onclick="setVistaManual('mobile')" class="secondary view-switch">Ver móvil</button>
-      <button id="btnVistaAutoDesktop" onclick="setVistaManual('auto')" class="secondary view-switch" title="Automático: usa detección de dispositivo para decidir vista móvil o escritorio.">Automático</button>
-      <button onclick="logout()" class="secondary">Salir</button>
+      <div class="header-session-row">
+        <div id="infoSesionHeader" class="info-sesion-header" data-session-info></div>
+      </div>
+      <div class="header-cta-row">
+        <button id="btnInstitucion" onclick="volverSeleccionCliente()" class="secondary">Institución</button>
+        <button id="btnVolverLuizLabs" onclick="irPanelPrincipalLuizLabs()" class="secondary" style="display:none;">Panel principal</button>
+        <button id="btnForzarMovil" onclick="setVistaManual('mobile')" class="secondary view-switch">Ver móvil</button>
+        <button id="btnVistaAutoDesktop" onclick="setVistaManual('auto')" class="secondary view-switch" title="Automático: usa detección de dispositivo para decidir vista móvil o escritorio.">Automático</button>
+        <button onclick="logout()" class="secondary">Salir</button>
+      </div>
     </div>
   </div>
 
