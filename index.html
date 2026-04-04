@@ -2391,12 +2391,35 @@ function exportarDashboardPDF(){
     })
 }
 
-function cargarUsuariosAdminLocal(){
-  try{
-    usuariosAdmin = JSON.parse(localStorage.getItem("usuariosAdmin") || "[]")
-  }catch{
+async function cargarUsuariosAdminDesdeSupabase(){
+  if(!haySupabase()){
     usuariosAdmin = []
+    renderUsuariosAdmin()
+    return
   }
+
+  const { data, error } = await supabaseClient
+    .from("usuarios_admin")
+    .select("id,nombre,usuario,clave,rol,activo")
+    .eq("activo", true)
+    .order("nombre", { ascending: true })
+
+  if(error){
+    if(!esTablaNoExiste(error)){
+      console.warn("No se pudo cargar usuarios_admin:", error.message)
+    }
+    usuariosAdmin = []
+    renderUsuariosAdmin()
+    return
+  }
+
+  usuariosAdmin = (data || []).map(u=>({
+    id: u.id,
+    nombre: u.nombre || "",
+    usuario: (u.usuario || "").toLowerCase(),
+    clave: u.clave || "",
+    rol: u.rol || "editor"
+  }))
   renderUsuariosAdmin()
 }
 
@@ -2440,7 +2463,7 @@ function limpiarUsuarioAdmin(){
   editUsuarioIndex = -1
 }
 
-function guardarUsuarioAdmin(){
+async function guardarUsuarioAdmin(){
   const nombre = (userNombre.value || "").trim()
   const usuario = (userLogin.value || "").trim().toLowerCase()
   const clave = (userPass.value || "").trim()
@@ -2453,7 +2476,19 @@ function guardarUsuarioAdmin(){
 
   const item = { nombre, usuario, clave, rol }
   if(editUsuarioIndex >= 0){
-    usuariosAdmin[editUsuarioIndex] = item
+    const original = usuariosAdmin[editUsuarioIndex]
+    if(!original?.id){
+      alert("No se encontró el usuario a editar")
+      return
+    }
+    const { error } = await supabaseClient
+      .from("usuarios_admin")
+      .update(item)
+      .eq("id", original.id)
+    if(error){
+      alert(`No se pudo actualizar: ${error.message}`)
+      return
+    }
   }else{
     if(SYSTEM_USERS.some(s => s.usuario === usuario)){
       alert("Ese usuario es del sistema y ya existe")
@@ -2464,11 +2499,16 @@ function guardarUsuarioAdmin(){
       alert("Ese usuario ya existe")
       return
     }
-    usuariosAdmin.push(item)
+    const { error } = await supabaseClient
+      .from("usuarios_admin")
+      .insert([{ ...item, activo: true }])
+    if(error){
+      alert(`No se pudo crear usuario: ${error.message}`)
+      return
+    }
   }
 
-  localStorage.setItem("usuariosAdmin", JSON.stringify(usuariosAdmin))
-  renderUsuariosAdmin()
+  await cargarUsuariosAdminDesdeSupabase()
   limpiarUsuarioAdmin()
 }
 
@@ -2482,11 +2522,20 @@ function editarUsuarioAdmin(idx){
   editUsuarioIndex = idx
 }
 
-function eliminarUsuarioAdmin(idx){
+async function eliminarUsuarioAdmin(idx){
   if(!confirm("¿Eliminar usuario?")) return
-  usuariosAdmin.splice(idx, 1)
-  localStorage.setItem("usuariosAdmin", JSON.stringify(usuariosAdmin))
-  renderUsuariosAdmin()
+  const u = usuariosAdmin[idx]
+  if(!u?.id) return
+
+  const { error } = await supabaseClient
+    .from("usuarios_admin")
+    .update({ activo: false })
+    .eq("id", u.id)
+  if(error){
+    alert(`No se pudo eliminar usuario: ${error.message}`)
+    return
+  }
+  await cargarUsuariosAdminDesdeSupabase()
 }
 
 async function cargarExcelAspirantes(){
@@ -2681,7 +2730,7 @@ async function cargarSedesUbo(){
 async function cargarSeccionesCursoDesdeSupabase(){
   const { data, error } = await supabaseClient
     .from("curso_secciones")
-    .select("seccion,modalidad,hora_inicio")
+    .select("*")
     .eq("curso_id", 1)
     .order("seccion", { ascending: true })
 
@@ -2695,14 +2744,14 @@ async function cargarSeccionesCursoDesdeSupabase(){
     seccion: String(x.seccion || "").trim(),
     modalidad: x.modalidad || "Presencial",
     hora_inicio: x.hora_inicio || "",
-    dias: []
+    dias: Array.isArray(x.dias) ? x.dias : []
   })).filter(x=>x.seccion)
 }
 
 async function cargarSedesCursoDesdeSupabase(){
   const { data, error } = await supabaseClient
     .from("curso_sedes_ubo")
-    .select("seccion,ubo,modalidad,hora_inicio")
+    .select("*")
     .eq("curso_id", 1)
     .order("seccion", { ascending: true })
 
@@ -2717,70 +2766,40 @@ async function cargarSedesCursoDesdeSupabase(){
     ubo: String(x.ubo || "").trim(),
     modalidad: x.modalidad || "Presencial",
     hora_inicio: x.hora_inicio || "",
-    dias: []
+    dias: Array.isArray(x.dias) ? x.dias : [],
+    todos_dias: !!x.todos_dias
   })).filter(x=>x.seccion)
 }
 
-function guardarEstructuraCursoLocal(){
-  localStorage.setItem("cursoSecciones", JSON.stringify(cursoSecciones))
-  localStorage.setItem("cursoSedesUbo", JSON.stringify(cursoSedesUbo))
-}
+function guardarEstructuraCursoLocal(){}
 
 async function aplicarCursoEnUI(cfg){
-  const nombreLocal = localStorage.getItem("cursoNombre") || ""
-  const seccionesLocalesMap = {}
-  const sedesLocalesMap = {}
-
   if(cfg){
-    cursoNombre.value = (cfg.nombre_curso || nombreLocal || "").toUpperCase()
+    cursoNombre.value = String(cfg.nombre_curso || "").toUpperCase()
     cursoInicio.value = cfg.fecha_inicio || ""
     cursoFin.value = cfg.fecha_fin || ""
     cursoRadio.value = cfg.radio_m || 50
     toggleGPS.checked = !!cfg.gps_activo
   }else{
-    cursoNombre.value = nombreLocal.toUpperCase()
+    cursoNombre.value = ""
+    cursoInicio.value = ""
+    cursoFin.value = ""
     cursoRadio.value = "50"
+    toggleGPS.checked = false
   }
-
-  try{
-    cursoSecciones = JSON.parse(localStorage.getItem("cursoSecciones") || "[]")
-  }catch{
-    cursoSecciones = []
-  }
-  cursoSecciones.forEach(s=>{
-    if(s?.seccion) seccionesLocalesMap[String(s.seccion)] = s
-  })
-
-  try{
-    cursoSedesUbo = JSON.parse(localStorage.getItem("cursoSedesUbo") || "[]")
-  }catch{
-    cursoSedesUbo = []
-  }
-  cursoSedesUbo.forEach(s=>{
-    if(s?.seccion) sedesLocalesMap[String(s.seccion)] = s
-  })
 
   const seccionesDb = await cargarSeccionesCursoDesdeSupabase()
   if(Array.isArray(seccionesDb)){
-    cursoSecciones = seccionesDb.map(item=>{
-      const local = seccionesLocalesMap[item.seccion]
-      return {
-        ...item,
-        dias: Array.isArray(local?.dias) ? local.dias : []
-      }
-    })
+    cursoSecciones = seccionesDb
+  }else{
+    cursoSecciones = []
   }
 
   const sedesDb = await cargarSedesCursoDesdeSupabase()
   if(Array.isArray(sedesDb)){
-    cursoSedesUbo = sedesDb.map(item=>{
-      const local = sedesLocalesMap[item.seccion]
-      return {
-        ...item,
-        dias: Array.isArray(local?.dias) ? local.dias : [],
-        todos_dias: !!local?.todos_dias
-      }
-    })
+    cursoSedesUbo = sedesDb
+  }else{
+    cursoSedesUbo = []
   }
 
   guardarEstructuraCursoLocal()
@@ -2970,9 +2989,9 @@ window.onload = async ()=>{
   }
 
   try{
-    cargarUsuariosAdminLocal()
+    await cargarUsuariosAdminDesdeSupabase()
   }catch(e){
-    console.error("Error cargando usuarios locales:", e)
+    console.error("Error cargando usuarios admin:", e)
   }
 
   try{
@@ -4008,12 +4027,9 @@ async function guardarCurso(){
     mapSedes[x.seccion] = x.ubo
   })
 
-  localStorage.setItem("cursoNombre", (cursoNombre.value || "").toUpperCase())
-  localStorage.setItem("cursoSecciones", JSON.stringify(cursoSecciones))
-  localStorage.setItem("cursoSedesUbo", JSON.stringify(cursoSedesUbo))
-
   const payload = {
     id: 1,
+    nombre_curso: (cursoNombre.value || "").toUpperCase() || null,
     fecha_inicio: cursoInicio.value || null,
     fecha_fin: cursoFin.value || null,
     seccion_a_ubo: mapSedes["A"] || null,
@@ -4025,11 +4041,39 @@ async function guardarCurso(){
 
   const { error, data } = await supabaseClient
     .from("curso_configuracion")
-    .upsert(payload)
+    .upsert(payload, { onConflict: "id" })
     .select()
     .single()
 
   if(error){
+    if(/nombre_curso/i.test(String(error.message || ""))){
+      const payloadSinNombre = {
+        id: 1,
+        fecha_inicio: cursoInicio.value || null,
+        fecha_fin: cursoFin.value || null,
+        seccion_a_ubo: mapSedes["A"] || null,
+        seccion_b_ubo: mapSedes["B"] || null,
+        seccion_c_ubo: mapSedes["C"] || null,
+        radio_m: Number(cursoRadio.value || 50),
+        gps_activo: !!toggleGPS.checked
+      }
+      const { error: errorSinNombre, data: dataSinNombre } = await supabaseClient
+        .from("curso_configuracion")
+        .upsert(payloadSinNombre, { onConflict: "id" })
+        .select()
+        .single()
+      if(errorSinNombre){
+        alert("Error al guardar configuración de curso")
+        console.error(errorSinNombre)
+        return
+      }
+      cursoConfigCache = {
+        ...(dataSinNombre || {}),
+        nombre_curso: (cursoNombre.value || "").toUpperCase()
+      }
+      alert("Curso guardado (falta columna nombre_curso en Supabase).")
+      return
+    }
     alert("Error al guardar configuración de curso")
     console.error(error)
     return
@@ -4120,20 +4164,37 @@ async function guardarSeccionCurso(){
         .eq("seccion", oldSeccion)
     }
 
-    await supabaseClient
+    const { error: errorDeleteActual } = await supabaseClient
       .from("curso_secciones")
       .delete()
       .eq("curso_id", 1)
       .eq("seccion", item.seccion)
+    if(errorDeleteActual && !esTablaNoExiste(errorDeleteActual)){
+      throw errorDeleteActual
+    }
 
-    const { error } = await supabaseClient
+    const payloadSeccion = {
+      curso_id: 1,
+      seccion: item.seccion,
+      modalidad: item.modalidad,
+      hora_inicio: item.hora_inicio,
+      dias: item.dias
+    }
+
+    let { error } = await supabaseClient
       .from("curso_secciones")
-      .insert([{
-        curso_id: 1,
-        seccion: item.seccion,
-        modalidad: item.modalidad,
-        hora_inicio: item.hora_inicio
-      }])
+      .insert([payloadSeccion])
+
+    if(error && /dias/i.test(String(error.message || ""))){
+      ({ error } = await supabaseClient
+        .from("curso_secciones")
+        .insert([{
+          curso_id: 1,
+          seccion: item.seccion,
+          modalidad: item.modalidad,
+          hora_inicio: item.hora_inicio
+        }]))
+    }
 
     if(error){
       if(!esTablaNoExiste(error)){
@@ -4147,17 +4208,8 @@ async function guardarSeccionCurso(){
   }
 
   if(persistioEnDb){
-    const mapDias = {}
-    cursoSecciones.forEach(s=>{
-      if(s?.seccion) mapDias[s.seccion] = s.dias || []
-    })
     const seccionesDb = await cargarSeccionesCursoDesdeSupabase()
-    if(Array.isArray(seccionesDb)){
-      cursoSecciones = seccionesDb.map(s=>({
-        ...s,
-        dias: mapDias[s.seccion] || []
-      }))
-    }
+    if(Array.isArray(seccionesDb)) cursoSecciones = seccionesDb
   }
 
   guardarEstructuraCursoLocal()
@@ -4292,21 +4344,40 @@ async function guardarSedeUbo(){
         .eq("seccion", oldSeccion)
     }
 
-    await supabaseClient
+    const { error: errorDeleteActual } = await supabaseClient
       .from("curso_sedes_ubo")
       .delete()
       .eq("curso_id", 1)
       .eq("seccion", item.seccion)
+    if(errorDeleteActual && !esTablaNoExiste(errorDeleteActual)){
+      throw errorDeleteActual
+    }
 
-    const { error } = await supabaseClient
+    const payloadSede = {
+      curso_id: 1,
+      seccion: item.seccion,
+      ubo: item.ubo,
+      modalidad: item.modalidad,
+      hora_inicio: item.hora_inicio,
+      dias: item.dias,
+      todos_dias: item.todos_dias
+    }
+
+    let { error } = await supabaseClient
       .from("curso_sedes_ubo")
-      .insert([{
-        curso_id: 1,
-        seccion: item.seccion,
-        ubo: item.ubo,
-        modalidad: item.modalidad,
-        hora_inicio: item.hora_inicio
-      }])
+      .insert([payloadSede])
+
+    if(error && /(dias|todos_dias)/i.test(String(error.message || ""))){
+      ({ error } = await supabaseClient
+        .from("curso_sedes_ubo")
+        .insert([{
+          curso_id: 1,
+          seccion: item.seccion,
+          ubo: item.ubo,
+          modalidad: item.modalidad,
+          hora_inicio: item.hora_inicio
+        }]))
+    }
 
     if(error){
       if(!esTablaNoExiste(error)){
@@ -4320,22 +4391,8 @@ async function guardarSedeUbo(){
   }
 
   if(persistioEnDb){
-    const mapDias = {}
-    const mapTodos = {}
-    cursoSedesUbo.forEach(s=>{
-      if(s?.seccion){
-        mapDias[s.seccion] = s.dias || []
-        mapTodos[s.seccion] = !!s.todos_dias
-      }
-    })
     const sedesDb = await cargarSedesCursoDesdeSupabase()
-    if(Array.isArray(sedesDb)){
-      cursoSedesUbo = sedesDb.map(s=>({
-        ...s,
-        dias: mapDias[s.seccion] || [],
-        todos_dias: !!mapTodos[s.seccion]
-      }))
-    }
+    if(Array.isArray(sedesDb)) cursoSedesUbo = sedesDb
   }
 
   guardarEstructuraCursoLocal()
@@ -4476,9 +4533,6 @@ async function limpiarCurso(){
     console.warn("No se pudo limpiar curso_sedes_ubo:", e)
   }
 
-  localStorage.removeItem("cursoNombre")
-  localStorage.removeItem("cursoSecciones")
-  localStorage.removeItem("cursoSedesUbo")
   renderSeccionesCurso()
   renderSedesUbo()
   actualizarOpcionesSeccionSede()
