@@ -58,33 +58,7 @@ h2{
 }
 
 #vistaDesktop .header{
-  display:grid;
-  grid-template-columns:minmax(360px, 1fr) auto;
-  gap:10px 14px;
-  align-items:center;
-  padding:10px 20px;
-  min-height:74px;
-}
-
-#vistaDesktop .header .header-actions{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:8px;
-  min-width:0;
-}
-
-#vistaDesktop .header-session-row{
-  display:flex;
-  justify-content:flex-end;
-  width:100%;
-}
-
-#vistaDesktop .header-cta-row{
-  display:flex;
-  justify-content:flex-end;
-  gap:8px;
-  flex-wrap:wrap;
+  min-height:64px;
 }
 
 #vistaDesktop .header > div:first-child{
@@ -130,6 +104,36 @@ h2{
   opacity:0.9;
 }
 
+.info-sesion-sidebar{
+  width:100%;
+  max-width:none;
+  height:auto;
+  margin:0 0 14px;
+  padding:10px 11px;
+  border-radius:14px;
+  background:linear-gradient(180deg, #f8fbff 0%, #f1f5fc 100%);
+  border:1px solid #d9e2f1;
+}
+
+.info-sesion-sidebar .session-row{
+  max-width:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:2px 0;
+}
+
+.info-sesion-sidebar .session-key{
+  font-size:11px;
+  color:#6a7b9f;
+  font-weight:600;
+  letter-spacing:0.1px;
+}
+
+.info-sesion-sidebar .session-sep{
+  display:none;
+}
+
 @media (max-width: 760px){
   .info-sesion-header{
     min-width:0;
@@ -148,21 +152,10 @@ h2{
   .info-sesion-header .session-sep{
     display:none;
   }
-}
 
-@media (max-width: 1780px){
-  #vistaDesktop .header{
-    grid-template-columns:1fr;
-    align-items:stretch;
-  }
-  #vistaDesktop .header .header-actions{
-    align-items:stretch;
-  }
-  #vistaDesktop .header-session-row{
-    justify-content:flex-start;
-  }
-  #vistaDesktop .header-cta-row{
-    justify-content:flex-start;
+  .info-sesion-sidebar{
+    padding:8px 9px;
+    margin-bottom:10px;
   }
 }
 
@@ -1646,22 +1639,18 @@ input, select{
       <strong id="tenantPanelTitulo">ESBAS Panel Administrativo</strong>
     </div>
     <div class="header-actions">
-      <div class="header-session-row">
-        <div id="infoSesionHeader" class="info-sesion-header" data-session-info></div>
-      </div>
-      <div class="header-cta-row">
-        <button id="btnInstitucion" onclick="volverSeleccionCliente()" class="secondary">Institución</button>
-        <button id="btnVolverLuizLabs" onclick="irPanelPrincipalLuizLabs()" class="secondary" style="display:none;">Panel principal</button>
-        <button id="btnForzarMovil" onclick="setVistaManual('mobile')" class="secondary view-switch">Ver móvil</button>
-        <button id="btnVistaAutoDesktop" onclick="setVistaManual('auto')" class="secondary view-switch" title="Automático: usa detección de dispositivo para decidir vista móvil o escritorio.">Automático</button>
-        <button onclick="logout()" class="secondary">Salir</button>
-      </div>
+      <button id="btnInstitucion" onclick="volverSeleccionCliente()" class="secondary">Institución</button>
+      <button id="btnVolverLuizLabs" onclick="irPanelPrincipalLuizLabs()" class="secondary" style="display:none;">Panel principal</button>
+      <button id="btnForzarMovil" onclick="setVistaManual('mobile')" class="secondary view-switch">Ver móvil</button>
+      <button id="btnVistaAutoDesktop" onclick="setVistaManual('auto')" class="secondary view-switch" title="Automático: usa detección de dispositivo para decidir vista móvil o escritorio.">Automático</button>
+      <button onclick="logout()" class="secondary">Salir</button>
     </div>
   </div>
 
   <div style="display:flex;min-height:calc(100vh - 60px);">
 
     <div class="sidebar">
+      <div id="infoSesionSidebarAdmin" class="info-sesion-header info-sesion-sidebar" data-session-info></div>
       <p id="navReportes" class="nav-item active" data-view="reportes" onclick="mostrarVista('reportes')">📄 Reportes</p>
       <p id="navDashboard" class="nav-item" data-view="dashboard" onclick="mostrarVista('dashboard')">📊 Dashboard</p>
       <p id="navConfig" class="nav-item" data-view="config" onclick="mostrarVista('config')">⚙️ Configuración</p>
@@ -2125,13 +2114,13 @@ input, select{
       <strong>asistIA - Gestión de Instituciones</strong>
     </div>
     <div class="header-actions">
-      <div id="infoSesionHeaderLuiz" class="info-sesion-header" data-session-info></div>
       <button onclick="logout()" class="secondary">Salir</button>
     </div>
   </div>
 
   <div style="display:flex;min-height:calc(100vh - 60px);">
     <div class="sidebar">
+      <div id="infoSesionSidebarLuiz" class="info-sesion-header info-sesion-sidebar" data-session-info></div>
       <p class="nav-item active">🏢 Instituciones</p>
       <p class="hint" style="padding:0 8px;">Próximamente: Usuarios y métricas</p>
     </div>
@@ -2504,7 +2493,15 @@ function renderInfoSesionHeader(){
   const compact = getVistaActiva() === "mobile" || (window.innerWidth || 0) < 760
 
   nodos.forEach(el=>{
-    if(compact){
+    const enSidebar = el.classList.contains("info-sesion-sidebar")
+    if(enSidebar){
+      el.innerHTML = `
+        <span class="session-row"><span class="session-key">👤 Usuario</span><strong>${usuario}</strong></span>
+        <span class="session-row"><span class="session-key">🔐 Rol</span><strong>${rolUI}</strong></span>
+        <span class="session-row"><span class="session-key">🏢 Entorno</span><strong>${tenantLinea}</strong></span>
+      `
+      el.classList.remove("compact")
+    }else if(compact){
       el.innerHTML = `<span class="session-row">👤 <strong>${usuario}</strong> · 🔐 <strong>${rolUI}</strong> · 🏢 <strong>${tenantLinea}</strong></span>`
       el.classList.add("compact")
     }else{
