@@ -2137,6 +2137,7 @@ const ADMIN_SESSION_KEY = "asistia_admin_session_v1"
 const LUIZLABS_STORE_KEY = "asistia_luizlabs_v1"
 const DEFAULT_INSTITUTION_LOGO = "/asistIA_logo.png"
 const MULTITENANT_MODE = true
+let tenantScopeBackendReady = false
 const ROLES_ADMIN = Object.freeze({
   SUPERUSUARIO: "superusuario",
   ADMINISTRADOR: "administrador"
@@ -3264,7 +3265,7 @@ function volverSeleccionCliente(){
 }
 
 function withTenantScope(query){
-  if(!MULTITENANT_MODE || !tenantActivoId) return query
+  if(!MULTITENANT_MODE || !tenantActivoId || !tenantScopeBackendReady) return query
   if(esTenantConDatosLegacy(tenantActivoId)){
     return query.or(`tenant_id.eq.${tenantActivoId},tenant_id.is.null`)
   }
