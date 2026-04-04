@@ -1491,9 +1491,8 @@ input, select{
             <div>
               <label for="userRol">Rol</label>
               <select id="userRol">
-                <option value="editor">Editor</option>
-                <option value="supervisor">Supervisor</option>
                 <option value="administrador">Administrador</option>
+                <option value="super_admin">Super Admin</option>
               </select>
             </div>
           </div>
@@ -1837,6 +1836,12 @@ function enlazarIdsGlobales(){
 
 function haySupabase(){
   return !!supabaseClient
+}
+
+function normalizarRolUsuario(rol){
+  const raw = String(rol || "").trim().toLowerCase()
+  if(raw === "super_admin") return "super_admin"
+  return "administrador"
 }
 
 enlazarIdsGlobales()
@@ -2417,7 +2422,7 @@ async function cargarUsuariosAdminDesdeSupabase(){
     nombre: u.nombre || "",
     usuario: (u.usuario || "").toLowerCase(),
     clave: u.clave || "",
-    rol: u.rol || "editor"
+    rol: normalizarRolUsuario(u.rol)
   }))
   renderUsuariosAdmin()
 }
@@ -2458,7 +2463,7 @@ function limpiarUsuarioAdmin(){
   userNombre.value = ""
   userLogin.value = ""
   userPass.value = ""
-  userRol.value = "editor"
+  userRol.value = "administrador"
   editUsuarioIndex = -1
 }
 
@@ -2466,7 +2471,7 @@ async function guardarUsuarioAdmin(){
   const nombre = (userNombre.value || "").trim()
   const usuario = (userLogin.value || "").trim().toLowerCase()
   const clave = (userPass.value || "").trim()
-  const rol = userRol.value
+  const rol = normalizarRolUsuario(userRol.value)
 
   if(!nombre || !usuario || !clave){
     alert("Completa nombre, usuario y clave")
@@ -2517,7 +2522,7 @@ function editarUsuarioAdmin(idx){
   userNombre.value = u.nombre || ""
   userLogin.value = u.usuario || ""
   userPass.value = u.clave || ""
-  userRol.value = u.rol || "editor"
+  userRol.value = normalizarRolUsuario(u.rol)
   editUsuarioIndex = idx
 }
 
