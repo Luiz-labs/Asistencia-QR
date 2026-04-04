@@ -1257,6 +1257,16 @@ input, select{
   color:var(--muted);
 }
 
+.mobile-actions{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px dashed #d3ddef;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+
 .mobile-section-btn{
   background:#eef2f9 !important;
   color:#243451 !important;
@@ -1299,7 +1309,7 @@ input, select{
   margin-top:4px;
   font-size:15px !important;
   letter-spacing:0.2px;
-  width:min(100%, 300px) !important;
+  width:min(100%, 260px) !important;
   margin-left:auto !important;
   margin-right:auto !important;
   display:flex !important;
@@ -1311,7 +1321,7 @@ input, select{
   color:#243451 !important;
   border:1px solid #d3deef !important;
   box-shadow:none !important;
-  width:min(100%, 260px) !important;
+  width:min(100%, 220px) !important;
   margin-left:auto !important;
   margin-right:auto !important;
   display:flex !important;
@@ -1880,8 +1890,10 @@ input, select{
   <button class="mobile-section-btn" data-seccion="B" onclick="setSeccion('B')">Sección B (Sábados Presencial)</button>
   <button class="mobile-section-btn" data-seccion="C" onclick="setSeccion('C')">Sección C (Sábados Virtual)</button>
 
-  <button class="mobile-primary" onclick="guardarAsistencia()">REGISTRAR ASISTENCIA</button>
-  <button class="mobile-exit" onclick="volverInicio()">Salir</button>
+  <div class="mobile-actions">
+    <button class="mobile-primary" onclick="guardarAsistencia()">REGISTRAR ASISTENCIA</button>
+    <button class="mobile-exit" onclick="volverInicio()">Salir</button>
+  </div>
 
   <p id="mensaje"></p>
 
