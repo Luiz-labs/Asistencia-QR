@@ -958,7 +958,7 @@ input, select{
   padding:14px 16px !important;
   display:flex;
   flex-direction:column;
-  justify-content:center;
+  justify-content:flex-start;
 }
 
 #vistaMovil .mobile-qr-brandline,
@@ -1022,6 +1022,12 @@ input, select{
   margin:2px auto 12px;
   width:min(100%, 352px);
   text-align:center;
+}
+
+#vistaMovil .mobile-qr-title,
+#vistaMovil .mobile-qr-subtitle,
+#tenantSubtituloMovil{
+  display:none;
 }
 
 .mobile-tenant-lines p{
@@ -1215,6 +1221,7 @@ input, select{
   box-shadow:var(--shadow);
   border-radius:16px;
   padding:16px !important;
+  padding-bottom:calc(18px + env(safe-area-inset-bottom)) !important;
 }
 
 #formulario .form-header{
@@ -3509,8 +3516,10 @@ function esRutaInstitucionalValidaActiva(){
 }
 
 function puedeMostrarAccesoAdminInstitucional(){
+  const formularioVisible = document.getElementById("formulario")?.style?.display === "block"
   return esRutaInstitucionalValidaActiva() &&
     !haySesionAdminActiva() &&
+    !formularioVisible &&
     getVistaActiva() === "mobile"
 }
 
