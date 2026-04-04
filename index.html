@@ -4778,15 +4778,15 @@ function aplicarLayout(){
       aplicarRestriccionesPanelPorContexto()
     }else{
       if(!esModoStaff){
+        // En escritorio institucional mostramos la vista de login/admin.
         if(elTenant) elTenant.style.display="none"
-        if(elLogin) elLogin.style.display="none"
+        if(elLogin) elLogin.style.display="flex"
         if(elDesktop) elDesktop.style.display="none"
         if(elLuizLabs) elLuizLabs.style.display="none"
-        if(elMovilInicio) elMovilInicio.style.display = dniMovil ? "none" : "flex"
-        if(elMovil) elMovil.style.display = dniMovil ? "block" : "none"
-        if(elFormulario && elFormulario.style.display !== "block"){
-          mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
-        }
+        if(elMovilInicio) elMovilInicio.style.display="none"
+        if(elMovil) elMovil.style.display="none"
+        if(elFormulario) elFormulario.style.display="none"
+        mostrarPasoMovil("ingreso")
         actualizarBotonesVista()
         aplicarVisibilidadAccesoAdminInstitucional()
         return
