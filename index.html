@@ -418,6 +418,25 @@ input, select{
   min-width:230px;
 }
 
+.luiz-inst-create-row{
+  align-items:center;
+}
+
+#luizInstLogoFile{
+  height:42px;
+  padding:8px 10px;
+  line-height:24px;
+  min-width:320px;
+  background:#fff;
+}
+
+@media (max-width: 760px){
+  #luizInstLogoFile{
+    min-width:100%;
+    width:100%;
+  }
+}
+
 .config-row select,
 .config-row input{
   min-width:170px;
@@ -2171,9 +2190,9 @@ input, select{
     <div style="flex:1;padding:20px;">
       <div class="card" style="margin-bottom:14px;">
         <h2 style="margin-bottom:10px;">Nueva institución</h2>
-        <div class="filtros">
+        <div class="filtros luiz-inst-create-row">
           <input id="luizInstNombre" placeholder="Nombre de institución" style="min-width:260px;">
-          <input id="luizInstLogoFile" type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg" style="max-width:280px;">
+          <input id="luizInstLogoFile" type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg">
           <button onclick="crearInstitucionLuizLabs()">Crear institución</button>
         </div>
         <p class="hint">Logo institucional opcional (PNG/JPG/JPEG). Si no cargas uno, se usará el logo de asistIA.</p>
