@@ -57,6 +57,25 @@ h2{
   flex-wrap:wrap;
 }
 
+#infoSesionHeader{
+  display:none;
+  min-width:220px;
+  background:#f6f8fd;
+  border:1px solid #dbe3f2;
+  border-radius:10px;
+  padding:6px 10px;
+  font-size:12px;
+  line-height:1.35;
+  color:#2a3a5d;
+}
+
+#infoSesionHeader .session-row{
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
 .sidebar{
   width:228px;
   padding:20px 14px;
@@ -1537,6 +1556,7 @@ input, select{
       <strong id="tenantPanelTitulo">ESBAS Panel Administrativo</strong>
     </div>
     <div class="header-actions">
+      <div id="infoSesionHeader"></div>
       <button id="btnInstitucion" onclick="volverSeleccionCliente()" class="secondary">Institución</button>
       <button id="btnVolverLuizLabs" onclick="irPanelPrincipalLuizLabs()" class="secondary" style="display:none;">Panel principal</button>
       <button id="btnForzarMovil" onclick="setVistaManual('mobile')" class="secondary view-switch">Ver móvil</button>
@@ -2313,6 +2333,7 @@ function setSesionAdminActiva(sesion){
   sesionAdminActiva = normalizarSesionAdmin(sesion)
   guardarSesionAdminEnStorage()
   sincronizarEstadoLegacyAdmin()
+  actualizarInfoSesionHeader()
   return sesionAdminActiva
 }
 
@@ -2325,6 +2346,7 @@ function limpiarSesionAdminActiva(){
   sesionAdminActiva = crearSesionAdminVacia()
   guardarSesionAdminEnStorage()
   sincronizarEstadoLegacyAdmin()
+  actualizarInfoSesionHeader()
 }
 
 function obtenerSesionAdminActiva(){
@@ -2349,6 +2371,49 @@ function esAdministradorActivo(){
 
 function tenantSesionActiva(){
   return String(sesionAdminActiva?.tenantId || "")
+}
+
+function obtenerNombreRolUI(rol){
+  const normalizado = normalizarRolUsuario(rol || "")
+  if(normalizado === ROLES_ADMIN.SUPERUSUARIO) return "Superusuario"
+  return "Administrador"
+}
+
+function obtenerNombreTenantUI(tenantId){
+  const id = String(tenantId || "").trim()
+  if(!id) return "Plataforma asistIA"
+  const instLuiz = (institucionesLuiz || []).find(x=>String(x.slug || "") === id)
+  if(instLuiz?.nombre) return instLuiz.nombre
+  const tenant = TENANTS.find(t=>String(t.id || "") === id)
+  return tenant?.nombre || id
+}
+
+function renderInfoSesionHeader(){
+  const el = document.getElementById("infoSesionHeader")
+  if(!el) return
+
+  if(!haySesionAdminActiva()){
+    el.style.display = "none"
+    el.innerHTML = ""
+    return
+  }
+
+  const sesion = obtenerSesionAdminActiva()
+  const usuario = String(sesion.usuario || "").trim() || "-"
+  const rolUI = obtenerNombreRolUI(sesion.rol)
+  const tenantUI = obtenerNombreTenantUI(sesion.tenantId)
+  const tenantLinea = sesion.tenantId ? `Accediendo a: ${tenantUI}` : tenantUI
+
+  el.innerHTML = `
+    <span class="session-row">👤 ${usuario}</span>
+    <span class="session-row">🔐 ${rolUI}</span>
+    <span class="session-row">🏢 ${tenantLinea}</span>
+  `
+  el.style.display = "block"
+}
+
+function actualizarInfoSesionHeader(){
+  renderInfoSesionHeader()
 }
 
 function esTenantConDatosLegacy(tenantId){
@@ -3433,6 +3498,7 @@ function obtenerTenantActivo(){
 function asignarTenantActivo(id){
   tenantActivoId = String(id || "")
   aplicarTenantEnUI()
+  actualizarInfoSesionHeader()
 }
 
 function aplicarTenantEnUI(){
@@ -4577,6 +4643,7 @@ function aplicarLayout(){
 
   actualizarBotonesVista()
   aplicarVisibilidadAccesoAdminInstitucional()
+  actualizarInfoSesionHeader()
 }
 
 function actualizarEstadoChecks(){
