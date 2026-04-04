@@ -943,33 +943,37 @@ input, select{
 #vistaMovilInicio .mobile-qr-brandline{
   display:flex;
   align-items:center;
-  justify-content:center;
+  justify-content:flex-start;
   gap:12px;
-  margin:0 0 8px;
+  width:min(100%, 352px);
+  margin:0 auto 12px;
 }
 
 .mobile-qr-logo{
-  width:48px;
-  height:48px;
+  width:clamp(44px, 12vw, 54px);
+  height:clamp(44px, 12vw, 54px);
   border-radius:12px;
   object-fit:contain;
   background:#fff;
   border:1px solid #d7e3f6;
-  padding:4px;
+  padding:5px;
   box-shadow:0 8px 18px rgba(29, 62, 119, 0.12);
+  flex-shrink:0;
 }
 
 .mobile-qr-brandcopy{
   text-align:left;
+  min-width:0;
+  flex:1;
 }
 
 .mobile-asistia-wordmark{
   margin:0;
   font-family:"Outfit","Sora","Avenir Next","Nunito Sans",sans-serif;
-  font-size:clamp(2rem, 7.2vw, 2.45rem);
+  font-size:clamp(1.88rem, 7vw, 2.35rem);
   line-height:0.95;
   font-weight:800;
-  letter-spacing:-0.5px;
+  letter-spacing:-0.42px;
   background:linear-gradient(92deg, #0d52d8 6%, #2b7dff 46%, #77b2ff 100%);
   -webkit-background-clip:text;
   background-clip:text;
@@ -993,7 +997,8 @@ input, select{
 }
 
 #vistaMovil .mobile-tenant-lines{
-  margin:2px 0 10px;
+  margin:2px auto 12px;
+  width:min(100%, 352px);
   text-align:center;
 }
 
@@ -1036,7 +1041,8 @@ input, select{
   box-shadow:var(--shadow);
   border-radius:22px;
   padding:18px;
-  margin-top:14px;
+  margin:14px auto 0;
+  width:min(100%, 380px);
 }
 
 #vistaMovilInicio p{
@@ -1066,7 +1072,8 @@ input, select{
   box-shadow:var(--shadow);
   border-radius:22px;
   padding:18px;
-  margin-top:14px;
+  margin:14px auto 0;
+  width:min(100%, 380px);
 }
 
 #vistaMovil .mobile-step p{
@@ -1091,6 +1098,32 @@ input, select{
   border-radius:18px;
   font-size:18px;
   font-weight:700;
+}
+
+@media (max-width: 390px){
+  #vistaMovil .mobile-qr-brandline,
+  #vistaMovilInicio .mobile-qr-brandline{
+    gap:10px;
+    width:min(100%, 330px);
+  }
+
+  .mobile-asistia-wordmark{
+    font-size:clamp(1.72rem, 8vw, 2.05rem);
+    letter-spacing:-0.3px;
+  }
+
+  .mobile-qr-title{
+    font-size:clamp(1rem, 4.7vw, 1.18rem);
+  }
+
+  .mobile-qr-subtitle{
+    font-size:clamp(0.95rem, 4.1vw, 1.06rem);
+  }
+
+  #vistaMovil .mobile-step p,
+  #vistaMovilInicio .mobile-step p{
+    font-size:16px;
+  }
 }
 
 #scanOverlay{
