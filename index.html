@@ -1958,6 +1958,38 @@ input, select{
 
       <div class="card">
         <h2 style="margin-bottom:10px;">Usuarios admin por institución</h2>
+        <div class="config-grid" style="margin-bottom:10px;">
+          <div>
+            <label for="luizUserNombre">Usuario</label>
+            <input id="luizUserNombre" placeholder="admin@institucion">
+          </div>
+          <div>
+            <label for="luizUserRol">Rol</label>
+            <select id="luizUserRol">
+              <option value="administrador">Administrador</option>
+              <option value="superusuario">Superusuario</option>
+            </select>
+          </div>
+          <div>
+            <label for="luizUserTenant">Institución</label>
+            <select id="luizUserTenant"></select>
+          </div>
+          <div>
+            <label for="luizUserPass">Clave</label>
+            <input id="luizUserPass" placeholder="Clave temporal">
+          </div>
+        </div>
+        <div class="table-actions" style="margin-bottom:10px;">
+          <button onclick="guardarUsuarioAdminLuiz()">Guardar usuario</button>
+          <button class="secondary" onclick="generarClaveUsuarioLuiz()">Generar clave</button>
+          <button class="icon-btn" onclick="copiarClaveUsuarioLuiz()" title="Copiar clave" aria-label="Copiar clave">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="9" y="3" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
+              <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
+            </svg>
+          </button>
+          <button class="secondary" onclick="limpiarUsuarioAdminLuizForm()">Limpiar</button>
+        </div>
         <div class="table-wrap">
           <table class="luiz-users-table">
             <thead>
@@ -2042,6 +2074,7 @@ let mostrarSelectorStaff = false
 let sesionAdminActiva = crearSesionAdminVacia()
 let institucionesLuiz = []
 let usuariosAdminLuiz = []
+let editUsuarioLuizIndex = -1
 const SYSTEM_USERS = [
   { nombre: "Administrador Principal", usuario: "llecaros", rol: "administrador", system: true }
 ]
@@ -2264,6 +2297,10 @@ function esTenantProtegido(slug){
   return slug === "esbas-24" || slug === "bomberos-lurin-129"
 }
 
+function esUsuarioProtegidoLuiz(usuario){
+  return String(usuario || "").trim().toLowerCase() === "llecaros"
+}
+
 function cargarLuizLabsDesdeStorage(){
   try{
     const raw = localStorage.getItem(LUIZLABS_STORE_KEY)
@@ -2332,7 +2369,21 @@ function obtenerInstitucionLuiz(tenantId){
 function renderPanelLuizLabs(){
   const tablaInst = document.getElementById("tablaInstitucionesLuiz")
   const tablaUsers = document.getElementById("tablaUsuariosAdminLuiz")
+  const elTenant = document.getElementById("luizUserTenant")
+  const tenantPrevio = elTenant?.value || ""
   if(!tablaInst || !tablaUsers) return
+
+  if(elTenant){
+    const institucionesActivas = institucionesLuiz.filter(i=>i.estado === "activo")
+    let tenantHtml = `<option value="">Seleccionar institución</option>`
+    institucionesActivas.forEach(inst=>{
+      tenantHtml += `<option value="${inst.slug}">${inst.nombre}</option>`
+    })
+    elTenant.innerHTML = tenantHtml
+    if(tenantPrevio && institucionesActivas.some(i=>i.slug === tenantPrevio)){
+      elTenant.value = tenantPrevio
+    }
+  }
 
   if(!institucionesLuiz.length){
     tablaInst.innerHTML = `<tr><td colspan="5">Sin instituciones.</td></tr>`
@@ -2387,24 +2438,31 @@ function renderPanelLuizLabs(){
     const estado = inst?.estado === "activo" ? "Activa" : "Inactiva"
     const estadoUser = u.estado === "activo"
     const fechaUser = String(u.fecha_creacion || "").slice(0,10)
+    const protegido = esUsuarioProtegidoLuiz(u.usuario)
     usersHtml += `
       <tr>
-        <td>${u.usuario || ""}</td>
+        <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">LEGACY</span>` : ""}</td>
         <td>${u.rol || ""}</td>
         <td>${inst?.nombre || u.tenantId || ""}</td>
         <td>${estado}</td>
         <td>${fechaUser}</td>
         <td class="actions-col">
           <div class="table-actions luiz-actions">
-            <button class="secondary" onclick="regenerarClaveUsuarioAdminLuiz(${idx})" title="Regenerar clave temporal">Clave</button>
-            <button
-              class="state-toggle ${estadoUser ? "active" : ""}"
-              onclick="toggleEstadoUsuarioAdminLuiz(${idx})"
-              title="${estadoUser ? "Desactivar usuario" : "Activar usuario"}"
-              aria-label="${estadoUser ? "Desactivar usuario" : "Activar usuario"}">
-              <span class="dot"></span>
-            </button>
-            <button class="secondary" onclick="eliminarUsuarioAdminLuiz(${idx})">Eliminar</button>
+            ${protegido
+              ? `<span class="hint">Protegido</span>`
+              : `
+                <button onclick="editarUsuarioAdminLuiz(${idx})">Editar</button>
+                <button class="secondary" onclick="regenerarClaveUsuarioAdminLuiz(${idx})" title="Regenerar clave temporal">Reset</button>
+                <button
+                  class="state-toggle ${estadoUser ? "active" : ""}"
+                  onclick="toggleEstadoUsuarioAdminLuiz(${idx})"
+                  title="${estadoUser ? "Desactivar usuario" : "Activar usuario"}"
+                  aria-label="${estadoUser ? "Desactivar usuario" : "Activar usuario"}">
+                  <span class="dot"></span>
+                </button>
+                <button class="secondary" onclick="eliminarUsuarioAdminLuiz(${idx})">Eliminar</button>
+              `
+            }
           </div>
         </td>
       </tr>
@@ -2448,6 +2506,7 @@ function crearInstitucionLuizLabs(){
   renderTenantSelector()
   renderPanelLuizLabs()
   if(input) input.value = ""
+  limpiarUsuarioAdminLuizForm()
 
   alert(
     `Institución creada correctamente.\n\n` +
@@ -2560,6 +2619,10 @@ function regenerarClaveUsuarioAdminLuiz(idx){
   if(!puedeEntrarPanelLuizLabs()) return
   const user = usuariosAdminLuiz[idx]
   if(!user) return
+  if(esUsuarioProtegidoLuiz(user.usuario)){
+    alert("El usuario legacy está protegido y no se puede modificar aquí.")
+    return
+  }
   const nuevaClave = generarClaveTemporal(8)
   user.password = nuevaClave
   guardarLuizLabsEnStorage()
@@ -2575,6 +2638,10 @@ function toggleEstadoUsuarioAdminLuiz(idx){
   if(!puedeEntrarPanelLuizLabs()) return
   const user = usuariosAdminLuiz[idx]
   if(!user) return
+  if(esUsuarioProtegidoLuiz(user.usuario)){
+    alert("El usuario legacy está protegido y no se puede modificar aquí.")
+    return
+  }
   user.estado = user.estado === "activo" ? "inactivo" : "activo"
   guardarLuizLabsEnStorage()
   renderPanelLuizLabs()
@@ -2584,11 +2651,141 @@ function eliminarUsuarioAdminLuiz(idx){
   if(!puedeEntrarPanelLuizLabs()) return
   const user = usuariosAdminLuiz[idx]
   if(!user) return
+  if(esUsuarioProtegidoLuiz(user.usuario)){
+    alert("El usuario legacy está protegido y no se puede eliminar.")
+    return
+  }
   const ok = confirm(`¿Eliminar usuario admin "${user.usuario}"?`)
   if(!ok) return
   usuariosAdminLuiz.splice(idx, 1)
   guardarLuizLabsEnStorage()
   renderPanelLuizLabs()
+}
+
+function limpiarUsuarioAdminLuizForm(){
+  editUsuarioLuizIndex = -1
+  if(luizUserNombre) luizUserNombre.value = ""
+  if(luizUserRol) luizUserRol.value = ROLES_ADMIN.ADMINISTRADOR
+  if(luizUserTenant) luizUserTenant.value = ""
+  if(luizUserPass) luizUserPass.value = ""
+}
+
+function generarClaveUsuarioLuiz(){
+  if(!luizUserPass) return
+  luizUserPass.value = generarClaveTemporal(8)
+}
+
+async function copiarClaveUsuarioLuiz(){
+  const clave = String(luizUserPass?.value || "").trim()
+  if(!clave){
+    alert("No hay clave para copiar. Genera o ingresa una primero.")
+    return
+  }
+  try{
+    if(navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(clave)
+      alert("Clave copiada.")
+      return
+    }
+  }catch(e){
+    console.warn("No se pudo copiar clave:", e)
+  }
+  const soporte = window.prompt("Copia esta clave:", clave)
+  if(soporte !== null){
+    alert("Clave lista para copiar.")
+  }
+}
+
+function editarUsuarioAdminLuiz(idx){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const user = usuariosAdminLuiz[idx]
+  if(!user) return
+  if(esUsuarioProtegidoLuiz(user.usuario)){
+    alert("El usuario legacy está protegido y no se edita desde este módulo.")
+    return
+  }
+
+  editUsuarioLuizIndex = idx
+  if(luizUserNombre) luizUserNombre.value = user.usuario || ""
+  if(luizUserRol) luizUserRol.value = normalizarRolUsuario(user.rol)
+  if(luizUserTenant) luizUserTenant.value = user.tenantId || ""
+  if(luizUserPass) luizUserPass.value = user.password || ""
+}
+
+function guardarUsuarioAdminLuiz(){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const usuario = String(luizUserNombre?.value || "").trim().toLowerCase()
+  const rol = normalizarRolUsuario(luizUserRol?.value || ROLES_ADMIN.ADMINISTRADOR)
+  const tenantId = String(luizUserTenant?.value || "").trim()
+  const password = String(luizUserPass?.value || "").trim()
+
+  if(!usuario || !tenantId || !password){
+    alert("Completa usuario, institución y clave.")
+    return
+  }
+  if(esUsuarioProtegidoLuiz(usuario)){
+    alert("El usuario legacy está protegido y no se gestiona desde aquí.")
+    return
+  }
+  const usuarioReservadoSistema = SYSTEM_USERS.some(u=>String(u.usuario || "").toLowerCase() === usuario)
+  if(usuarioReservadoSistema){
+    alert("Ese usuario ya existe como usuario del sistema.")
+    return
+  }
+  const usuarioSupabase = (usuariosAdmin || []).some(u=>String(u.usuario || "").toLowerCase() === usuario)
+  if(usuarioSupabase){
+    alert("Ese usuario ya existe en el panel de usuarios.")
+    return
+  }
+  const inst = obtenerInstitucionLuiz(tenantId)
+  if(!inst || inst.estado !== "activo"){
+    alert("Selecciona una institución activa.")
+    return
+  }
+
+  if(editUsuarioLuizIndex >= 0){
+    const actual = usuariosAdminLuiz[editUsuarioLuizIndex]
+    if(!actual){
+      limpiarUsuarioAdminLuizForm()
+      return
+    }
+    if(esUsuarioProtegidoLuiz(actual.usuario)){
+      alert("El usuario legacy está protegido.")
+      limpiarUsuarioAdminLuizForm()
+      return
+    }
+
+    const duplicado = usuariosAdminLuiz.some((u, i)=>i !== editUsuarioLuizIndex && u.usuario === usuario)
+    if(duplicado){
+      alert("Ya existe un usuario con ese nombre.")
+      return
+    }
+
+    actual.usuario = usuario
+    actual.rol = rol
+    actual.tenantId = tenantId
+    actual.password = password
+    if(!actual.fecha_creacion) actual.fecha_creacion = new Date().toISOString()
+    if(!actual.estado) actual.estado = "activo"
+  }else{
+    const existe = usuariosAdminLuiz.some(u=>u.usuario === usuario)
+    if(existe){
+      alert("Ese usuario ya existe.")
+      return
+    }
+    usuariosAdminLuiz.push({
+      usuario,
+      password,
+      rol,
+      tenantId,
+      estado: "activo",
+      fecha_creacion: new Date().toISOString()
+    })
+  }
+
+  guardarLuizLabsEnStorage()
+  renderPanelLuizLabs()
+  limpiarUsuarioAdminLuizForm()
 }
 
 function esModoAdminMovilLimitado(){
