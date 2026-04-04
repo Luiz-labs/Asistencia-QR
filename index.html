@@ -1765,6 +1765,70 @@ input, select{
 
 </div>
 
+<div id="vistaLuizLabs" style="display:none;">
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="/asistIA_logo.png" style="width:28px;">
+      <strong>Luiz Labs - Gestión de Instituciones</strong>
+    </div>
+    <div class="header-actions">
+      <button onclick="logout()" class="secondary">Salir</button>
+    </div>
+  </div>
+
+  <div style="display:flex;min-height:calc(100vh - 60px);">
+    <div class="sidebar">
+      <p class="nav-item active">🏢 Instituciones</p>
+      <p class="hint" style="padding:0 8px;">Próximamente: Usuarios y métricas</p>
+    </div>
+
+    <div style="flex:1;padding:20px;">
+      <div class="card" style="margin-bottom:14px;">
+        <h2 style="margin-bottom:10px;">Nueva institución</h2>
+        <div class="filtros">
+          <input id="luizInstNombre" placeholder="Nombre de institución" style="min-width:260px;">
+          <button onclick="crearInstitucionLuizLabs()">Crear institución</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px;">
+        <h2 style="margin-bottom:10px;">Instituciones</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Slug</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaInstitucionesLuiz"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom:10px;">Usuarios admin por institución</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Institución</th>
+                <th>Estado institución</th>
+              </tr>
+            </thead>
+            <tbody id="tablaUsuariosAdminLuiz"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -1796,6 +1860,7 @@ let cacheRiesgoUbo = []
 let vistaAdminActual = "reportes"
 const VISTA_MODO_KEY = "vistaModoManual"
 const ADMIN_SESSION_KEY = "asistia_admin_session_v1"
+const LUIZLABS_STORE_KEY = "asistia_luizlabs_v1"
 const MULTITENANT_MODE = false
 const ROLES_ADMIN = Object.freeze({
   SUPERUSUARIO: "superusuario",
@@ -1826,6 +1891,8 @@ let esModoStaff = true
 let accesoDirectoInstitucion = false
 let mostrarSelectorStaff = false
 let sesionAdminActiva = crearSesionAdminVacia()
+let institucionesLuiz = []
+let usuariosAdminLuiz = []
 const SYSTEM_USERS = [
   { nombre: "Administrador Principal", usuario: "llecaros", rol: "administrador", system: true }
 ]
@@ -1968,10 +2035,265 @@ function puedeEntrarPanelAdmin(tenantId = tenantActivoId){
   return tenantSesionActiva() === String(tenantId || "")
 }
 
+function puedeEntrarPanelLuizLabs(){
+  return esModoStaff && haySesionAdminActiva() && esSuperusuarioActivo()
+}
+
+function slugDesdeNombre(nombre){
+  return String(nombre || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
+
+function generarSlugInstitucionUnico(nombre){
+  const base = slugDesdeNombre(nombre) || "institucion"
+  let slug = base
+  let n = 2
+  while(institucionesLuiz.some(x=>x.slug === slug)){
+    slug = `${base}-${n}`
+    n++
+  }
+  return slug
+}
+
+function generarClaveTemporal(len = 8){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"
+  let out = ""
+  for(let i=0; i<len; i++){
+    out += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return out
+}
+
+function generarIdInstitucion(){
+  return `inst_${Date.now()}_${Math.random().toString(36).slice(2,8)}`
+}
+
+function guardarLuizLabsEnStorage(){
+  try{
+    const payload = {
+      instituciones: institucionesLuiz,
+      usuarios_admin: usuariosAdminLuiz
+    }
+    localStorage.setItem(LUIZLABS_STORE_KEY, JSON.stringify(payload))
+  }catch(e){
+    console.warn("No se pudo guardar Luiz Labs en storage:", e)
+  }
+}
+
+function mapearInstitucionesBaseDesdeTenants(){
+  return TENANTS.map(t=>({
+    id: t.id,
+    nombre: t.nombre,
+    slug: t.id,
+    estado: t.habilitado ? "activo" : "inactivo",
+    fecha_creacion: new Date().toISOString()
+  }))
+}
+
+function mapearUsuariosBaseDesdeTenants(){
+  const items = []
+  TENANTS.forEach(t=>{
+    const user = (t.usuariosSistema || [])[0]
+    if(!user) return
+    items.push({
+      usuario: String(user).toLowerCase(),
+      password: "",
+      rol: ROLES_ADMIN.ADMINISTRADOR,
+      tenantId: t.id
+    })
+  })
+  return items
+}
+
+function cargarLuizLabsDesdeStorage(){
+  try{
+    const raw = localStorage.getItem(LUIZLABS_STORE_KEY)
+    if(raw){
+      const parsed = JSON.parse(raw)
+      institucionesLuiz = Array.isArray(parsed?.instituciones) ? parsed.instituciones : []
+      usuariosAdminLuiz = Array.isArray(parsed?.usuarios_admin) ? parsed.usuarios_admin : []
+    }
+  }catch(e){
+    console.warn("No se pudo leer storage de Luiz Labs:", e)
+  }
+
+  if(!institucionesLuiz.length){
+    institucionesLuiz = mapearInstitucionesBaseDesdeTenants()
+  }
+  if(!usuariosAdminLuiz.length){
+    usuariosAdminLuiz = mapearUsuariosBaseDesdeTenants()
+  }
+
+  sincronizarTenantsDesdeInstituciones()
+  guardarLuizLabsEnStorage()
+}
+
+function sincronizarTenantsDesdeInstituciones(){
+  const bySlug = {}
+  institucionesLuiz.forEach(inst=>{
+    bySlug[inst.slug] = inst
+  })
+
+  TENANTS.forEach(t=>{
+    const inst = bySlug[t.id]
+    if(inst){
+      t.nombre = inst.nombre
+      t.habilitado = inst.estado === "activo"
+    }
+  })
+
+  institucionesLuiz.forEach(inst=>{
+    const exists = TENANTS.find(t=>t.id === inst.slug)
+    if(exists) return
+    TENANTS.push({
+      id: inst.slug,
+      nombre: inst.nombre,
+      linea: "Módulo institucional",
+      curso: "Instrucción asistIA",
+      logo: "/logo.png",
+      habilitado: inst.estado === "activo",
+      usuariosSistema: []
+    })
+  })
+}
+
+function obtenerInstitucionLuiz(tenantId){
+  return institucionesLuiz.find(x=>x.slug === String(tenantId || ""))
+}
+
+function renderPanelLuizLabs(){
+  const tablaInst = document.getElementById("tablaInstitucionesLuiz")
+  const tablaUsers = document.getElementById("tablaUsuariosAdminLuiz")
+  if(!tablaInst || !tablaUsers) return
+
+  if(!institucionesLuiz.length){
+    tablaInst.innerHTML = `<tr><td colspan="5">Sin instituciones.</td></tr>`
+  }else{
+    let html = ""
+    institucionesLuiz
+      .slice()
+      .sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre)))
+      .forEach(inst=>{
+        const activo = inst.estado === "activo"
+        const fecha = String(inst.fecha_creacion || "").slice(0,10)
+        html += `
+          <tr>
+            <td>${inst.nombre}</td>
+            <td>${inst.slug}</td>
+            <td>${activo ? "Activo" : "Inactivo"}</td>
+            <td>${fecha}</td>
+            <td>
+              <div class="table-actions">
+                <button onclick="editarInstitucionLuizLabs('${inst.id}')">Editar</button>
+                <button class="secondary" onclick="toggleEstadoInstitucionLuizLabs('${inst.id}')">${activo ? "Desactivar" : "Activar"}</button>
+              </div>
+            </td>
+          </tr>
+        `
+      })
+    tablaInst.innerHTML = html
+  }
+
+  if(!usuariosAdminLuiz.length){
+    tablaUsers.innerHTML = `<tr><td colspan="4">Sin usuarios admin.</td></tr>`
+    return
+  }
+
+  let usersHtml = ""
+  usuariosAdminLuiz.forEach(u=>{
+    const inst = obtenerInstitucionLuiz(u.tenantId)
+    const estado = inst?.estado === "activo" ? "Activa" : "Inactiva"
+    usersHtml += `
+      <tr>
+        <td>${u.usuario || ""}</td>
+        <td>${u.rol || ""}</td>
+        <td>${inst?.nombre || u.tenantId || ""}</td>
+        <td>${estado}</td>
+      </tr>
+    `
+  })
+  tablaUsers.innerHTML = usersHtml
+}
+
+function crearInstitucionLuizLabs(){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const input = document.getElementById("luizInstNombre")
+  const nombre = String(input?.value || "").trim()
+  if(!nombre){
+    alert("Ingresa el nombre de la institución.")
+    return
+  }
+
+  const slug = generarSlugInstitucionUnico(nombre)
+  const inst = {
+    id: generarIdInstitucion(),
+    nombre,
+    slug,
+    estado: "activo",
+    fecha_creacion: new Date().toISOString()
+  }
+  institucionesLuiz.push(inst)
+
+  const usuario = `admin@${slug}`
+  const password = generarClaveTemporal(8)
+  usuariosAdminLuiz.push({
+    usuario,
+    password,
+    rol: ROLES_ADMIN.ADMINISTRADOR,
+    tenantId: slug
+  })
+
+  sincronizarTenantsDesdeInstituciones()
+  guardarLuizLabsEnStorage()
+  renderTenantSelector()
+  renderPanelLuizLabs()
+  if(input) input.value = ""
+
+  alert(
+    `Institución creada correctamente.\n\n` +
+    `Usuario admin: ${usuario}\n` +
+    `Contraseña temporal: ${password}`
+  )
+}
+
+function editarInstitucionLuizLabs(id){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const inst = institucionesLuiz.find(x=>x.id === id)
+  if(!inst) return
+  const nuevoNombre = prompt("Nuevo nombre de institución:", inst.nombre || "")
+  if(nuevoNombre == null) return
+  const limpio = String(nuevoNombre).trim()
+  if(!limpio){
+    alert("Nombre no válido.")
+    return
+  }
+  inst.nombre = limpio
+  sincronizarTenantsDesdeInstituciones()
+  guardarLuizLabsEnStorage()
+  renderTenantSelector()
+  aplicarTenantEnUI()
+  renderPanelLuizLabs()
+}
+
+function toggleEstadoInstitucionLuizLabs(id){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const inst = institucionesLuiz.find(x=>x.id === id)
+  if(!inst) return
+  inst.estado = inst.estado === "activo" ? "inactivo" : "activo"
+  sincronizarTenantsDesdeInstituciones()
+  guardarLuizLabsEnStorage()
+  renderTenantSelector()
+  renderPanelLuizLabs()
+}
+
 function esModoAdminMovilLimitado(){
   if(!haySesionAdminActiva()) return false
   if(!puedeEntrarPanelAdmin()) return false
-  return esMovil()
+  return getVistaActiva() === "mobile"
 }
 
 function esVistaPermitidaEnAdminMovil(vista){
@@ -2028,16 +2350,18 @@ function normalizarPathname(pathname){
 function obtenerRutaTenant(id){
   if(id === "esbas-24") return "/esbas-24/"
   if(id === "bomberos-lurin-129") return "/bomberos-lurin-129/"
-  return "/"
+  const clean = String(id || "").trim().replace(/^\/+|\/+$/g, "")
+  return clean ? `/${clean}/` : "/"
 }
 
 function resolverAccesoDesdeRuta(){
   const path = normalizarPathname(window.location.pathname)
-  if(path === "/esbas-24/"){
-    return { staff: false, tenantId: "esbas-24" }
-  }
-  if(path === "/bomberos-lurin-129/"){
-    return { staff: false, tenantId: "bomberos-lurin-129" }
+  if(path !== "/"){
+    const slug = path.replace(/^\/|\/$/g, "")
+    const tenant = TENANTS.find(t=>t.id === slug)
+    if(tenant){
+      return { staff: false, tenantId: tenant.id }
+    }
   }
   return { staff: true, tenantId: "" }
 }
@@ -2048,10 +2372,20 @@ function aplicarAccesoDesdeRuta(){
   accesoDirectoInstitucion = !acceso.staff
   asignarTenantActivo(acceso.tenantId)
 
+  if(!acceso.staff){
+    const tenant = obtenerTenantActivo()
+    if(tenant && !tenant.habilitado){
+      limpiarSesionAdminActiva()
+      alert("Esta institución está inactiva. Contacta a Luiz Labs.")
+      window.location.href = "/"
+      return
+    }
+  }
+
   if(esModoStaff){
     if(haySesionAdminActiva()){
       actualizarSesionAdmin({ tenantId: "" })
-      mostrarSelectorStaff = true
+      mostrarSelectorStaff = !esSuperusuarioActivo()
     }else{
       mostrarSelectorStaff = false
     }
@@ -2239,11 +2573,19 @@ function getVistaActiva(){
 
 function actualizarBotonesVista(){
   const mode = getVistaManual()
+  const btnForzarMovil = document.getElementById("btnForzarMovil")
+  const btnForzarDesktop = document.getElementById("btnForzarDesktop")
   const btnAutoDesktop = document.getElementById("btnVistaAutoDesktop")
   const btnAutoMovil = document.getElementById("btnVistaAutoMovil")
   const setAutoLabel = (el)=>{
     if(!el) return
     el.innerText = mode === "auto" ? "Automático ✓" : "Automático"
+  }
+  if(btnForzarMovil){
+    btnForzarMovil.innerText = mode === "mobile" ? "Ver móvil ✓" : "Ver móvil"
+  }
+  if(btnForzarDesktop){
+    btnForzarDesktop.innerText = mode === "desktop" ? "Ver escritorio ✓" : "Ver escritorio"
   }
   setAutoLabel(btnAutoDesktop)
   setAutoLabel(btnAutoMovil)
@@ -3096,6 +3438,7 @@ function aplicarLayout(){
   const elTenant = document.getElementById("tenantScreen")
   const elLogin = document.getElementById("loginScreen")
   const elDesktop = document.getElementById("vistaDesktop")
+  const elLuizLabs = document.getElementById("vistaLuizLabs")
   const elMovilInicio = document.getElementById("vistaMovilInicio")
   const elMovil = document.getElementById("vistaMovil")
   const elFormulario = document.getElementById("formulario")
@@ -3111,6 +3454,7 @@ function aplicarLayout(){
       cerrarScanner()
       if(elTenant) elTenant.style.display="none"
       if(elLogin) elLogin.style.display="none"
+      if(elLuizLabs) elLuizLabs.style.display="none"
       if(elMovilInicio) elMovilInicio.style.display="none"
       if(elMovil) elMovil.style.display="none"
       if(elFormulario) elFormulario.style.display="none"
@@ -3120,9 +3464,21 @@ function aplicarLayout(){
         mostrarVista("reportes")
       }
     }else{
+      if(puedeEntrarPanelLuizLabs()){
+        if(elTenant) elTenant.style.display="none"
+        if(elLogin) elLogin.style.display="none"
+        if(elDesktop) elDesktop.style.display="none"
+        if(elMovilInicio) elMovilInicio.style.display="none"
+        if(elMovil) elMovil.style.display="none"
+        if(elFormulario) elFormulario.style.display="none"
+        if(elLuizLabs) elLuizLabs.style.display="block"
+        renderPanelLuizLabs()
+        return
+      }
       if(elTenant) elTenant.style.display="none"
       if(elLogin) elLogin.style.display="none"
       if(elDesktop) elDesktop.style.display="none"
+      if(elLuizLabs) elLuizLabs.style.display="none"
       if(elMovilInicio) elMovilInicio.style.display = dniMovil ? "none" : "flex"
       if(elMovil) elMovil.style.display = dniMovil ? "block" : "none"
 
@@ -3136,15 +3492,23 @@ function aplicarLayout(){
     if(elMovil) elMovil.style.display="none"
     if(elFormulario) elFormulario.style.display="none"
 
-    if(puedeEntrarPanelAdmin()){
+    if(puedeEntrarPanelLuizLabs()){
+      if(elTenant) elTenant.style.display="none"
+      if(elLogin) elLogin.style.display="none"
+      if(elDesktop) elDesktop.style.display="none"
+      if(elLuizLabs) elLuizLabs.style.display="block"
+      renderPanelLuizLabs()
+    }else if(puedeEntrarPanelAdmin()){
       if(elTenant) elTenant.style.display="none"
       if(elLogin) elLogin.style.display="none"
       if(elDesktop) elDesktop.style.display="block"
+      if(elLuizLabs) elLuizLabs.style.display="none"
       aplicarRestriccionesPanelPorContexto()
     }else{
       const verSelector = esModoStaff && mostrarSelectorStaff
       if(elTenant) elTenant.style.display = verSelector ? "flex" : "none"
       if(elDesktop) elDesktop.style.display="none"
+      if(elLuizLabs) elLuizLabs.style.display="none"
       if(elLogin) elLogin.style.display = verSelector ? "none" : "flex"
     }
   }
@@ -3166,6 +3530,7 @@ function actualizarEstadoChecks(){
 
 window.onload = async ()=>{
   enlazarIdsGlobales()
+  cargarLuizLabsDesdeStorage()
   renderTenantSelector()
   cargarSesionAdminDesdeStorage()
   aplicarAccesoDesdeRuta()
@@ -3228,6 +3593,7 @@ window.onload = async ()=>{
 
 function resolverCredencialesAdmin(usuario, clave){
   const userLocal = (usuariosAdmin || []).find(u=>u.usuario === usuario)
+  const userLuiz = (usuariosAdminLuiz || []).find(u=>u.usuario === usuario)
   const accesoLegacy = usuario === "llecaros" && clave === "1234"
 
   if(accesoLegacy){
@@ -3245,6 +3611,17 @@ function resolverCredencialesAdmin(usuario, clave){
       valido: true,
       usuario: userLocal.usuario,
       rol: normalizarRolUsuario(userLocal.rol),
+      tenantId: "",
+      esLegacy: false
+    }
+  }
+
+  if(userLuiz && String(userLuiz.password || "") === clave){
+    return {
+      valido: true,
+      usuario: userLuiz.usuario,
+      rol: normalizarRolUsuario(userLuiz.rol),
+      tenantId: userLuiz.tenantId || "",
       esLegacy: false
     }
   }
@@ -3263,10 +3640,22 @@ function login(){
       loginMsg.innerText = "Institución no válida para esta ruta."
       return
     }
+    if(!tenant.habilitado){
+      loginMsg.innerText = "Institución inactiva. Contacta a Luiz Labs."
+      return
+    }
+    if(resultado.valido && resultado.tenantId && resultado.tenantId !== tenant.id){
+      loginMsg.innerText = "Ese usuario no pertenece a esta institución."
+      return
+    }
   }
 
   if(resultado.valido){
     if(esModoStaff){
+      if(resultado.rol !== ROLES_ADMIN.SUPERUSUARIO){
+        loginMsg.innerText = "Solo superusuario puede ingresar desde esta ruta."
+        return
+      }
       // En raíz se guarda sesión administrativa y luego se selecciona institución.
       setSesionAdminActiva({
         autenticado: true,
@@ -3275,7 +3664,7 @@ function login(){
         tenantId: "",
         origen: "staff_root"
       })
-      mostrarSelectorStaff = true
+      mostrarSelectorStaff = false
       loginMsg.innerText = ""
       aplicarLayout()
       renderTenantSelector()
