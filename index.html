@@ -57,10 +57,27 @@ h2{
   flex-wrap:wrap;
 }
 
+#vistaDesktop .header{
+  display:grid;
+  grid-template-columns:minmax(360px, 1fr) auto;
+  gap:10px 14px;
+  align-items:center;
+  padding:10px 20px;
+  min-height:74px;
+}
+
+#vistaDesktop .header .header-actions{
+  justify-content:flex-end;
+}
+
+#vistaDesktop .header > div:first-child{
+  min-width:0;
+}
+
 .info-sesion-header{
   display:none;
   min-width:0;
-  max-width:460px;
+  max-width:380px;
   height:42px;
   align-items:center;
   gap:8px;
@@ -113,6 +130,16 @@ h2{
   }
   .info-sesion-header .session-sep{
     display:none;
+  }
+}
+
+@media (max-width: 1780px){
+  #vistaDesktop .header{
+    grid-template-columns:1fr;
+    align-items:stretch;
+  }
+  #vistaDesktop .header .header-actions{
+    justify-content:flex-end;
   }
 }
 
