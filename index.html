@@ -4203,10 +4203,16 @@ function exportarRiesgoUboExcel(){
     return
   }
 
-  const rows = cacheRiesgoUbo.map(([ubo, casos])=>({
-    UBO: ubo,
-    Casos: casos
-  }))
+  const rows = cacheRiesgoUbo.map(([ubo, casos])=>{
+    const item = (casos && typeof casos === "object") ? casos : {}
+    return {
+      UBO: ubo,
+      Total: Number(item.total || 0),
+      Tardanza: Number(item.tardanza || 0),
+      "Fuera de día": Number(item.fueraDia || 0),
+      Otros: Number(item.otros || 0)
+    }
+  })
 
   descargarExcelDesdeJSON("dashboard_riesgo_ubo.xlsx", rows)
 }
@@ -4472,17 +4478,33 @@ async function cargarAspirantesCargados(){
   const limpiarDni = (v)=>String(v || "").replace(/\D/g, "")
   const registros = new Map()
 
-  const { data: dataAspirantes, error: errorAspirantes } = await supabaseClient
+  let dataAspirantes = []
+  let errorAspirantes = null
+
+  // Intenta leer tenant_id para aislar por institución cuando la columna exista.
+  ({ data: dataAspirantes, error: errorAspirantes } = await supabaseClient
     .from("aspirantes")
-    .select("apellidos,nombres,dni,ubo")
-    .limit(1000)
+    .select("apellidos,nombres,dni,ubo,tenant_id")
+    .limit(1000))
+
+  if(errorAspirantes && /tenant_id/i.test(String(errorAspirantes.message || ""))){
+    // Compatibilidad con esquemas legacy sin tenant_id en aspirantes.
+    const fallback = await supabaseClient
+      .from("aspirantes")
+      .select("apellidos,nombres,dni,ubo")
+      .limit(1000)
+    dataAspirantes = (fallback.data || []).map(r=>Object.assign({}, r, { tenant_id: null }))
+    errorAspirantes = fallback.error
+  }
 
   if(errorAspirantes){
     tablaAspirantesCargados.innerHTML = `<tr><td colspan="5">No se pudo cargar el listado.</td></tr>`
     return
   }
 
-  ;(dataAspirantes || []).forEach(r=>{
+  const aspirantesScoped = filtrarDataTenantActivo(dataAspirantes || [])
+
+  ;(aspirantesScoped || []).forEach(r=>{
     const dni = limpiarDni(r.dni)
     if(!dni) return
     registros.set(dni, {
@@ -5146,10 +5168,10 @@ function verCriterio(tipo){
   if(tipo === "semaforo"){
     titulo = "Criterio Semáforo"
     contenido = `
-      <p><strong>Verde:</strong> primera marcación del último día <= 19:10.</p>
-      <p><strong>Amarillo:</strong> primera marcación del último día entre 19:11 y 19:30.</p>
-      <p><strong>Rojo:</strong> primera marcación del último día > 19:30.</p>
-      <p style="margin-top:10px;color:#5f6f8f;">El cálculo se hace por aspirante en el rango de fechas filtrado.</p>
+      <p><strong>Verde:</strong> primera marcación del último día hasta +10 minutos sobre la hora de inicio de su sección.</p>
+      <p><strong>Amarillo:</strong> primera marcación entre +11 y +30 minutos sobre la hora de inicio.</p>
+      <p><strong>Rojo:</strong> primera marcación con más de +30 minutos o fuera de día configurado.</p>
+      <p style="margin-top:10px;color:#5f6f8f;">El cálculo es dinámico por sección (hora_inicio y días) para cada aspirante dentro del rango filtrado.</p>
     `
   }
 
@@ -5519,8 +5541,21 @@ async function cargarDatos(){
 
 function renderTabla(data){
   const activos = (data || []).filter(r => r.estado !== "retirado")
+  const hayFiltroUbo = !!String(filtroUbo?.value || "").trim()
   const clavesAlerta = obtenerClavesAlertaDispositivo(activos)
   cacheReportes = []
+
+  if(!activos.length){
+    const msg = hayFiltroUbo
+      ? "No hay registros para la UBO seleccionada en el rango indicado."
+      : "No hay datos para el rango seleccionado."
+    tabla.innerHTML = `
+      <div class="hint" style="padding:8px 2px;">
+        ${msg}
+      </div>
+    `
+    return
+  }
 
   let html = `
   <table>
@@ -5608,7 +5643,7 @@ async function cargarAlertasReporte(){
   const scopedData = filtrarDataTenantActivo(data)
 
   if(!scopedData || scopedData.length===0){
-    tablaAlertasContenido.innerHTML = "Sin alertas registradas."
+    tablaAlertasContenido.innerHTML = "No hay alertas registradas en este período."
     return
   }
 
@@ -5862,6 +5897,10 @@ async function cargarDashboard(){
       </p>`
     })
 
+  if(!html){
+    html = `<p class="hint">No hay datos para el rango seleccionado.</p>`
+  }
+
   topUbo.innerHTML = html
   semaforoInfo.innerText = "Semáforo: usa la primera marcación del último día del aspirante contra la hora de su sección (Verde: hasta +10m, Amarillo: +11 a +30m, Rojo: >+30m o fuera de día configurado). Si la sección no tiene hora, no penaliza."
   riesgoInfo.innerText = "Riesgo por UBO: cantidad de aspirantes en Rojo según la configuración de horario/días y el rango filtrado."
@@ -5955,18 +5994,33 @@ async function buscarAspirantes(){
     .select("dni,nombre,ubo,tenant_id")
     .ilike("ubo","%"+ubo+"%"))
   const scopedData = filtrarDataTenantActivo(data)
+  const dedupe = new Map()
+
+  ;(scopedData || []).forEach(a=>{
+    const dni = String(a?.dni || "").trim()
+    if(!dni || dedupe.has(dni)) return
+    dedupe.set(dni, {
+      dni,
+      nombre: String(a?.nombre || "").trim() || "Sin nombre",
+      ubo: String(a?.ubo || "").trim()
+    })
+  })
+
+  const lista = Array.from(dedupe.values()).sort((a,b)=>
+    `${a.nombre} ${a.dni}`.localeCompare(`${b.nombre} ${b.dni}`)
+  )
 
   let html=""
 
-  scopedData.forEach(a=>{
+  lista.forEach(a=>{
     html+=`
       <p onclick="seleccionarAspirante('${a.dni}','${a.nombre}')">
-        ${a.nombre} (${a.dni})
+        ${a.nombre} (${a.dni})${a.ubo ? ` - UBO ${a.ubo}` : ""}
       </p>
     `
   })
 
-  listaAspirantes.innerHTML = html
+  listaAspirantes.innerHTML = html || `<p class="hint">No hay aspirantes para el filtro seleccionado.</p>`
 }
 
 async function retirarAspirante(dni){
