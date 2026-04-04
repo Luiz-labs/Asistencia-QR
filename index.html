@@ -1299,6 +1299,11 @@ input, select{
   margin-top:4px;
   font-size:15px !important;
   letter-spacing:0.2px;
+  width:min(100%, 300px) !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  display:flex !important;
+  justify-content:center !important;
 }
 
 .mobile-exit{
@@ -1306,6 +1311,11 @@ input, select{
   color:#243451 !important;
   border:1px solid #d3deef !important;
   box-shadow:none !important;
+  width:min(100%, 260px) !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  display:flex !important;
+  justify-content:center !important;
 }
 
 .mobile-exit:hover{
@@ -4443,6 +4453,7 @@ function mostrarPasoMovil(paso){
   const elScan = document.getElementById("mobileStepScan")
   if(elIngreso) elIngreso.style.display = paso === "ingreso" ? "block" : "none"
   if(elScan) elScan.style.display = paso === "scan" ? "block" : "none"
+  aplicarVisibilidadAccesoAdminInstitucional()
 }
 
 function seleccionarBotonSeccion(valor){
@@ -5776,6 +5787,7 @@ function scanQR(){
 
       vistaMovil.style.display="none"
       formulario.style.display="block"
+      aplicarVisibilidadAccesoAdminInstitucional()
 
       console.log("QR detectado:", code.data) // 🔥 debug
 
@@ -5794,6 +5806,7 @@ function volverInicio(){
   formulario.style.display="none"
   vistaMovil.style.display="block"
   mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
+  aplicarVisibilidadAccesoAdminInstitucional()
   setMensaje("")
 }
 
