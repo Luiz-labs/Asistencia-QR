@@ -1538,6 +1538,7 @@ input, select{
     </div>
     <div class="header-actions">
       <button id="btnInstitucion" onclick="volverSeleccionCliente()" class="secondary">Institución</button>
+      <button id="btnVolverLuizLabs" onclick="irPanelPrincipalLuizLabs()" class="secondary" style="display:none;">Panel principal</button>
       <button id="btnForzarMovil" onclick="setVistaManual('mobile')" class="secondary view-switch">Ver móvil</button>
       <button id="btnVistaAutoDesktop" onclick="setVistaManual('auto')" class="secondary view-switch" title="Automático: usa detección de dispositivo para decidir vista móvil o escritorio.">Automático</button>
       <button onclick="logout()" class="secondary">Salir</button>
@@ -1735,7 +1736,6 @@ input, select{
               <label for="userRol">Rol</label>
               <select id="userRol">
                 <option value="administrador">Administrador</option>
-                <option value="superusuario">Superusuario</option>
               </select>
             </div>
           </div>
@@ -2061,7 +2061,6 @@ input, select{
             <label for="luizUserRol">Rol</label>
             <select id="luizUserRol">
               <option value="administrador">Administrador</option>
-              <option value="superusuario">Superusuario</option>
             </select>
           </div>
           <div>
@@ -2137,7 +2136,7 @@ const VISTA_MODO_KEY = "vistaModoManual"
 const ADMIN_SESSION_KEY = "asistia_admin_session_v1"
 const LUIZLABS_STORE_KEY = "asistia_luizlabs_v1"
 const DEFAULT_INSTITUTION_LOGO = "/asistIA_logo.png"
-const MULTITENANT_MODE = false
+const MULTITENANT_MODE = true
 const ROLES_ADMIN = Object.freeze({
   SUPERUSUARIO: "superusuario",
   ADMINISTRADOR: "administrador"
@@ -2303,6 +2302,10 @@ function esAdministradorActivo(){
 
 function tenantSesionActiva(){
   return String(sesionAdminActiva?.tenantId || "")
+}
+
+function esTenantConDatosLegacy(tenantId){
+  return String(tenantId || "") === "esbas-24"
 }
 
 function puedeEntrarPanelAdmin(tenantId = tenantActivoId){
@@ -2471,14 +2474,16 @@ function cargarLuizLabsDesdeStorage(){
     usuariosAdminLuiz = mapearUsuariosBaseDesdeTenants()
   }
 
-  usuariosAdminLuiz = usuariosAdminLuiz.map(u=>({
+  usuariosAdminLuiz = usuariosAdminLuiz.map(u=>{
+    const rolNormalizado = normalizarRolUsuario(u.rol || ROLES_ADMIN.ADMINISTRADOR)
+    return {
     usuario: String(u.usuario || "").toLowerCase(),
     password: String(u.password || ""),
-    rol: normalizarRolUsuario(u.rol || ROLES_ADMIN.ADMINISTRADOR),
+    rol: rolNormalizado === ROLES_ADMIN.SUPERUSUARIO ? ROLES_ADMIN.ADMINISTRADOR : rolNormalizado,
     tenantId: String(u.tenantId || ""),
     estado: String(u.estado || "activo") === "inactivo" ? "inactivo" : "activo",
     fecha_creacion: u.fecha_creacion || new Date().toISOString()
-  }))
+  }})
 
   institucionesLuiz = institucionesLuiz.map(inst=>({
     id: String(inst.id || generarIdInstitucion()),
@@ -2589,13 +2594,17 @@ function renderPanelLuizLabs(){
     tablaInst.innerHTML = html
   }
 
-  if(!usuariosAdminLuiz.length){
+  const usuariosInstitucionales = (usuariosAdminLuiz || [])
+    .map((u, idx)=>({ u, idx }))
+    .filter(({ u })=>normalizarRolUsuario(u.rol) !== ROLES_ADMIN.SUPERUSUARIO)
+
+  if(!usuariosInstitucionales.length){
     tablaUsers.innerHTML = `<tr><td colspan="6">Sin usuarios admin.</td></tr>`
     return
   }
 
   let usersHtml = ""
-  usuariosAdminLuiz.forEach((u, idx)=>{
+  usuariosInstitucionales.forEach(({ u, idx })=>{
     const inst = obtenerInstitucionLuiz(u.tenantId)
     const estado = inst?.estado === "activo" ? "Activa" : "Inactiva"
     const estadoUser = u.estado === "activo"
@@ -2946,6 +2955,10 @@ function guardarUsuarioAdminLuiz(){
     alert("Completa usuario, institución y clave.")
     return
   }
+  if(rol === ROLES_ADMIN.SUPERUSUARIO){
+    alert("El rol superusuario es global y no se gestiona como usuario institucional.")
+    return
+  }
   if(esUsuarioProtegidoLuiz(usuario)){
     alert("El usuario legacy está protegido y no se gestiona desde aquí.")
     return
@@ -3033,6 +3046,7 @@ function aplicarRestriccionesPanelPorContexto(){
   const navUsuarios = document.getElementById("navUsuarios")
   const adminMobileNotice = document.getElementById("adminMobileNotice")
   const btnInstitucion = document.getElementById("btnInstitucion")
+  const btnVolverLuizLabs = document.getElementById("btnVolverLuizLabs")
 
   if(navConfig) navConfig.style.display = limitado ? "none" : ""
   if(navUsuarios) navUsuarios.style.display = limitado ? "none" : ""
@@ -3046,9 +3060,19 @@ function aplicarRestriccionesPanelPorContexto(){
     }
   }
 
+  if(btnVolverLuizLabs){
+    const mostrar = !esModoStaff && haySesionAdminActiva() && esSuperusuarioActivo()
+    btnVolverLuizLabs.style.display = mostrar ? "inline-flex" : "none"
+  }
+
   if(limitado && !esVistaPermitidaEnAdminMovil(vistaAdminActual)){
     mostrarVista("dashboard")
   }
+}
+
+function irPanelPrincipalLuizLabs(){
+  if(!haySesionAdminActiva() || !esSuperusuarioActivo()) return
+  window.location.href = "/"
 }
 
 enlazarIdsGlobales()
@@ -3241,6 +3265,9 @@ function volverSeleccionCliente(){
 
 function withTenantScope(query){
   if(!MULTITENANT_MODE || !tenantActivoId) return query
+  if(esTenantConDatosLegacy(tenantActivoId)){
+    return query.or(`tenant_id.eq.${tenantActivoId},tenant_id.is.null`)
+  }
   return query.eq("tenant_id", tenantActivoId)
 }
 
@@ -3251,6 +3278,20 @@ function withTenantPayload(payload){
 
 function withTenantPayloadList(items){
   return (items || []).map(withTenantPayload)
+}
+
+function filtrarDataTenantActivo(rows){
+  if(!MULTITENANT_MODE || !tenantActivoId){
+    return Array.isArray(rows) ? rows : []
+  }
+  const tenant = String(tenantActivoId || "")
+  return (rows || []).filter(r=>{
+    const tenantFila = String(r?.tenant_id || "").trim()
+    if(tenantFila){
+      return tenantFila === tenant
+    }
+    return esTenantConDatosLegacy(tenant)
+  })
 }
 
 function esTablaNoExiste(error){
@@ -3693,7 +3734,12 @@ async function cargarUsuariosAdminDesdeSupabase(){
 
 function renderUsuariosAdmin(){
   if(!tablaUsuariosAdmin) return
-  const data = SYSTEM_USERS.concat(usuariosAdmin.filter(u => !SYSTEM_USERS.some(s => s.usuario === u.usuario)))
+  const data = SYSTEM_USERS.concat(
+    usuariosAdmin.filter(u =>
+      !SYSTEM_USERS.some(s => s.usuario === u.usuario) &&
+      normalizarRolUsuario(u.rol) !== ROLES_ADMIN.SUPERUSUARIO
+    )
+  )
 
   if(!data.length){
     tablaUsuariosAdmin.innerHTML = `<tr><td colspan="4">Sin usuarios creados.</td></tr>`
@@ -3743,6 +3789,10 @@ async function guardarUsuarioAdmin(){
   }
 
   const item = { nombre, usuario, clave, rol }
+  if(rol === ROLES_ADMIN.SUPERUSUARIO){
+    alert("El rol superusuario es global y no se gestiona en este módulo institucional.")
+    return
+  }
   if(editUsuarioIndex >= 0){
     const original = usuariosAdmin[editUsuarioIndex]
     if(!original?.id){
@@ -4171,10 +4221,15 @@ function aplicarLayout(){
   const elMovil = document.getElementById("vistaMovil")
   const elFormulario = document.getElementById("formulario")
   const elBtnInstitucion = document.getElementById("btnInstitucion")
+  const elBtnVolverLuizLabs = document.getElementById("btnVolverLuizLabs")
   const vista = getVistaActiva()
 
   if(elBtnInstitucion){
     elBtnInstitucion.style.display = accesoDirectoInstitucion ? "none" : "inline-flex"
+  }
+  if(elBtnVolverLuizLabs){
+    const mostrar = !esModoStaff && haySesionAdminActiva() && esSuperusuarioActivo()
+    elBtnVolverLuizLabs.style.display = mostrar ? "inline-flex" : "none"
   }
 
   if(vista === "mobile"){
@@ -4366,7 +4421,7 @@ function resolverCredencialesAdmin(usuario, clave){
     return {
       valido: true,
       usuario: userLuiz.usuario,
-      rol: normalizarRolUsuario(userLuiz.rol),
+      rol: ROLES_ADMIN.ADMINISTRADOR,
       tenantId: userLuiz.tenantId || "",
       esLegacy: false
     }
@@ -4445,6 +4500,13 @@ function login(){
     if(resultado.valido && resultado.tenantId && resultado.tenantId !== tenant.id){
       loginMsg.innerText = "Ese usuario no pertenece a esta institución."
       return
+    }
+    if(resultado.valido && resultado.rol === ROLES_ADMIN.ADMINISTRADOR){
+      const tenantAsignado = resultado.tenantId || obtenerTenantAsignadoUsuario(resultado.usuario)
+      if(!tenantAsignado || tenantAsignado !== tenant.id){
+        loginMsg.innerText = "Usuario no autorizado para esta institución."
+        return
+      }
     }
   }
 
@@ -4858,7 +4920,8 @@ async function cargarDatos(){
   }
 
   const {data} = await q
-  renderTabla((data || []).filter(d => d.estado !== "retirado"))
+  const scopedData = filtrarDataTenantActivo(data)
+  renderTabla((scopedData || []).filter(d => d.estado !== "retirado"))
   await cargarAlertasReporte()
 }
 
@@ -4950,7 +5013,9 @@ async function cargarAlertasReporte(){
     return
   }
 
-  if(!data || data.length===0){
+  const scopedData = filtrarDataTenantActivo(data)
+
+  if(!scopedData || scopedData.length===0){
     tablaAlertasContenido.innerHTML = "Sin alertas registradas."
     return
   }
@@ -4972,7 +5037,7 @@ async function cargarAlertasReporte(){
     <tbody>
   `
 
-  data.forEach(r=>{
+  scopedData.forEach(r=>{
     html += `
       <tr>
         <td>${r.fecha || ""}</td>
@@ -5015,7 +5080,8 @@ async function aplicarFiltros(){
     return
   }
 
-  renderTabla(data.filter(d => d.estado !== "retirado"))
+  const scopedData = filtrarDataTenantActivo(data)
+  renderTabla(scopedData.filter(d => d.estado !== "retirado"))
   await cargarAlertasReporte()
 
 }
@@ -5051,7 +5117,8 @@ async function cargarDashboard(){
   }
 
   const { data } = await q
-  const dataActivos = (data || []).filter(r => r.estado !== "retirado")
+  const scopedData = filtrarDataTenantActivo(data)
+  const dataActivos = (scopedData || []).filter(r => r.estado !== "retirado")
   cacheDashboard = dataActivos
 
   let padronTotal = 0
@@ -5110,7 +5177,7 @@ async function cargarDashboard(){
   }
 
   const { data: alertasDetalle } = await alertasDetalleQ
-  window.detalleAlertasDispositivo = alertasDetalle || []
+  window.detalleAlertasDispositivo = filtrarDataTenantActivo(alertasDetalle)
 
   let alumnos = {}
 
@@ -5291,14 +5358,15 @@ async function buscarAspirantes(){
 
   const ubo = filtroUboConfig.value
 
-  const { data } = await supabaseClient
+  const { data } = await withTenantScope(supabaseClient
     .from("asistencias")
-    .select("dni,nombre,ubo")
-    .ilike("ubo","%"+ubo+"%")
+    .select("dni,nombre,ubo,tenant_id")
+    .ilike("ubo","%"+ubo+"%"))
+  const scopedData = filtrarDataTenantActivo(data)
 
   let html=""
 
-  data.forEach(a=>{
+  scopedData.forEach(a=>{
     html+=`
       <p onclick="seleccionarAspirante('${a.dni}','${a.nombre}')">
         ${a.nombre} (${a.dni})
@@ -5311,10 +5379,10 @@ async function buscarAspirantes(){
 
 async function retirarAspirante(dni){
 
-  const { error } = await supabaseClient
+  const { error } = await withTenantScope(supabaseClient
     .from("asistencias")
     .update({ estado: "retirado" })
-    .eq("dni", dni)
+    .eq("dni", dni))
 
   if(error){
     alert("Error al retirar")
@@ -5412,10 +5480,10 @@ function verDetalle(color){
 
 async function cargarUbos(){
   const dashUboPrevio = dashUbo?.value || ""
-  const { data } = await supabaseClient
+  const { data } = await withTenantScope(supabaseClient
     .from("asistencias")
-    .select("ubo")
-  const ubosAsistencia = obtenerUbosUnicosDesdeAsistencias(data)
+    .select("ubo,tenant_id"))
+  const ubosAsistencia = obtenerUbosUnicosDesdeAsistencias(filtrarDataTenantActivo(data))
 
   await cargarSedesUbo()
   const ubosSedes = obtenerUbosUnicosDesdeAsistencias(ubosSedeCache)
@@ -6012,20 +6080,21 @@ async function cargarRetirados(){
 
   const ubo = filtroRetirados.value
 
-  let q = supabaseClient
+  let q = withTenantScope(supabaseClient
     .from("asistencias")
-    .select("dni,nombre,ubo")
-    .eq("estado","retirado")
+    .select("dni,nombre,ubo,tenant_id")
+    .eq("estado","retirado"))
 
   if(ubo){
     q = q.eq("ubo", ubo)
   }
 
   const { data } = await q
+  const scopedData = filtrarDataTenantActivo(data)
 
   let html=""
 
-  data.forEach(a=>{
+  scopedData.forEach(a=>{
     html += `
       <p style="display:flex; justify-content:space-between; align-items:center;">
         <span>${a.nombre} (${a.dni}) - UBO ${a.ubo}</span>
@@ -6044,10 +6113,10 @@ function limpiarRetirados(){
 
 async function reactivar(dni){
 
-  await supabaseClient
+  await withTenantScope(supabaseClient
     .from("asistencias")
     .update({ estado: null })
-    .eq("dni", dni)
+    .eq("dni", dni))
 
   cargarRetirados()
 }
