@@ -1801,7 +1801,7 @@ const TENANTS = [
     curso: "Instrucción ESBAS 2026",
     logo: "/logo.png",
     habilitado: true,
-    usuariosSistema: ["llecaros", "admin"]
+    usuariosSistema: ["llecaros"]
   },
   {
     id: "bomberos-lurin-129",
@@ -1818,8 +1818,7 @@ let esModoStaff = true
 let accesoDirectoInstitucion = false
 let mostrarSelectorStaff = false
 const SYSTEM_USERS = [
-  { nombre: "Administrador Principal", usuario: "llecaros", rol: "administrador", system: true },
-  { nombre: "Super Usuario", usuario: "admin", rol: "administrador", system: true }
+  { nombre: "Administrador Principal", usuario: "llecaros", rol: "administrador", system: true }
 ]
 
 const SECTION_TO_UBO_FIELD = {
@@ -3016,13 +3015,12 @@ function login(){
   const usuario = (loginUser.value || "").trim().toLowerCase()
   const clave = (loginPass.value || "").trim()
   let valido = false
+  const esAccesoLegacyLlecaros = usuario === "llecaros" && clave === "1234"
 
   if(esModoStaff){
-    const userSystem = SYSTEM_USERS.some(u=>u.usuario === usuario)
-    const userTenantSistema = TENANTS.some(t=>(t.usuariosSistema || []).includes(usuario))
     const userLocal = (usuariosAdmin || []).find(u=>u.usuario === usuario)
     valido =
-      ((userSystem || userTenantSistema) && clave === "1234") ||
+      esAccesoLegacyLlecaros ||
       (!!userLocal && String(userLocal.clave || "") === clave)
   }else{
     const tenant = obtenerTenantActivo()
@@ -3032,7 +3030,7 @@ function login(){
     }
     const userLocal = (usuariosAdmin || []).find(u=>u.usuario === usuario)
     valido =
-      ((tenant.usuariosSistema || []).includes(usuario) && clave === "1234") ||
+      esAccesoLegacyLlecaros ||
       (!!userLocal && String(userLocal.clave || "") === clave)
   }
 
