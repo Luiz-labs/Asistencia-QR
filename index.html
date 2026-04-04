@@ -2693,7 +2693,7 @@ Puedes analizar:
 • Semáforo de puntualidad
 • Riesgo por UBO
 
-Los colores se calculan según la hora de inicio de cada sección.`
+El semáforo usa la primera marcación del último día y la compara con la hora de inicio/días de la sección.`
   },
   {
     target: "#vistaConfig",
@@ -4577,8 +4577,24 @@ function obtenerReglaSeccion(seccion){
   return {
     seccion: sec,
     horaInicioMin: horaATotalMinutos(regla.hora_inicio),
+    horaInicioTexto: String(regla.hora_inicio || "").slice(0,5),
     dias: (regla.dias || []).map(normalizarTextoDia).filter(Boolean)
   }
+}
+
+function describirMotivoSemaforo(motivo){
+  const mapa = {
+    sin_registro: "Sin registro",
+    sin_seccion: "Sin sección asignada",
+    sin_hora_configurada: "Sin hora configurada en sección",
+    fuera_de_dia_configurado: "Fuera de día configurado",
+    sin_hora_marcada: "Sin hora de marcación",
+    hora_invalida_para_seccion: "Hora inválida para la sección",
+    a_tiempo: "A tiempo",
+    tardanza_moderada: "Tardanza moderada",
+    tardanza_alta: "Tardanza alta"
+  }
+  return mapa[motivo] || String(motivo || "Sin criterio")
 }
 
 function evaluarSemaforoPorRegla(registrosAlumno){
@@ -4591,36 +4607,47 @@ function evaluarSemaforoPorRegla(registrosAlumno){
     return { estado: "rojo", motivo: "sin_registro" }
   }
 
-  const ultimo = registros[registros.length - 1]
-  const regla = obtenerReglaSeccion(ultimo.seccion)
-  const ultimaFecha = ultimo.fecha || ""
+  const ultimaFecha = (registros[registros.length - 1] || {}).fecha || ""
   const primerMarcadoUltimoDia = registros
     .filter(x => x.fecha === ultimaFecha)
     .sort((a,b)=>(a.hora || "").localeCompare(b.hora || ""))[0]
+  const seccionEvaluada = String(primerMarcadoUltimoDia?.seccion || "").trim().toUpperCase()
+  const regla = obtenerReglaSeccion(seccionEvaluada)
   const horaMarcadaMin = horaATotalMinutos(primerMarcadoUltimoDia?.hora || "")
+  const horaMarcadaTexto = String(primerMarcadoUltimoDia?.hora || "").slice(0,5)
+
+  if(!seccionEvaluada){
+    return { estado: "rojo", motivo: "sin_seccion", fecha: ultimaFecha, horaMarcada: horaMarcadaTexto, seccion: "-", horaInicio: "-" }
+  }
 
   if(!regla || regla.horaInicioMin == null){
-    return { estado: "verde", motivo: "sin_hora_configurada" }
+    return { estado: "rojo", motivo: "sin_hora_configurada", fecha: ultimaFecha, horaMarcada: horaMarcadaTexto, seccion: seccionEvaluada, horaInicio: "-" }
   }
 
   if(regla.dias.length){
     const dia = obtenerDiaSemanaEs(ultimaFecha)
     if(!regla.dias.includes(dia)){
-      return { estado: "rojo", motivo: "fuera_de_dia_configurado" }
+      return { estado: "rojo", motivo: "fuera_de_dia_configurado", fecha: ultimaFecha, horaMarcada: horaMarcadaTexto, seccion: seccionEvaluada, horaInicio: regla.horaInicioTexto || "-" }
     }
   }
 
   if(horaMarcadaMin == null){
-    return { estado: "rojo", motivo: "sin_hora_marcada" }
+    return { estado: "rojo", motivo: "sin_hora_marcada", fecha: ultimaFecha, horaMarcada: "-", seccion: seccionEvaluada, horaInicio: regla.horaInicioTexto || "-" }
   }
 
-  if(horaMarcadaMin <= regla.horaInicioMin + 10){
-    return { estado: "verde", motivo: "a_tiempo" }
+  // Si la marcación cae en madrugada para una sección de tarde/noche, se considera inválida.
+  const deltaMin = horaMarcadaMin - regla.horaInicioMin
+  if(deltaMin < -120){
+    return { estado: "rojo", motivo: "hora_invalida_para_seccion", fecha: ultimaFecha, horaMarcada: horaMarcadaTexto, seccion: seccionEvaluada, horaInicio: regla.horaInicioTexto || "-" }
   }
-  if(horaMarcadaMin <= regla.horaInicioMin + 30){
-    return { estado: "amarillo", motivo: "tardanza_moderada" }
+
+  if(deltaMin <= 10){
+    return { estado: "verde", motivo: "a_tiempo", fecha: ultimaFecha, horaMarcada: horaMarcadaTexto, seccion: seccionEvaluada, horaInicio: regla.horaInicioTexto || "-" }
   }
-  return { estado: "rojo", motivo: "tardanza_alta" }
+  if(deltaMin <= 30){
+    return { estado: "amarillo", motivo: "tardanza_moderada", fecha: ultimaFecha, horaMarcada: horaMarcadaTexto, seccion: seccionEvaluada, horaInicio: regla.horaInicioTexto || "-" }
+  }
+  return { estado: "rojo", motivo: "tardanza_alta", fecha: ultimaFecha, horaMarcada: horaMarcadaTexto, seccion: seccionEvaluada, horaInicio: regla.horaInicioTexto || "-" }
 }
 
 function distanciaMetros(lat1, lon1, lat2, lon2){
@@ -5675,8 +5702,8 @@ function verCriterio(tipo){
     contenido = `
       <p><strong>Verde:</strong> primera marcación del último día hasta +10 minutos sobre la hora de inicio de su sección.</p>
       <p><strong>Amarillo:</strong> primera marcación entre +11 y +30 minutos sobre la hora de inicio.</p>
-      <p><strong>Rojo:</strong> primera marcación con más de +30 minutos o fuera de día configurado.</p>
-      <p style="margin-top:10px;color:#5f6f8f;">El cálculo es dinámico por sección (hora_inicio y días) para cada aspirante dentro del rango filtrado.</p>
+      <p><strong>Rojo:</strong> más de +30 minutos, fuera de día configurado o sin sección/hora válida para evaluar.</p>
+      <p style="margin-top:10px;color:#5f6f8f;">El cálculo es dinámico por sección (<code>hora_inicio</code> y días). No usa horas fijas globales.</p>
     `
   }
 
@@ -6356,7 +6383,12 @@ async function cargarDashboard(){
       nombre:a.nombre,
       ubo:a.ubo,
       total:a.total,
-      criterio: evaluacion.motivo || ""
+      criterioCodigo: evaluacion.motivo || "",
+      criterio: describirMotivoSemaforo(evaluacion.motivo),
+      fecha: evaluacion.fecha || "-",
+      horaMarcada: evaluacion.horaMarcada || "-",
+      seccion: evaluacion.seccion || "-",
+      horaInicio: evaluacion.horaInicio || "-"
     })
 
     if(estado==="rojo"){
@@ -6410,7 +6442,7 @@ async function cargarDashboard(){
   }
 
   topUbo.innerHTML = html
-  semaforoInfo.innerText = "Semáforo: usa la primera marcación del último día del aspirante contra la hora de su sección (Verde: hasta +10m, Amarillo: +11 a +30m, Rojo: >+30m o fuera de día configurado). Si la sección no tiene hora, no penaliza."
+  semaforoInfo.innerText = "Semáforo: usa la primera marcación del último día y la compara con la hora_inicio de su sección (Verde: hasta +10m, Amarillo: +11 a +30m, Rojo: >+30m, fuera de día o sin configuración válida)."
   riesgoInfo.innerText = "Riesgo por UBO: cantidad de aspirantes en Rojo según la configuración de horario/días y el rango filtrado."
 }
 
@@ -6468,6 +6500,10 @@ function verUbo(ubo){
       <th>DNI</th>
       <th>Nombre</th>
       <th>UBO</th>
+      <th>Sección</th>
+      <th>Hora sección</th>
+      <th>Fecha</th>
+      <th>Hora marcada</th>
       <th>Asistencias</th>
       <th>Criterio</th>
     </tr>
@@ -6479,6 +6515,10 @@ function verUbo(ubo){
         <td>${r.dni}</td>
         <td>${r.nombre}</td>
         <td>${r.ubo}</td>
+        <td>${r.seccion || "-"}</td>
+        <td>${r.horaInicio || "-"}</td>
+        <td>${r.fecha || "-"}</td>
+        <td>${r.horaMarcada || "-"}</td>
         <td>${r.total}</td>
         <td>${r.criterio || "-"}</td>
       </tr>
@@ -6614,6 +6654,10 @@ function verDetalle(color){
       <th>DNI</th>
       <th>Nombre</th>
       <th>UBO</th>
+      <th>Sección</th>
+      <th>Hora sección</th>
+      <th>Fecha</th>
+      <th>Hora marcada</th>
       <th>Asistencias</th>
       <th>Criterio</th>
     </tr>
@@ -6625,6 +6669,10 @@ function verDetalle(color){
         <td>${x.dni}</td>
         <td>${x.nombre}</td>
         <td>${x.ubo}</td>
+        <td>${x.seccion || "-"}</td>
+        <td>${x.horaInicio || "-"}</td>
+        <td>${x.fecha || "-"}</td>
+        <td>${x.horaMarcada || "-"}</td>
         <td>${x.total}</td>
         <td>${x.criterio || "-"}</td>
       </tr>
@@ -7202,7 +7250,7 @@ function limpiarDashboard(){
   kpiDispCard.style.opacity = "0.75"
 
   topUbo.innerHTML = ""
-  semaforoInfo.innerText = "Semáforo: compara cada aspirante contra hora/días configurados de su sección."
+  semaforoInfo.innerText = "Semáforo: primera marcación del último día vs hora/días de su sección."
   riesgoInfo.innerText = "Riesgo UBO: cantidad de aspirantes en rojo por UBO según horario/días."
 
   // limpiar memoria
