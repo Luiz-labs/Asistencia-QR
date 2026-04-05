@@ -468,6 +468,29 @@ input, select{
   color:#18284c;
 }
 
+.login-powered{
+  margin-top:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:#6a7895;
+  font-size:13px;
+  font-weight:600;
+}
+
+.login-powered-wordmark{
+  font-family:"Outfit","Sora","Avenir Next","Nunito Sans",sans-serif;
+  font-size:22px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:-0.25px;
+  background:linear-gradient(94deg, #0b4fd6 8%, #1575ff 42%, #58a0ff 66%, #112a56 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
 #tabla{
   overflow:auto;
 }
@@ -1789,6 +1812,16 @@ input, select{
   #vistaDesktop > div:nth-child(2) > div:last-child{
     padding:14px;
   }
+
+  .login-powered{
+    margin-top:10px;
+    font-size:12px;
+    gap:6px;
+  }
+
+  .login-powered-wordmark{
+    font-size:19px;
+  }
 }
 
 @media (max-width: 900px){
@@ -1820,6 +1853,15 @@ input, select{
 
   .dias label{
     min-width:135px;
+  }
+
+  .login-powered{
+    margin-top:8px;
+    font-size:11px;
+  }
+
+  .login-powered-wordmark{
+    font-size:17px;
   }
 }
 
@@ -1925,6 +1967,11 @@ input, select{
 
     <p id="loginMsg" style="margin-top:10px;color:red;"></p>
 
+  </div>
+
+  <div id="loginPoweredBy" class="login-powered">
+    <span>Powered by</span>
+    <span class="login-powered-wordmark">asistIA</span>
   </div>
 
   <!-- FOOTER -->
@@ -2262,8 +2309,24 @@ input, select{
           <h3>Perfiles de Acceso</h3>
           <div class="config-grid">
             <div>
-              <label for="userNombre">Nombre</label>
-              <input id="userNombre" placeholder="Nombre completo">
+              <label for="userNombres">Nombres</label>
+              <input id="userNombres" placeholder="Nombres">
+            </div>
+            <div>
+              <label for="userApellidos">Apellidos</label>
+              <input id="userApellidos" placeholder="Apellidos">
+            </div>
+            <div>
+              <label for="userDni">DNI</label>
+              <input id="userDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+            </div>
+            <div>
+              <label for="userCorreo">Correo</label>
+              <input id="userCorreo" placeholder="correo@dominio.com" type="email">
+            </div>
+            <div>
+              <label for="userCelular">Celular</label>
+              <input id="userCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
             </div>
             <div>
               <label for="userLogin">Usuario</label>
@@ -2286,13 +2349,18 @@ input, select{
           </div>
           <div class="config-actions">
             <button onclick="guardarUsuarioAdmin()">Guardar Usuario</button>
+            <button class="secondary" onclick="cancelarEdicionUsuarioAdmin()">Cancelar edición</button>
             <button class="secondary" onclick="limpiarUsuarioAdmin()">Limpiar</button>
           </div>
           <div class="table-wrap user-table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Nombre</th>
+                  <th>Nombres</th>
+                  <th>Apellidos</th>
+                  <th>DNI</th>
+                  <th>Correo</th>
+                  <th>Celular</th>
                   <th>Usuario</th>
                   <th>Rol</th>
                   <th>Perfil</th>
@@ -2545,6 +2613,7 @@ input, select{
         <h2>Actividad</h2>
         <div class="card config-card" style="margin-bottom:14px;">
           <h3>Logs institucionales</h3>
+          <p id="logsTenantRangeLabel" class="hint">Mostrando mes actual.</p>
           <div class="config-row">
             <input id="filtroActividadTenantTexto" placeholder="Buscar acción/usuario/ruta">
             <input id="filtroActividadTenantDesde" type="date">
@@ -2560,6 +2629,7 @@ input, select{
                   <th>Fecha</th>
                   <th>Acción</th>
                   <th>Usuario</th>
+                  <th>Dispositivo</th>
                   <th>Rol</th>
                   <th>Detalle</th>
                 </tr>
@@ -2638,6 +2708,26 @@ input, select{
           <h2 style="margin-bottom:10px;">Usuarios asistIA (globales)</h2>
           <div class="config-grid" style="margin-bottom:10px;">
             <div>
+              <label for="luizGlobalNombres">Nombres</label>
+              <input id="luizGlobalNombres" placeholder="Nombres">
+            </div>
+            <div>
+              <label for="luizGlobalApellidos">Apellidos</label>
+              <input id="luizGlobalApellidos" placeholder="Apellidos">
+            </div>
+            <div>
+              <label for="luizGlobalDni">DNI</label>
+              <input id="luizGlobalDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+            </div>
+            <div>
+              <label for="luizGlobalCorreo">Correo</label>
+              <input id="luizGlobalCorreo" placeholder="correo@dominio.com" type="email">
+            </div>
+            <div>
+              <label for="luizGlobalCelular">Celular</label>
+              <input id="luizGlobalCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
+            </div>
+            <div>
               <label for="luizGlobalUserNombre">Usuario</label>
               <input id="luizGlobalUserNombre" placeholder="superusuario">
             </div>
@@ -2661,12 +2751,18 @@ input, select{
                 <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
               </svg>
             </button>
+            <button class="secondary" onclick="cancelarEdicionUsuarioGlobalLuiz()">Cancelar edición</button>
             <button class="secondary" onclick="limpiarUsuarioGlobalLuizForm()">Limpiar</button>
           </div>
           <div class="table-wrap">
             <table class="luiz-users-table">
               <thead>
                 <tr>
+                  <th>Nombres</th>
+                  <th>Apellidos</th>
+                  <th>DNI</th>
+                  <th>Correo</th>
+                  <th>Celular</th>
                   <th>Usuario</th>
                   <th>Rol</th>
                   <th>Estado</th>
@@ -2682,6 +2778,26 @@ input, select{
         <div class="card">
           <h2 style="margin-bottom:10px;">Usuarios admin por institución</h2>
           <div class="config-grid" style="margin-bottom:10px;">
+            <div>
+              <label for="luizUserNombres">Nombres</label>
+              <input id="luizUserNombres" placeholder="Nombres">
+            </div>
+            <div>
+              <label for="luizUserApellidos">Apellidos</label>
+              <input id="luizUserApellidos" placeholder="Apellidos">
+            </div>
+            <div>
+              <label for="luizUserDni">DNI</label>
+              <input id="luizUserDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+            </div>
+            <div>
+              <label for="luizUserCorreo">Correo</label>
+              <input id="luizUserCorreo" placeholder="correo@dominio.com" type="email">
+            </div>
+            <div>
+              <label for="luizUserCelular">Celular</label>
+              <input id="luizUserCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
+            </div>
             <div>
               <label for="luizUserNombre">Usuario</label>
               <input id="luizUserNombre" placeholder="admin@institucion">
@@ -2714,12 +2830,18 @@ input, select{
                 <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
               </svg>
             </button>
+            <button class="secondary" onclick="cancelarEdicionUsuarioAdminLuiz()">Cancelar edición</button>
             <button class="secondary" onclick="limpiarUsuarioAdminLuizForm()">Limpiar</button>
           </div>
           <div class="table-wrap">
             <table class="luiz-users-table">
               <thead>
                 <tr>
+                  <th>Nombres</th>
+                  <th>Apellidos</th>
+                  <th>DNI</th>
+                  <th>Correo</th>
+                  <th>Celular</th>
                   <th>Usuario</th>
                   <th>Rol</th>
                   <th>Perfil</th>
@@ -2754,6 +2876,7 @@ input, select{
           <div id="luizPerfilPermisos" class="dias" style="margin-top:4px;margin-bottom:10px;"></div>
           <div class="table-actions" style="margin-bottom:10px;">
             <button onclick="guardarPerfilLuiz()">Guardar perfil</button>
+            <button class="secondary" onclick="cancelarEdicionPerfilLuiz()">Cancelar edición</button>
             <button class="secondary" onclick="limpiarPerfilLuizForm()">Limpiar</button>
           </div>
           <div class="table-wrap">
@@ -2776,6 +2899,7 @@ input, select{
       <div id="luizBloqueLogs" style="display:none;">
         <div class="card">
           <h2 style="margin-bottom:10px;">Logs globales asistIA</h2>
+          <p id="logsGlobalRangeLabel" class="hint">Mostrando mes actual.</p>
           <div class="config-row">
             <select id="filtroActividadGlobalTenant"></select>
             <input id="filtroActividadGlobalTexto" placeholder="Buscar acción/usuario/ruta">
@@ -2792,6 +2916,7 @@ input, select{
                   <th>Fecha</th>
                   <th>Acción</th>
                   <th>Usuario</th>
+                  <th>Dispositivo</th>
                   <th>Rol</th>
                   <th>Institución</th>
                   <th>Detalle</th>
@@ -2849,6 +2974,7 @@ const ADMIN_SESSION_KEY = "asistia_admin_session_v1"
 const LUIZLABS_STORE_KEY = "asistia_luizlabs_v1"
 const ACTIVITY_LOGS_KEY = "asistia_activity_logs_v1"
 const ACTIVITY_LOGS_MAX = 1200
+const ACTIVITY_DEVICE_KEY = "asistia_device_id_v1"
 const DEFAULT_INSTITUTION_LOGO = "/asistIA_logo.png"
 const MULTITENANT_MODE = true
 let tenantScopeBackendReady = false
@@ -3007,6 +3133,30 @@ function guardarActividadLogs(logs){
   }
 }
 
+function obtenerIdDispositivoActividad(){
+  try{
+    let id = String(localStorage.getItem(ACTIVITY_DEVICE_KEY) || "").trim()
+    if(!id){
+      id = `dev_${Math.random().toString(36).slice(2,10)}`
+      localStorage.setItem(ACTIVITY_DEVICE_KEY, id)
+    }
+    return id
+  }catch(e){
+    return "dev_na"
+  }
+}
+
+function obtenerEtiquetaDispositivoActividad(){
+  const ua = String(navigator.userAgent || "")
+  if(/iPhone/i.test(ua)) return "iPhone"
+  if(/iPad/i.test(ua)) return "iPad"
+  if(/Android/i.test(ua)) return "Android"
+  if(/Windows/i.test(ua)) return "Windows"
+  if(/Macintosh|Mac OS X/i.test(ua)) return "Mac"
+  if(/Linux/i.test(ua)) return "Linux"
+  return "Desconocido"
+}
+
 function obtenerContextoActividad(){
   const sesion = sesionAdminActiva || crearSesionAdminVacia()
   const tenantId = String(sesion.tenantId || tenantActivoId || "").trim()
@@ -3016,7 +3166,11 @@ function obtenerContextoActividad(){
     tenantId,
     tenantNombre: obtenerNombreTenantUI(tenantId),
     entorno: esModoStaff ? "staff_root" : "tenant_route",
-    ruta: String(window.location.pathname || "/")
+    ruta: String(window.location.pathname || "/"),
+    deviceId: obtenerIdDispositivoActividad(),
+    deviceLabel: obtenerEtiquetaDispositivoActividad(),
+    ip: "N/D navegador",
+    deviceUa: String(navigator.userAgent || "")
   }
 }
 
@@ -3038,6 +3192,10 @@ function registrarActividad(accion, detalle = {}, opts = {}){
     tenantNombre: obtenerNombreTenantUI(tenantIdFinal),
     entorno: String(opts.entorno || contexto.entorno || ""),
     ruta: String(opts.ruta || contexto.ruta || "/"),
+    deviceId: String(opts.deviceId || contexto.deviceId || "dev_na"),
+    deviceLabel: String(opts.deviceLabel || contexto.deviceLabel || "Desconocido"),
+    ip: String(opts.ip || contexto.ip || "N/D"),
+    deviceUa: String(opts.deviceUa || contexto.deviceUa || ""),
     detalle: (detalle && typeof detalle === "object") ? detalle : { valor: String(detalle || "") }
   }
 
@@ -3149,6 +3307,9 @@ function filtrarLogsActividad(logs = [], opts = {}){
       item?.accion,
       item?.usuario,
       item?.rol,
+      item?.deviceLabel,
+      item?.deviceId,
+      item?.ip,
       item?.tenantNombre,
       item?.ruta,
       JSON.stringify(item?.detalle || {})
@@ -3177,7 +3338,7 @@ function renderTablaActividadTenant(rows = []){
   const tbody = document.getElementById("tablaActividadTenant")
   if(!tbody) return
   if(!rows.length){
-    tbody.innerHTML = `<tr><td colspan="5">Sin actividad en este tenant.</td></tr>`
+    tbody.innerHTML = `<tr><td colspan="6">Sin actividad en este tenant.</td></tr>`
     return
   }
   let html = ""
@@ -3187,6 +3348,7 @@ function renderTablaActividadTenant(rows = []){
         <td>${formatearFechaActividad(item.fecha)}</td>
         <td>${humanizarAccionActividad(item.accion)}</td>
         <td>${item.usuario || "-"}</td>
+        <td>${item.deviceLabel || "Desconocido"}<br><span class="hint">${item.deviceId || "-"}</span></td>
         <td>${obtenerNombreRolUI(item.rol)}</td>
         <td>${resumirDetalleActividad(item.detalle)}</td>
       </tr>
@@ -3199,7 +3361,7 @@ function renderTablaActividadGlobal(rows = []){
   const tbody = document.getElementById("tablaActividadGlobal")
   if(!tbody) return
   if(!rows.length){
-    tbody.innerHTML = `<tr><td colspan="6">Sin actividad registrada.</td></tr>`
+    tbody.innerHTML = `<tr><td colspan="7">Sin actividad registrada.</td></tr>`
     return
   }
   let html = ""
@@ -3209,6 +3371,7 @@ function renderTablaActividadGlobal(rows = []){
         <td>${formatearFechaActividad(item.fecha)}</td>
         <td>${humanizarAccionActividad(item.accion)}</td>
         <td>${item.usuario || "-"}</td>
+        <td>${item.deviceLabel || "Desconocido"}<br><span class="hint">${item.deviceId || "-"}</span></td>
         <td>${obtenerNombreRolUI(item.rol)}</td>
         <td>${item.tenantNombre || "Plataforma asistIA"}</td>
         <td>${resumirDetalleActividad(item.detalle)}</td>
@@ -3218,6 +3381,34 @@ function renderTablaActividadGlobal(rows = []){
   tbody.innerHTML = html
 }
 
+function actualizarEtiquetaRangoLogs(){
+  const tenantDesde = document.getElementById("filtroActividadTenantDesde")?.value || ""
+  const tenantHasta = document.getElementById("filtroActividadTenantHasta")?.value || ""
+  const globalDesde = document.getElementById("filtroActividadGlobalDesde")?.value || ""
+  const globalHasta = document.getElementById("filtroActividadGlobalHasta")?.value || ""
+  const elTenant = document.getElementById("logsTenantRangeLabel")
+  const elGlobal = document.getElementById("logsGlobalRangeLabel")
+  if(elTenant){
+    elTenant.innerText = `Mostrando rango: ${tenantDesde || "-"} a ${tenantHasta || "-"}`
+  }
+  if(elGlobal){
+    elGlobal.innerText = `Mostrando rango: ${globalDesde || "-"} a ${globalHasta || "-"}`
+  }
+}
+
+function aplicarRangoMesActualEnLogs(){
+  const { from, to } = obtenerRangoMesActual()
+  const elTenantDesde = document.getElementById("filtroActividadTenantDesde")
+  const elTenantHasta = document.getElementById("filtroActividadTenantHasta")
+  const elGlobalDesde = document.getElementById("filtroActividadGlobalDesde")
+  const elGlobalHasta = document.getElementById("filtroActividadGlobalHasta")
+  if(elTenantDesde && !elTenantDesde.value) elTenantDesde.value = from
+  if(elTenantHasta && !elTenantHasta.value) elTenantHasta.value = to
+  if(elGlobalDesde && !elGlobalDesde.value) elGlobalDesde.value = from
+  if(elGlobalHasta && !elGlobalHasta.value) elGlobalHasta.value = to
+  actualizarEtiquetaRangoLogs()
+}
+
 function cargarActividadTenant(){
   const base = obtenerActividadPorScope("tenant")
   const texto = document.getElementById("filtroActividadTenantTexto")?.value || ""
@@ -3225,15 +3416,17 @@ function cargarActividadTenant(){
   const hasta = document.getElementById("filtroActividadTenantHasta")?.value || ""
   const filtrada = filtrarLogsActividad(base, { texto, desde, hasta })
   renderTablaActividadTenant(filtrada)
+  actualizarEtiquetaRangoLogs()
 }
 
 function limpiarActividadTenant(){
   const elTexto = document.getElementById("filtroActividadTenantTexto")
   const elDesde = document.getElementById("filtroActividadTenantDesde")
   const elHasta = document.getElementById("filtroActividadTenantHasta")
+  const { from, to } = obtenerRangoMesActual()
   if(elTexto) elTexto.value = ""
-  if(elDesde) elDesde.value = ""
-  if(elHasta) elHasta.value = ""
+  if(elDesde) elDesde.value = from
+  if(elHasta) elHasta.value = to
   cargarActividadTenant()
 }
 
@@ -3245,6 +3438,7 @@ function cargarActividadGlobal(){
   const tenantId = document.getElementById("filtroActividadGlobalTenant")?.value || ""
   const filtrada = filtrarLogsActividad(base, { texto, desde, hasta, tenantId })
   renderTablaActividadGlobal(filtrada)
+  actualizarEtiquetaRangoLogs()
 }
 
 function limpiarActividadGlobal(){
@@ -3252,9 +3446,10 @@ function limpiarActividadGlobal(){
   const elDesde = document.getElementById("filtroActividadGlobalDesde")
   const elHasta = document.getElementById("filtroActividadGlobalHasta")
   const elTenant = document.getElementById("filtroActividadGlobalTenant")
+  const { from, to } = obtenerRangoMesActual()
   if(elTexto) elTexto.value = ""
-  if(elDesde) elDesde.value = ""
-  if(elHasta) elHasta.value = ""
+  if(elDesde) elDesde.value = from
+  if(elHasta) elHasta.value = to
   if(elTenant) elTenant.value = ""
   cargarActividadGlobal()
 }
@@ -3275,13 +3470,13 @@ function exportarActividadCSV(scope = "tenant"){
 
   const escape = (v)=>`"${String(v ?? "").replace(/"/g, '""')}"`
   const headers = esGlobal
-    ? ["fecha","accion","usuario","rol","tenant_id","tenant_nombre","ruta","detalle"]
-    : ["fecha","accion","usuario","rol","tenant_id","ruta","detalle"]
+    ? ["fecha","accion","usuario","rol","device_label","device_id","ip","tenant_id","tenant_nombre","ruta","detalle"]
+    : ["fecha","accion","usuario","rol","device_label","device_id","ip","tenant_id","ruta","detalle"]
   const lines = [headers.join(",")]
   rows.forEach(item=>{
     const values = esGlobal
-      ? [item.fecha, item.accion, item.usuario, item.rol, item.tenantId, item.tenantNombre, item.ruta, JSON.stringify(item.detalle || {})]
-      : [item.fecha, item.accion, item.usuario, item.rol, item.tenantId, item.ruta, JSON.stringify(item.detalle || {})]
+      ? [item.fecha, item.accion, item.usuario, item.rol, item.deviceLabel, item.deviceId, item.ip, item.tenantId, item.tenantNombre, item.ruta, JSON.stringify(item.detalle || {})]
+      : [item.fecha, item.accion, item.usuario, item.rol, item.deviceLabel, item.deviceId, item.ip, item.tenantId, item.ruta, JSON.stringify(item.detalle || {})]
     lines.push(values.map(escape).join(","))
   })
 
@@ -3549,6 +3744,10 @@ function limpiarPerfilLuizForm(){
   if(luizPerfilNombre) luizPerfilNombre.value = ""
   if(luizPerfilEstado) luizPerfilEstado.value = "activo"
   renderPerfilPermisosEditor()
+}
+
+function cancelarEdicionPerfilLuiz(){
+  limpiarPerfilLuizForm()
 }
 
 function editarPerfilLuiz(idx){
@@ -4102,6 +4301,11 @@ function cargarLuizLabsDesdeStorage(){
   usuariosAdminLuiz = usuariosAdminLuiz.map(u=>{
     const rolNormalizado = normalizarRolUsuario(u.rol || ROLES_ADMIN.ADMINISTRADOR)
     return {
+    nombres: String(u.nombres || "").trim(),
+    apellidos: String(u.apellidos || "").trim(),
+    dni: String(u.dni || "").replace(/\D/g, ""),
+    correo: String(u.correo || "").trim().toLowerCase(),
+    celular: String(u.celular || "").replace(/\D/g, ""),
     usuario: String(u.usuario || "").toLowerCase(),
     // Compatibilidad: acepta ambos formatos históricos de clave (password/clave).
     password: String(u.password || u.clave || ""),
@@ -4305,28 +4509,58 @@ function renderPanelLuizLabs(){
     tablaInst.innerHTML = html
   }
 
-  const usuariosGlobales = (usuariosAdminLuiz || [])
-    .map((u, idx)=>({ u, idx }))
+  const usuariosGlobalesLocales = (usuariosAdminLuiz || [])
+    .map((u, idx)=>({ u, idx, source: "local" }))
     .filter(({ u })=>esUsuarioGlobalAsistIA(u))
 
+  const usuariosGlobalesSupabase = (usuariosAdmin || [])
+    .filter(u=>normalizarRolUsuario(u.rol) === ROLES_ADMIN.SUPERUSUARIO)
+    .filter(u=>!(usuariosAdminLuiz || []).some(l=>String(l.usuario || "").toLowerCase() === String(u.usuario || "").toLowerCase()))
+    .map(u=>({
+      u: {
+        nombres: u.nombres || "",
+        apellidos: u.apellidos || "",
+        dni: u.dni || "",
+        correo: u.correo || "",
+        celular: u.celular || "",
+        usuario: u.usuario || "",
+        rol: normalizarRolUsuario(u.rol),
+        estado: "activo",
+        fecha_creacion: "",
+        system: true
+      },
+      idx: -1,
+      source: "supabase"
+    }))
+
+  const usuariosGlobales = usuariosGlobalesLocales.concat(usuariosGlobalesSupabase)
+
   if(!usuariosGlobales.length){
-    tablaGlobal.innerHTML = `<tr><td colspan="5">Sin usuarios globales.</td></tr>`
+    tablaGlobal.innerHTML = `<tr><td colspan="10">Sin usuarios globales.</td></tr>`
   }else{
     let globalHtml = ""
-    usuariosGlobales.forEach(({ u, idx })=>{
+    usuariosGlobales.forEach(({ u, idx, source })=>{
       const estadoUser = u.estado === "activo"
       const fechaUser = String(u.fecha_creacion || "").slice(0,10)
       const protegido = esUsuarioProtegidoLuiz(u.usuario)
+      const esSupabase = source === "supabase"
       globalHtml += `
         <tr>
-          <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">LEGACY</span>` : ""}</td>
+          <td>${u.nombres || "-"}</td>
+          <td>${u.apellidos || "-"}</td>
+          <td>${u.dni || "-"}</td>
+          <td>${u.correo || "-"}</td>
+          <td>${u.celular || "-"}</td>
+          <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">LEGACY</span>` : ""}${esSupabase ? ` <span class="tag-system">SUPABASE</span>` : ""}</td>
           <td>${normalizarRolUsuario(u.rol)}</td>
           <td>${estadoUser ? "Activo" : "Inactivo"}</td>
-          <td>${fechaUser}</td>
+          <td>${fechaUser || "-"}</td>
           <td class="actions-col">
             <div class="table-actions luiz-actions">
               ${protegido
                 ? `<span class="hint">Protegido</span>`
+                : esSupabase
+                ? `<span class="hint">Gestionado por Supabase</span>`
                 : `
                   <button onclick="editarUsuarioGlobalLuiz(${idx})">Editar</button>
                   <button class="secondary" onclick="regenerarClaveUsuarioAdminLuiz(${idx})" title="Regenerar clave temporal">Reset</button>
@@ -4353,7 +4587,7 @@ function renderPanelLuizLabs(){
     .filter(({ u })=>esUsuarioInstitucionalLuiz(u))
 
   if(!usuariosInstitucionales.length){
-    tablaUsers.innerHTML = `<tr><td colspan="7">Sin usuarios admin.</td></tr>`
+    tablaUsers.innerHTML = `<tr><td colspan="12">Sin usuarios admin.</td></tr>`
   }else{
     let usersHtml = ""
     usuariosInstitucionales.forEach(({ u, idx })=>{
@@ -4365,6 +4599,11 @@ function renderPanelLuizLabs(){
       const perfilNombre = obtenerPerfilPorId(u.perfilId)?.nombre || "Administrador"
       usersHtml += `
         <tr>
+          <td>${u.nombres || "-"}</td>
+          <td>${u.apellidos || "-"}</td>
+          <td>${u.dni || "-"}</td>
+          <td>${u.correo || "-"}</td>
+          <td>${u.celular || "-"}</td>
           <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">LEGACY</span>` : ""}</td>
           <td>${u.rol || ""}</td>
           <td>${perfilNombre}</td>
@@ -4742,9 +4981,18 @@ function eliminarUsuarioAdminLuiz(idx){
 
 function limpiarUsuarioGlobalLuizForm(){
   editUsuarioGlobalLuizIndex = -1
+  if(luizGlobalNombres) luizGlobalNombres.value = ""
+  if(luizGlobalApellidos) luizGlobalApellidos.value = ""
+  if(luizGlobalDni) luizGlobalDni.value = ""
+  if(luizGlobalCorreo) luizGlobalCorreo.value = ""
+  if(luizGlobalCelular) luizGlobalCelular.value = ""
   if(luizGlobalUserNombre) luizGlobalUserNombre.value = ""
   if(luizGlobalUserRol) luizGlobalUserRol.value = ROLES_ADMIN.SUPERUSUARIO
   if(luizGlobalUserPass) luizGlobalUserPass.value = ""
+}
+
+function cancelarEdicionUsuarioGlobalLuiz(){
+  limpiarUsuarioGlobalLuizForm()
 }
 
 function generarClaveUsuarioGlobalLuiz(){
@@ -4783,6 +5031,11 @@ function editarUsuarioGlobalLuiz(idx){
   }
 
   editUsuarioGlobalLuizIndex = idx
+  if(luizGlobalNombres) luizGlobalNombres.value = user.nombres || ""
+  if(luizGlobalApellidos) luizGlobalApellidos.value = user.apellidos || ""
+  if(luizGlobalDni) luizGlobalDni.value = user.dni || ""
+  if(luizGlobalCorreo) luizGlobalCorreo.value = user.correo || ""
+  if(luizGlobalCelular) luizGlobalCelular.value = user.celular || ""
   if(luizGlobalUserNombre) luizGlobalUserNombre.value = user.usuario || ""
   if(luizGlobalUserRol) luizGlobalUserRol.value = ROLES_ADMIN.SUPERUSUARIO
   if(luizGlobalUserPass) luizGlobalUserPass.value = user.password || ""
@@ -4824,12 +5077,29 @@ function eliminarUsuarioGlobalLuiz(idx){
 
 function guardarUsuarioGlobalLuiz(){
   if(!puedeEntrarPanelLuizLabs()) return
+  const nombres = String(luizGlobalNombres?.value || "").trim()
+  const apellidos = String(luizGlobalApellidos?.value || "").trim()
+  const dni = String(luizGlobalDni?.value || "").replace(/\D/g, "")
+  const correo = String(luizGlobalCorreo?.value || "").trim().toLowerCase()
+  const celular = String(luizGlobalCelular?.value || "").replace(/\D/g, "")
   const usuario = String(luizGlobalUserNombre?.value || "").trim().toLowerCase()
   const rol = normalizarRolUsuario(luizGlobalUserRol?.value || ROLES_ADMIN.SUPERUSUARIO)
   const password = String(luizGlobalUserPass?.value || "").trim()
 
-  if(!usuario || !password){
-    alert("Completa usuario y clave global.")
+  if(!nombres || !apellidos || !dni || !usuario || !password){
+    alert("Completa nombres, apellidos, DNI, usuario y clave global.")
+    return
+  }
+  if(dni.length !== 8){
+    alert("El DNI debe tener 8 dígitos.")
+    return
+  }
+  if(correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)){
+    alert("Correo no válido.")
+    return
+  }
+  if(celular && celular.length < 9){
+    alert("Celular no válido.")
     return
   }
   if(rol !== ROLES_ADMIN.SUPERUSUARIO){
@@ -4859,6 +5129,11 @@ function guardarUsuarioGlobalLuiz(){
       return
     }
     actual.usuario = usuario
+    actual.nombres = nombres
+    actual.apellidos = apellidos
+    actual.dni = dni
+    actual.correo = correo
+    actual.celular = celular
     actual.password = password
     actual.rol = ROLES_ADMIN.SUPERUSUARIO
     actual.tenantId = ""
@@ -4873,6 +5148,11 @@ function guardarUsuarioGlobalLuiz(){
       return
     }
     usuariosAdminLuiz.push({
+      nombres,
+      apellidos,
+      dni,
+      correo,
+      celular,
       usuario,
       password,
       rol: ROLES_ADMIN.SUPERUSUARIO,
@@ -4886,16 +5166,25 @@ function guardarUsuarioGlobalLuiz(){
   guardarLuizLabsEnStorage()
   renderPanelLuizLabs()
   limpiarUsuarioGlobalLuizForm()
-  registrarActividad(accion, { usuario, rol })
+  registrarActividad(accion, { usuario, rol, dni })
 }
 
 function limpiarUsuarioAdminLuizForm(){
   editUsuarioLuizIndex = -1
+  if(luizUserNombres) luizUserNombres.value = ""
+  if(luizUserApellidos) luizUserApellidos.value = ""
+  if(luizUserDni) luizUserDni.value = ""
+  if(luizUserCorreo) luizUserCorreo.value = ""
+  if(luizUserCelular) luizUserCelular.value = ""
   if(luizUserNombre) luizUserNombre.value = ""
   if(luizUserRol) luizUserRol.value = ROLES_ADMIN.ADMINISTRADOR
   if(luizUserTenant) luizUserTenant.value = ""
   if(luizUserPass) luizUserPass.value = ""
   if(luizUserPerfil) luizUserPerfil.value = "administrador"
+}
+
+function cancelarEdicionUsuarioAdminLuiz(){
+  limpiarUsuarioAdminLuizForm()
 }
 
 function generarClaveUsuarioLuiz(){
@@ -4935,6 +5224,11 @@ function editarUsuarioAdminLuiz(idx){
   }
 
   editUsuarioLuizIndex = idx
+  if(luizUserNombres) luizUserNombres.value = user.nombres || ""
+  if(luizUserApellidos) luizUserApellidos.value = user.apellidos || ""
+  if(luizUserDni) luizUserDni.value = user.dni || ""
+  if(luizUserCorreo) luizUserCorreo.value = user.correo || ""
+  if(luizUserCelular) luizUserCelular.value = user.celular || ""
   if(luizUserNombre) luizUserNombre.value = user.usuario || ""
   if(luizUserRol) luizUserRol.value = normalizarRolUsuario(user.rol)
   if(luizUserTenant) luizUserTenant.value = user.tenantId || ""
@@ -4944,14 +5238,31 @@ function editarUsuarioAdminLuiz(idx){
 
 function guardarUsuarioAdminLuiz(){
   if(!puedeEntrarPanelLuizLabs()) return
+  const nombres = String(luizUserNombres?.value || "").trim()
+  const apellidos = String(luizUserApellidos?.value || "").trim()
+  const dni = String(luizUserDni?.value || "").replace(/\D/g, "")
+  const correo = String(luizUserCorreo?.value || "").trim().toLowerCase()
+  const celular = String(luizUserCelular?.value || "").replace(/\D/g, "")
   const usuario = String(luizUserNombre?.value || "").trim().toLowerCase()
   const rol = normalizarRolUsuario(luizUserRol?.value || ROLES_ADMIN.ADMINISTRADOR)
   const tenantId = String(luizUserTenant?.value || "").trim()
   const password = String(luizUserPass?.value || "").trim()
   const perfilId = normalizarPerfilId(luizUserPerfil?.value || "administrador") || "administrador"
 
-  if(!usuario || !tenantId || !password){
-    alert("Completa usuario, institución y clave.")
+  if(!nombres || !apellidos || !dni || !usuario || !tenantId || !password){
+    alert("Completa nombres, apellidos, DNI, usuario, institución y clave.")
+    return
+  }
+  if(dni.length !== 8){
+    alert("El DNI debe tener 8 dígitos.")
+    return
+  }
+  if(correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)){
+    alert("Correo no válido.")
+    return
+  }
+  if(celular && celular.length < 9){
+    alert("Celular no válido.")
     return
   }
   if(rol === ROLES_ADMIN.SUPERUSUARIO){
@@ -5003,6 +5314,11 @@ function guardarUsuarioAdminLuiz(){
     }
 
     actual.usuario = usuario
+    actual.nombres = nombres
+    actual.apellidos = apellidos
+    actual.dni = dni
+    actual.correo = correo
+    actual.celular = celular
     actual.rol = rol
     actual.tenantId = tenantId
     actual.password = password
@@ -5017,6 +5333,11 @@ function guardarUsuarioAdminLuiz(){
       return
     }
     usuariosAdminLuiz.push({
+      nombres,
+      apellidos,
+      dni,
+      correo,
+      celular,
       usuario,
       password,
       rol,
@@ -5032,6 +5353,7 @@ function guardarUsuarioAdminLuiz(){
   limpiarUsuarioAdminLuizForm()
   registrarActividad(accion, {
     usuario,
+    dni,
     rol,
     tenantId,
     perfilId
@@ -5790,11 +6112,31 @@ async function cargarUsuariosAdminDesdeSupabase(){
     return
   }
 
-  const { data, error } = await supabaseClient
+  let data = []
+  let error = null
+
+  ;({ data, error } = await supabaseClient
     .from("usuarios_admin")
-    .select("id,nombre,usuario,clave,rol,activo")
+    .select("id,nombre,nombres,apellidos,dni,correo,celular,usuario,clave,rol,activo,tenant_id")
     .eq("activo", true)
-    .order("nombre", { ascending: true })
+    .order("nombre", { ascending: true }))
+
+  if(error && /(tenant_id|nombres|apellidos|dni|correo|celular)/i.test(String(error.message || ""))){
+    const fallback = await supabaseClient
+      .from("usuarios_admin")
+      .select("id,nombre,usuario,clave,rol,activo")
+      .eq("activo", true)
+      .order("nombre", { ascending: true })
+    data = (fallback.data || []).map(u=>Object.assign({}, u, {
+      tenant_id: null,
+      nombres: "",
+      apellidos: "",
+      dni: "",
+      correo: "",
+      celular: ""
+    }))
+    error = fallback.error
+  }
 
   if(error){
     if(!esTablaNoExiste(error)){
@@ -5808,9 +6150,15 @@ async function cargarUsuariosAdminDesdeSupabase(){
   usuariosAdmin = (data || []).map(u=>({
     id: u.id,
     nombre: u.nombre || "",
+    nombres: u.nombres || String(u.nombre || "").trim().split(" ").slice(0, 1).join(" "),
+    apellidos: u.apellidos || String(u.nombre || "").trim().split(" ").slice(1).join(" "),
+    dni: u.dni || "",
+    correo: u.correo || "",
+    celular: u.celular || "",
     usuario: (u.usuario || "").toLowerCase(),
     clave: u.clave || "",
-    rol: normalizarRolUsuario(u.rol)
+    rol: normalizarRolUsuario(u.rol),
+    tenantId: String(u.tenant_id || "").trim().toLowerCase()
   }))
   renderUsuariosAdmin()
 }
@@ -5818,15 +6166,18 @@ async function cargarUsuariosAdminDesdeSupabase(){
 function renderUsuariosAdmin(){
   if(!tablaUsuariosAdmin) return
   poblarPerfilesInstitucionales()
-  const data = SYSTEM_USERS.concat(
-    usuariosAdmin.filter(u =>
+  const tenantActual = String(tenantActivoId || "").trim().toLowerCase()
+  const usuariosInstitucionales = usuariosAdmin
+    .map((u, sourceIndex)=>Object.assign({}, u, { sourceIndex }))
+    .filter(u =>
       !SYSTEM_USERS.some(s => s.usuario === u.usuario) &&
-      normalizarRolUsuario(u.rol) !== ROLES_ADMIN.SUPERUSUARIO
+      normalizarRolUsuario(u.rol) !== ROLES_ADMIN.SUPERUSUARIO &&
+      (!tenantActual || !String(u.tenantId || "").trim() || String(u.tenantId || "").trim().toLowerCase() === tenantActual)
     )
-  )
+  const data = SYSTEM_USERS.concat(usuariosInstitucionales)
 
   if(!data.length){
-    tablaUsuariosAdmin.innerHTML = `<tr><td colspan="5">Sin usuarios creados.</td></tr>`
+    tablaUsuariosAdmin.innerHTML = `<tr><td colspan="10">Sin usuarios creados.</td></tr>`
     return
   }
 
@@ -5837,7 +6188,11 @@ function renderUsuariosAdmin(){
     const perfilNombre = obtenerPerfilPorId(perfilId)?.nombre || "Administrador"
     html += `
       <tr>
-        <td>${u.nombre || ""}${isSystem ? `<span class="tag-system">SISTEMA</span>` : ""}</td>
+        <td>${u.nombres || u.nombre || ""}${isSystem ? `<span class="tag-system">SISTEMA</span>` : ""}</td>
+        <td>${u.apellidos || "-"}</td>
+        <td>${u.dni || "-"}</td>
+        <td>${u.correo || "-"}</td>
+        <td>${u.celular || "-"}</td>
         <td>${u.usuario || ""}</td>
         <td>${u.rol || ""}</td>
         <td>${perfilNombre}</td>
@@ -5845,8 +6200,8 @@ function renderUsuariosAdmin(){
           <div class="table-actions">
             ${isSystem
               ? `<span class="hint">No editable</span>`
-              : `<button onclick="editarUsuarioAdmin(${idx - SYSTEM_USERS.length})">Modificar</button>
-                 <button class="secondary" onclick="eliminarUsuarioAdmin(${idx - SYSTEM_USERS.length})">Eliminar</button>`
+              : `<button onclick="editarUsuarioAdmin(${u.sourceIndex})">Modificar</button>
+                 <button class="secondary" onclick="eliminarUsuarioAdmin(${u.sourceIndex})">Eliminar</button>`
             }
           </div>
         </td>
@@ -5857,7 +6212,11 @@ function renderUsuariosAdmin(){
 }
 
 function limpiarUsuarioAdmin(){
-  userNombre.value = ""
+  if(userNombres) userNombres.value = ""
+  if(userApellidos) userApellidos.value = ""
+  if(userDni) userDni.value = ""
+  if(userCorreo) userCorreo.value = ""
+  if(userCelular) userCelular.value = ""
   userLogin.value = ""
   userPass.value = ""
   userRol.value = "administrador"
@@ -5865,19 +6224,50 @@ function limpiarUsuarioAdmin(){
   editUsuarioIndex = -1
 }
 
+function cancelarEdicionUsuarioAdmin(){
+  limpiarUsuarioAdmin()
+}
+
 async function guardarUsuarioAdmin(){
-  const nombre = (userNombre.value || "").trim()
+  const nombres = (userNombres?.value || "").trim()
+  const apellidos = (userApellidos?.value || "").trim()
+  const dni = String(userDni?.value || "").replace(/\D/g, "")
+  const correo = String(userCorreo?.value || "").trim().toLowerCase()
+  const celular = String(userCelular?.value || "").replace(/\D/g, "")
   const usuario = (userLogin.value || "").trim().toLowerCase()
   const clave = (userPass.value || "").trim()
   const rol = normalizarRolUsuario(userRol.value)
   const perfilId = normalizarPerfilId(userPerfil?.value || "administrador") || "administrador"
 
-  if(!nombre || !usuario || !clave){
-    alert("Completa nombre, usuario y clave")
+  if(!nombres || !apellidos || !dni || !usuario || !clave){
+    alert("Completa nombres, apellidos, DNI, usuario y clave")
+    return
+  }
+  if(dni.length !== 8){
+    alert("El DNI debe tener 8 dígitos.")
+    return
+  }
+  if(correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)){
+    alert("Correo no válido.")
+    return
+  }
+  if(celular && celular.length < 9){
+    alert("Celular no válido.")
     return
   }
 
-  const item = { nombre, usuario, clave, rol }
+  const item = {
+    nombre: `${nombres} ${apellidos}`.trim(),
+    nombres,
+    apellidos,
+    dni,
+    correo,
+    celular,
+    usuario,
+    clave,
+    rol,
+    tenant_id: tenantActivoId || null
+  }
   const perfil = obtenerPerfilPorId(perfilId)
   if(!perfil || perfil.estado !== "activo"){
     alert("Selecciona un perfil activo.")
@@ -5894,10 +6284,18 @@ async function guardarUsuarioAdmin(){
       alert("No se encontró el usuario a editar")
       return
     }
-    const { error } = await supabaseClient
+    let { error } = await supabaseClient
       .from("usuarios_admin")
       .update(item)
       .eq("id", original.id)
+    if(error && /(tenant_id|nombres|apellidos|dni|correo|celular)/i.test(String(error.message || ""))){
+      const itemFallback = { nombre: `${nombres} ${apellidos}`.trim(), usuario, clave, rol }
+      const fallback = await supabaseClient
+        .from("usuarios_admin")
+        .update(itemFallback)
+        .eq("id", original.id)
+      error = fallback.error
+    }
     if(error){
       alert(`No se pudo actualizar: ${error.message}`)
       return
@@ -5913,9 +6311,15 @@ async function guardarUsuarioAdmin(){
       alert("Ese usuario ya existe")
       return
     }
-    const { error } = await supabaseClient
+    let { error } = await supabaseClient
       .from("usuarios_admin")
       .insert([{ ...item, activo: true }])
+    if(error && /(tenant_id|nombres|apellidos|dni|correo|celular)/i.test(String(error.message || ""))){
+      const fallback = await supabaseClient
+        .from("usuarios_admin")
+        .insert([{ nombre: `${nombres} ${apellidos}`.trim(), usuario, clave, rol, activo: true }])
+      error = fallback.error
+    }
     if(error){
       alert(`No se pudo crear usuario: ${error.message}`)
       return
@@ -5926,13 +6330,17 @@ async function guardarUsuarioAdmin(){
   perfilesUsuariosLocales[usuario] = perfilId
   guardarLuizLabsEnStorage()
   limpiarUsuarioAdmin()
-  registrarActividad(accion, { usuario, rol, perfilId }, { tenantId: tenantActivoId })
+  registrarActividad(accion, { usuario, rol, perfilId, dni }, { tenantId: tenantActivoId })
 }
 
 function editarUsuarioAdmin(idx){
   const u = usuariosAdmin[idx]
   if(!u) return
-  userNombre.value = u.nombre || ""
+  if(userNombres) userNombres.value = u.nombres || u.nombre || ""
+  if(userApellidos) userApellidos.value = u.apellidos || ""
+  if(userDni) userDni.value = u.dni || ""
+  if(userCorreo) userCorreo.value = u.correo || ""
+  if(userCelular) userCelular.value = u.celular || ""
   userLogin.value = u.usuario || ""
   userPass.value = u.clave || ""
   userRol.value = normalizarRolUsuario(u.rol)
@@ -6535,6 +6943,7 @@ window.onload = async ()=>{
 
   try{
     aplicarRangoMesActualEnFiltros()
+    aplicarRangoMesActualEnLogs()
   }catch(e){
     console.error("Error aplicando rango de fechas:", e)
   }
@@ -6590,14 +6999,15 @@ function resolverCredencialesAdmin(usuario, clave){
   if(userLocal && String(userLocal.clave || "") === clave){
     const perfilLocal = String(perfilesUsuariosLocales?.[String(userLocal.usuario || "").toLowerCase()] || "administrador")
     const perfilDataLocal = obtenerPerfilPorId(perfilLocal)
-    if(!perfilDataLocal || String(perfilDataLocal.estado || "activo") !== "activo"){
+    const rolLocal = normalizarRolUsuario(userLocal.rol)
+    if(rolLocal === ROLES_ADMIN.ADMINISTRADOR && (!perfilDataLocal || String(perfilDataLocal.estado || "activo") !== "activo")){
       return { valido: false, motivo: "perfil_inactivo" }
     }
     return {
       valido: true,
       usuario: userLocal.usuario,
-      rol: normalizarRolUsuario(userLocal.rol),
-      tenantId: "",
+      rol: rolLocal,
+      tenantId: String(userLocal.tenantId || "").trim().toLowerCase(),
       perfilId: perfilLocal,
       esLegacy: false
     }
