@@ -2256,6 +2256,10 @@ input, select{
                 <option value="administrador">Administrador</option>
               </select>
             </div>
+            <div>
+              <label for="userPerfil">Perfil</label>
+              <select id="userPerfil"></select>
+            </div>
           </div>
           <div class="config-actions">
             <button onclick="guardarUsuarioAdmin()">Guardar Usuario</button>
@@ -2268,6 +2272,7 @@ input, select{
                   <th>Nombre</th>
                   <th>Usuario</th>
                   <th>Rol</th>
+                  <th>Perfil</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -2570,6 +2575,7 @@ input, select{
       <button class="sidebar-account-btn secondary" onclick="abrirCuentaModal()" style="display:none;" data-account-btn>👤 Cuenta</button>
       <p id="luizNavInstituciones" class="nav-item active" onclick="mostrarVistaLuizLabs('instituciones')">🏢 Instituciones</p>
       <p id="luizNavUsuarios" class="nav-item" onclick="mostrarVistaLuizLabs('usuarios')">👥 Usuarios</p>
+      <p id="luizNavPerfiles" class="nav-item" onclick="mostrarVistaLuizLabs('perfiles')">🛡️ Perfiles</p>
       <p id="luizNavLogs" class="nav-item" onclick="mostrarVistaLuizLabs('logs')">🧾 Logs</p>
     </div>
 
@@ -2671,6 +2677,10 @@ input, select{
               <label for="luizUserPass">Clave</label>
               <input id="luizUserPass" placeholder="Clave temporal">
             </div>
+            <div>
+              <label for="luizUserPerfil">Perfil</label>
+              <select id="luizUserPerfil"></select>
+            </div>
           </div>
           <div class="table-actions" style="margin-bottom:10px;">
             <button onclick="guardarUsuarioAdminLuiz()">Guardar usuario</button>
@@ -2689,6 +2699,7 @@ input, select{
                 <tr>
                   <th>Usuario</th>
                   <th>Rol</th>
+                  <th>Perfil</th>
                   <th>Institución</th>
                   <th>Estado institución</th>
                   <th>Fecha</th>
@@ -2696,6 +2707,44 @@ input, select{
                 </tr>
               </thead>
               <tbody id="tablaUsuariosAdminLuiz"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="luizBloquePerfiles" style="display:none;">
+        <div class="card" style="margin-bottom:14px;">
+          <h2 style="margin-bottom:10px;">Perfiles de acceso</h2>
+          <div class="config-grid" style="margin-bottom:10px;">
+            <div>
+              <label for="luizPerfilNombre">Nombre del perfil</label>
+              <input id="luizPerfilNombre" placeholder="Ejemplo: Staff Noche">
+            </div>
+            <div>
+              <label for="luizPerfilEstado">Estado</label>
+              <select id="luizPerfilEstado">
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+          <div id="luizPerfilPermisos" class="dias" style="margin-top:4px;margin-bottom:10px;"></div>
+          <div class="table-actions" style="margin-bottom:10px;">
+            <button onclick="guardarPerfilLuiz()">Guardar perfil</button>
+            <button class="secondary" onclick="limpiarPerfilLuizForm()">Limpiar</button>
+          </div>
+          <div class="table-wrap">
+            <table class="luiz-users-table">
+              <thead>
+                <tr>
+                  <th>Perfil</th>
+                  <th>Estado</th>
+                  <th>Permisos</th>
+                  <th>Fecha</th>
+                  <th class="actions-col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaPerfilesLuiz"></tbody>
             </table>
           </div>
         </div>
@@ -2780,6 +2829,13 @@ const ACTIVITY_LOGS_MAX = 1200
 const DEFAULT_INSTITUTION_LOGO = "/asistIA_logo.png"
 const MULTITENANT_MODE = true
 let tenantScopeBackendReady = false
+const PROFILE_MODULES = Object.freeze([
+  { id: "reportes", label: "Reportes" },
+  { id: "dashboard", label: "Dashboard" },
+  { id: "config", label: "Configuración" },
+  { id: "usuarios", label: "Usuarios" },
+  { id: "actividad", label: "Logs" }
+])
 const ROLES_ADMIN = Object.freeze({
   SUPERUSUARIO: "superusuario",
   ADMINISTRADOR: "administrador"
@@ -2811,8 +2867,11 @@ let mostrarSelectorStaff = false
 let sesionAdminActiva = crearSesionAdminVacia()
 let institucionesLuiz = []
 let usuariosAdminLuiz = []
+let perfilesLuiz = []
+let perfilesUsuariosLocales = {}
 let editUsuarioLuizIndex = -1
 let editUsuarioGlobalLuizIndex = -1
+let editPerfilLuizIndex = -1
 const SYSTEM_USERS = [
   { nombre: "Administrador Principal", usuario: "llecaros", rol: "administrador", system: true }
 ]
@@ -3030,7 +3089,11 @@ function humanizarAccionActividad(accion){
     sede_ubo_editada: "Sede UBO editada",
     sede_ubo_eliminada: "Sede UBO eliminada",
     aspirante_retirado: "Aspirante retirado",
-    aspirante_reactivado: "Aspirante reactivado"
+    aspirante_reactivado: "Aspirante reactivado",
+    perfil_creado: "Perfil creado",
+    perfil_editado: "Perfil editado",
+    perfil_estado_actualizado: "Estado de perfil actualizado",
+    perfil_eliminado: "Perfil eliminado"
   }
   return mapa[String(accion || "")] || String(accion || "-")
 }
@@ -3225,7 +3288,8 @@ function crearSesionAdminVacia(){
     usuario: "",
     rol: "",
     tenantId: "",
-    origen: ""
+    origen: "",
+    perfilId: ""
   }
 }
 
@@ -3237,6 +3301,7 @@ function normalizarSesionAdmin(raw){
   const rol = normalizarRolUsuario(raw.rol || "")
   const tenantId = String(raw.tenantId || "").trim()
   const origen = String(raw.origen || "").trim()
+  const perfilId = String(raw.perfilId || "").trim()
 
   if(!autenticado || !usuario){
     return base
@@ -3247,7 +3312,8 @@ function normalizarSesionAdmin(raw){
     usuario,
     rol,
     tenantId,
-    origen
+    origen,
+    perfilId
   }
 }
 
@@ -3343,6 +3409,238 @@ function obtenerNombreTenantUI(tenantId){
   return tenant?.nombre || id
 }
 
+function permisosPerfilFull(){
+  const out = {}
+  PROFILE_MODULES.forEach(m=>{ out[m.id] = true })
+  return out
+}
+
+function normalizarPermisosPerfil(permisos){
+  const out = {}
+  PROFILE_MODULES.forEach(m=>{
+    out[m.id] = !!(permisos && permisos[m.id])
+  })
+  return out
+}
+
+function perfilesBaseLuiz(){
+  return [
+    {
+      id: "administrador",
+      nombre: "Administrador",
+      estado: "activo",
+      permisos: permisosPerfilFull(),
+      system: true,
+      fecha_creacion: new Date().toISOString()
+    },
+    {
+      id: "staff",
+      nombre: "Staff",
+      estado: "activo",
+      permisos: normalizarPermisosPerfil({
+        reportes: true,
+        dashboard: true,
+        config: false,
+        usuarios: false,
+        actividad: true
+      }),
+      system: true,
+      fecha_creacion: new Date().toISOString()
+    }
+  ]
+}
+
+function normalizarPerfilId(id){
+  const raw = String(id || "").trim().toLowerCase()
+  if(!raw) return ""
+  return raw
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
+
+function obtenerPerfilPorId(perfilId){
+  const id = String(perfilId || "").trim().toLowerCase()
+  if(!id) return null
+  return (perfilesLuiz || []).find(p=>String(p.id || "").toLowerCase() === id) || null
+}
+
+function obtenerPerfilUsuarioActivo(){
+  if(!haySesionAdminActiva()) return null
+  if(esSuperusuarioActivo()) return null
+  const sesion = obtenerSesionAdminActiva()
+  const perfilSesion = obtenerPerfilPorId(sesion.perfilId)
+  if(perfilSesion) return perfilSesion
+
+  const userLuiz = (usuariosAdminLuiz || []).find(u=>String(u.usuario || "").toLowerCase() === String(sesion.usuario || "").toLowerCase())
+  if(userLuiz?.perfilId){
+    return obtenerPerfilPorId(userLuiz.perfilId) || null
+  }
+  return obtenerPerfilPorId("administrador")
+}
+
+function usuarioPuedeVerVista(vista){
+  const key = String(vista || "").trim()
+  if(!key) return true
+  if(esSuperusuarioActivo()) return true
+  const perfil = obtenerPerfilUsuarioActivo()
+  if(!perfil || String(perfil.estado || "activo") !== "activo") return key === "dashboard"
+  const permisos = normalizarPermisosPerfil(perfil.permisos || {})
+  if(!(key in permisos)) return true
+  return !!permisos[key]
+}
+
+function aplicarPermisosVistasPorPerfil(vista){
+  if(usuarioPuedeVerVista(vista)) return vista
+  const ordenFallback = ["dashboard","reportes","actividad","config","usuarios"]
+  const alternativa = ordenFallback.find(v=>usuarioPuedeVerVista(v))
+  return alternativa || "dashboard"
+}
+
+function renderPerfilPermisosEditor(perfil = null){
+  const cont = document.getElementById("luizPerfilPermisos")
+  if(!cont) return
+  const permisos = normalizarPermisosPerfil(perfil?.permisos || permisosPerfilFull())
+  let html = ""
+  PROFILE_MODULES.forEach(m=>{
+    html += `
+      <label>
+        <input type="checkbox" data-perfil-permiso="${m.id}" ${permisos[m.id] ? "checked" : ""}>
+        ${m.label}
+      </label>
+    `
+  })
+  cont.innerHTML = html
+}
+
+function leerPermisosPerfilDesdeUI(){
+  const out = {}
+  PROFILE_MODULES.forEach(m=>{
+    const el = document.querySelector(`#luizPerfilPermisos input[data-perfil-permiso="${m.id}"]`)
+    out[m.id] = !!el?.checked
+  })
+  return out
+}
+
+function limpiarPerfilLuizForm(){
+  editPerfilLuizIndex = -1
+  if(luizPerfilNombre) luizPerfilNombre.value = ""
+  if(luizPerfilEstado) luizPerfilEstado.value = "activo"
+  renderPerfilPermisosEditor()
+}
+
+function editarPerfilLuiz(idx){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const perfil = perfilesLuiz[idx]
+  if(!perfil) return
+  editPerfilLuizIndex = idx
+  if(luizPerfilNombre) luizPerfilNombre.value = perfil.nombre || ""
+  if(luizPerfilEstado) luizPerfilEstado.value = perfil.estado || "activo"
+  renderPerfilPermisosEditor(perfil)
+}
+
+function guardarPerfilLuiz(){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const nombre = String(luizPerfilNombre?.value || "").trim()
+  const estado = String(luizPerfilEstado?.value || "activo") === "inactivo" ? "inactivo" : "activo"
+  if(!nombre){
+    alert("Ingresa el nombre del perfil.")
+    return
+  }
+  const permisos = leerPermisosPerfilDesdeUI()
+  const idBase = normalizarPerfilId(nombre)
+  if(!idBase){
+    alert("Nombre de perfil no válido.")
+    return
+  }
+
+  let accion = "perfil_creado"
+  if(editPerfilLuizIndex >= 0){
+    const actual = perfilesLuiz[editPerfilLuizIndex]
+    if(!actual) return limpiarPerfilLuizForm()
+    const idFinal = actual.system ? actual.id : idBase
+    const duplicado = perfilesLuiz.some((p, i)=>i !== editPerfilLuizIndex && p.id === idFinal)
+    if(duplicado){
+      alert("Ya existe un perfil con ese nombre.")
+      return
+    }
+    actual.id = idFinal
+    actual.nombre = nombre
+    actual.estado = estado
+    actual.permisos = normalizarPermisosPerfil(permisos)
+    accion = "perfil_editado"
+  }else{
+    if(perfilesLuiz.some(p=>p.id === idBase)){
+      alert("Ya existe un perfil con ese nombre.")
+      return
+    }
+    perfilesLuiz.push({
+      id: idBase,
+      nombre,
+      estado,
+      permisos: normalizarPermisosPerfil(permisos),
+      system: false,
+      fecha_creacion: new Date().toISOString()
+    })
+  }
+
+  guardarLuizLabsEnStorage()
+  renderPanelLuizLabs()
+  limpiarPerfilLuizForm()
+  registrarActividad(accion, { perfil: nombre, estado, permisos })
+}
+
+function toggleEstadoPerfilLuiz(idx){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const perfil = perfilesLuiz[idx]
+  if(!perfil) return
+  perfil.estado = perfil.estado === "activo" ? "inactivo" : "activo"
+  guardarLuizLabsEnStorage()
+  renderPanelLuizLabs()
+  registrarActividad("perfil_estado_actualizado", {
+    perfil: perfil.nombre,
+    estado: perfil.estado
+  })
+}
+
+function eliminarPerfilLuiz(idx){
+  if(!puedeEntrarPanelLuizLabs()) return
+  const perfil = perfilesLuiz[idx]
+  if(!perfil) return
+  if(perfil.system){
+    alert("El perfil base no puede eliminarse.")
+    return
+  }
+  const enUso = (usuariosAdminLuiz || []).some(u=>String(u.perfilId || "") === String(perfil.id || ""))
+  if(enUso){
+    alert("El perfil está asignado a usuarios. Reasigna antes de eliminar.")
+    return
+  }
+  const ok = confirm(`¿Eliminar perfil "${perfil.nombre}"?`)
+  if(!ok) return
+  perfilesLuiz.splice(idx, 1)
+  guardarLuizLabsEnStorage()
+  renderPanelLuizLabs()
+  limpiarPerfilLuizForm()
+  registrarActividad("perfil_eliminado", { perfil: perfil.nombre })
+}
+
+function poblarPerfilesInstitucionales(){
+  const el = document.getElementById("userPerfil")
+  if(!el) return
+  const prev = el.value || ""
+  let html = `<option value="administrador">Administrador</option>`
+  ;(perfilesLuiz || [])
+    .filter(p=>p.estado === "activo")
+    .sort((a,b)=>String(a.nombre || "").localeCompare(String(b.nombre || "")))
+    .forEach(p=>{
+      html += `<option value="${p.id}">${p.nombre}</option>`
+    })
+  el.innerHTML = html
+  el.value = (perfilesLuiz || []).some(p=>p.id === prev && p.estado === "activo") ? prev : "administrador"
+}
+
 function actualizarBotonCuentaSidebar(){
   const mostrar = haySesionAdminActiva()
   document.querySelectorAll("[data-account-btn]").forEach(el=>{
@@ -3361,6 +3659,9 @@ function renderCuentaModalDetalle(){
   const usuario = String(sesion.usuario || "").trim() || "-"
   const rolUI = obtenerNombreRolUI(sesion.rol)
   const tenantUI = obtenerNombreTenantUI(sesion.tenantId)
+  const perfilUI = esSuperusuarioActivo()
+    ? "Acceso total"
+    : (obtenerPerfilUsuarioActivo()?.nombre || "Administrador")
 
   cuentaModalBody.innerHTML = `
     <div class="cuenta-row">
@@ -3370,6 +3671,10 @@ function renderCuentaModalDetalle(){
     <div class="cuenta-row">
       <span class="cuenta-key">🔐 Rol</span>
       <span class="cuenta-value">${rolUI}</span>
+    </div>
+    <div class="cuenta-row">
+      <span class="cuenta-key">🛡️ Perfil</span>
+      <span class="cuenta-value">${perfilUI}</span>
     </div>
     <div class="cuenta-row">
       <span class="cuenta-key">🏢 Entorno</span>
@@ -3426,7 +3731,13 @@ function obtenerTargetTutorial(step){
 }
 
 function puedeIniciarTutorial(){
-  return !esModoStaff && haySesionAdminActiva() && puedeEntrarPanelAdmin()
+  return !esModoStaff &&
+    haySesionAdminActiva() &&
+    puedeEntrarPanelAdmin() &&
+    usuarioPuedeVerVista("reportes") &&
+    usuarioPuedeVerVista("dashboard") &&
+    usuarioPuedeVerVista("config") &&
+    usuarioPuedeVerVista("usuarios")
 }
 
 function renderTooltipTutorial(step, index){
@@ -3674,7 +3985,9 @@ function guardarLuizLabsEnStorage(){
   try{
     const payload = {
       instituciones: institucionesLuiz,
-      usuarios_admin: usuariosAdminLuiz
+      usuarios_admin: usuariosAdminLuiz,
+      perfiles: perfilesLuiz,
+      user_profiles: perfilesUsuariosLocales
     }
     localStorage.setItem(LUIZLABS_STORE_KEY, JSON.stringify(payload))
   }catch(e){
@@ -3703,6 +4016,7 @@ function mapearUsuariosBaseDesdeTenants(){
       password: "",
       rol: ROLES_ADMIN.ADMINISTRADOR,
       tenantId: t.id,
+      perfilId: "administrador",
       estado: "activo",
       fecha_creacion: new Date().toISOString()
     })
@@ -3761,6 +4075,8 @@ function cargarLuizLabsDesdeStorage(){
       const parsed = JSON.parse(raw)
       institucionesLuiz = Array.isArray(parsed?.instituciones) ? parsed.instituciones : []
       usuariosAdminLuiz = Array.isArray(parsed?.usuarios_admin) ? parsed.usuarios_admin : []
+      perfilesLuiz = Array.isArray(parsed?.perfiles) ? parsed.perfiles : []
+      perfilesUsuariosLocales = (parsed?.user_profiles && typeof parsed.user_profiles === "object") ? parsed.user_profiles : {}
     }
   }catch(e){
     console.warn("No se pudo leer storage de Luiz Labs:", e)
@@ -3782,8 +4098,27 @@ function cargarLuizLabsDesdeStorage(){
     rol: rolNormalizado,
     tenantId: String(u.tenantId || ""),
     estado: String(u.estado || "activo") === "inactivo" ? "inactivo" : "activo",
-    fecha_creacion: u.fecha_creacion || new Date().toISOString()
+    fecha_creacion: u.fecha_creacion || new Date().toISOString(),
+    perfilId: normalizarPerfilId(u.perfilId || "")
   }})
+
+  perfilesLuiz = (perfilesLuiz || []).map(p=>({
+    id: normalizarPerfilId(p.id || p.nombre || ""),
+    nombre: String(p.nombre || "").trim(),
+    estado: String(p.estado || "activo") === "inactivo" ? "inactivo" : "activo",
+    permisos: normalizarPermisosPerfil(p.permisos || {}),
+    system: !!p.system,
+    fecha_creacion: p.fecha_creacion || new Date().toISOString()
+  })).filter(p=>p.id && p.nombre)
+
+  if(!perfilesLuiz.length){
+    perfilesLuiz = perfilesBaseLuiz()
+  }else{
+    perfilesBaseLuiz().forEach(base=>{
+      const existe = perfilesLuiz.some(p=>p.id === base.id)
+      if(!existe) perfilesLuiz.push(base)
+    })
+  }
 
   institucionesLuiz = institucionesLuiz.map(inst=>({
     id: String(inst.id || generarIdInstitucion()),
@@ -3795,6 +4130,12 @@ function cargarLuizLabsDesdeStorage(){
   })).filter(inst=>inst.slug && inst.nombre)
 
   asegurarUsuariosGlobalesLegacy()
+  usuariosAdminLuiz = usuariosAdminLuiz.map(u=>{
+    if(normalizarRolUsuario(u.rol) !== ROLES_ADMIN.ADMINISTRADOR) return u
+    const perfil = normalizarPerfilId(u.perfilId || "")
+    if(perfil && obtenerPerfilPorId(perfil)) return u
+    return Object.assign({}, u, { perfilId: "administrador" })
+  })
   migrarLogosInstitucionalesBase()
   sincronizarTenantsDesdeInstituciones()
   guardarLuizLabsEnStorage()
@@ -3837,22 +4178,30 @@ function obtenerInstitucionLuiz(tenantId){
 function mostrarVistaLuizLabs(vista){
   let next = "instituciones"
   if(vista === "usuarios") next = "usuarios"
+  if(vista === "perfiles") next = "perfiles"
   if(vista === "logs") next = "logs"
   vistaLuizLabsActual = next
 
   const navInst = document.getElementById("luizNavInstituciones")
   const navUsers = document.getElementById("luizNavUsuarios")
+  const navPerfiles = document.getElementById("luizNavPerfiles")
   const navLogs = document.getElementById("luizNavLogs")
   if(navInst) navInst.classList.toggle("active", next === "instituciones")
   if(navUsers) navUsers.classList.toggle("active", next === "usuarios")
+  if(navPerfiles) navPerfiles.classList.toggle("active", next === "perfiles")
   if(navLogs) navLogs.classList.toggle("active", next === "logs")
 
   const bloqueInst = document.getElementById("luizBloqueInstituciones")
   const bloqueUsers = document.getElementById("luizBloqueUsuarios")
+  const bloquePerfiles = document.getElementById("luizBloquePerfiles")
   const bloqueLogs = document.getElementById("luizBloqueLogs")
   if(bloqueInst) bloqueInst.style.display = next === "instituciones" ? "block" : "none"
   if(bloqueUsers) bloqueUsers.style.display = next === "usuarios" ? "block" : "none"
+  if(bloquePerfiles) bloquePerfiles.style.display = next === "perfiles" ? "block" : "none"
   if(bloqueLogs) bloqueLogs.style.display = next === "logs" ? "block" : "none"
+  if(next === "perfiles"){
+    renderPerfilPermisosEditor()
+  }
   if(next === "logs"){
     poblarFiltroTenantLogsGlobal()
     cargarActividadGlobal()
@@ -3863,8 +4212,11 @@ function renderPanelLuizLabs(){
   const tablaInst = document.getElementById("tablaInstitucionesLuiz")
   const tablaGlobal = document.getElementById("tablaUsuariosGlobalLuiz")
   const tablaUsers = document.getElementById("tablaUsuariosAdminLuiz")
+  const tablaPerfiles = document.getElementById("tablaPerfilesLuiz")
   const elTenant = document.getElementById("luizUserTenant")
+  const elPerfil = document.getElementById("luizUserPerfil")
   const tenantPrevio = elTenant?.value || ""
+  const perfilPrevio = elPerfil?.value || ""
   if(!tablaInst || !tablaUsers || !tablaGlobal) return
   mostrarVistaLuizLabs(vistaLuizLabsActual)
   poblarFiltroTenantLogsGlobal()
@@ -3878,6 +4230,20 @@ function renderPanelLuizLabs(){
     elTenant.innerHTML = tenantHtml
     if(tenantPrevio && institucionesActivas.some(i=>i.slug === tenantPrevio)){
       elTenant.value = tenantPrevio
+    }
+  }
+
+  if(elPerfil){
+    let perfilHtml = `<option value="">Seleccionar perfil</option>`
+    ;(perfilesLuiz || [])
+      .filter(p=>p.estado === "activo")
+      .sort((a,b)=>String(a.nombre || "").localeCompare(String(b.nombre || "")))
+      .forEach(p=>{
+        perfilHtml += `<option value="${p.id}">${p.nombre}</option>`
+      })
+    elPerfil.innerHTML = perfilHtml
+    if(perfilPrevio && (perfilesLuiz || []).some(p=>p.id === perfilPrevio && p.estado === "activo")){
+      elPerfil.value = perfilPrevio
     }
   }
 
@@ -3971,47 +4337,89 @@ function renderPanelLuizLabs(){
     .filter(({ u })=>esUsuarioInstitucionalLuiz(u))
 
   if(!usuariosInstitucionales.length){
-    tablaUsers.innerHTML = `<tr><td colspan="6">Sin usuarios admin.</td></tr>`
-    return
+    tablaUsers.innerHTML = `<tr><td colspan="7">Sin usuarios admin.</td></tr>`
+  }else{
+    let usersHtml = ""
+    usuariosInstitucionales.forEach(({ u, idx })=>{
+      const inst = obtenerInstitucionLuiz(u.tenantId)
+      const estado = inst?.estado === "activo" ? "Activa" : "Inactiva"
+      const estadoUser = u.estado === "activo"
+      const fechaUser = String(u.fecha_creacion || "").slice(0,10)
+      const protegido = esUsuarioProtegidoLuiz(u.usuario)
+      const perfilNombre = obtenerPerfilPorId(u.perfilId)?.nombre || "Administrador"
+      usersHtml += `
+        <tr>
+          <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">LEGACY</span>` : ""}</td>
+          <td>${u.rol || ""}</td>
+          <td>${perfilNombre}</td>
+          <td>${inst?.nombre || u.tenantId || ""}</td>
+          <td>${estado}</td>
+          <td>${fechaUser}</td>
+          <td class="actions-col">
+            <div class="table-actions luiz-actions">
+              ${protegido
+                ? `<span class="hint">Protegido</span>`
+                : `
+                  <button onclick="editarUsuarioAdminLuiz(${idx})">Editar</button>
+                  <button class="secondary" onclick="regenerarClaveUsuarioAdminLuiz(${idx})" title="Regenerar clave temporal">Reset</button>
+                  <button
+                    class="state-toggle ${estadoUser ? "active" : ""}"
+                    onclick="toggleEstadoUsuarioAdminLuiz(${idx})"
+                    title="${estadoUser ? "Desactivar usuario" : "Activar usuario"}"
+                    aria-label="${estadoUser ? "Desactivar usuario" : "Activar usuario"}">
+                    <span class="dot"></span>
+                  </button>
+                  <button class="secondary" onclick="eliminarUsuarioAdminLuiz(${idx})">Eliminar</button>
+                `
+              }
+            </div>
+          </td>
+        </tr>
+      `
+    })
+    tablaUsers.innerHTML = usersHtml
   }
 
-  let usersHtml = ""
-  usuariosInstitucionales.forEach(({ u, idx })=>{
-    const inst = obtenerInstitucionLuiz(u.tenantId)
-    const estado = inst?.estado === "activo" ? "Activa" : "Inactiva"
-    const estadoUser = u.estado === "activo"
-    const fechaUser = String(u.fecha_creacion || "").slice(0,10)
-    const protegido = esUsuarioProtegidoLuiz(u.usuario)
-    usersHtml += `
-      <tr>
-        <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">LEGACY</span>` : ""}</td>
-        <td>${u.rol || ""}</td>
-        <td>${inst?.nombre || u.tenantId || ""}</td>
-        <td>${estado}</td>
-        <td>${fechaUser}</td>
-        <td class="actions-col">
-          <div class="table-actions luiz-actions">
-            ${protegido
-              ? `<span class="hint">Protegido</span>`
-              : `
-                <button onclick="editarUsuarioAdminLuiz(${idx})">Editar</button>
-                <button class="secondary" onclick="regenerarClaveUsuarioAdminLuiz(${idx})" title="Regenerar clave temporal">Reset</button>
+  if(tablaPerfiles){
+    const perfilesOrdenados = (perfilesLuiz || [])
+      .map((perfil, idx)=>({ perfil, idx }))
+      .sort((a,b)=>String(a.perfil.nombre || "").localeCompare(String(b.perfil.nombre || "")))
+    if(!perfilesOrdenados.length){
+      tablaPerfiles.innerHTML = `<tr><td colspan="5">Sin perfiles.</td></tr>`
+    }else{
+      let perfilesHtml = ""
+      perfilesOrdenados.forEach(({ perfil: p, idx })=>{
+        const permisosTxt = PROFILE_MODULES.filter(m=>p.permisos?.[m.id]).map(m=>m.label).join(", ") || "Sin permisos"
+        const estado = p.estado === "activo" ? "Activo" : "Inactivo"
+        const fecha = String(p.fecha_creacion || "").slice(0,10)
+        perfilesHtml += `
+          <tr>
+            <td>${p.nombre}${p.system ? ` <span class="tag-system">BASE</span>` : ""}</td>
+            <td>${estado}</td>
+            <td>${permisosTxt}</td>
+            <td>${fecha}</td>
+            <td class="actions-col">
+              <div class="table-actions luiz-actions">
+                <button onclick="editarPerfilLuiz(${idx})">Editar</button>
                 <button
-                  class="state-toggle ${estadoUser ? "active" : ""}"
-                  onclick="toggleEstadoUsuarioAdminLuiz(${idx})"
-                  title="${estadoUser ? "Desactivar usuario" : "Activar usuario"}"
-                  aria-label="${estadoUser ? "Desactivar usuario" : "Activar usuario"}">
+                  class="state-toggle ${p.estado === "activo" ? "active" : ""}"
+                  onclick="toggleEstadoPerfilLuiz(${idx})"
+                  title="${p.estado === "activo" ? "Desactivar perfil" : "Activar perfil"}"
+                  aria-label="${p.estado === "activo" ? "Desactivar perfil" : "Activar perfil"}">
                   <span class="dot"></span>
                 </button>
-                <button class="secondary" onclick="eliminarUsuarioAdminLuiz(${idx})">Eliminar</button>
-              `
-            }
-          </div>
-        </td>
-      </tr>
-    `
-  })
-  tablaUsers.innerHTML = usersHtml
+                ${p.system
+                  ? `<span class="hint">Protegido</span>`
+                  : `<button class="secondary" onclick="eliminarPerfilLuiz(${idx})">Eliminar</button>`
+                }
+              </div>
+            </td>
+          </tr>
+        `
+      })
+      tablaPerfiles.innerHTML = perfilesHtml
+    }
+  }
 }
 
 function esRutaInstitucionalValidaActiva(){
@@ -4104,6 +4512,7 @@ async function crearInstitucionLuizLabs(){
     password,
     rol: ROLES_ADMIN.ADMINISTRADOR,
     tenantId: slug,
+    perfilId: "administrador",
     estado: "activo",
     fecha_creacion: new Date().toISOString()
   })
@@ -4437,6 +4846,7 @@ function guardarUsuarioGlobalLuiz(){
     actual.password = password
     actual.rol = ROLES_ADMIN.SUPERUSUARIO
     actual.tenantId = ""
+    actual.perfilId = ""
     if(!actual.fecha_creacion) actual.fecha_creacion = new Date().toISOString()
     if(!actual.estado) actual.estado = "activo"
     accion = "usuario_global_editado"
@@ -4451,6 +4861,7 @@ function guardarUsuarioGlobalLuiz(){
       password,
       rol: ROLES_ADMIN.SUPERUSUARIO,
       tenantId: "",
+      perfilId: "",
       estado: "activo",
       fecha_creacion: new Date().toISOString()
     })
@@ -4468,6 +4879,7 @@ function limpiarUsuarioAdminLuizForm(){
   if(luizUserRol) luizUserRol.value = ROLES_ADMIN.ADMINISTRADOR
   if(luizUserTenant) luizUserTenant.value = ""
   if(luizUserPass) luizUserPass.value = ""
+  if(luizUserPerfil) luizUserPerfil.value = "administrador"
 }
 
 function generarClaveUsuarioLuiz(){
@@ -4511,6 +4923,7 @@ function editarUsuarioAdminLuiz(idx){
   if(luizUserRol) luizUserRol.value = normalizarRolUsuario(user.rol)
   if(luizUserTenant) luizUserTenant.value = user.tenantId || ""
   if(luizUserPass) luizUserPass.value = user.password || ""
+  if(luizUserPerfil) luizUserPerfil.value = user.perfilId || "administrador"
 }
 
 function guardarUsuarioAdminLuiz(){
@@ -4519,6 +4932,7 @@ function guardarUsuarioAdminLuiz(){
   const rol = normalizarRolUsuario(luizUserRol?.value || ROLES_ADMIN.ADMINISTRADOR)
   const tenantId = String(luizUserTenant?.value || "").trim()
   const password = String(luizUserPass?.value || "").trim()
+  const perfilId = normalizarPerfilId(luizUserPerfil?.value || "administrador") || "administrador"
 
   if(!usuario || !tenantId || !password){
     alert("Completa usuario, institución y clave.")
@@ -4547,6 +4961,11 @@ function guardarUsuarioAdminLuiz(){
     alert("Selecciona una institución activa.")
     return
   }
+  const perfil = obtenerPerfilPorId(perfilId)
+  if(!perfil || perfil.estado !== "activo"){
+    alert("Selecciona un perfil activo.")
+    return
+  }
 
   let accion = "usuario_admin_luiz_creado"
   if(editUsuarioLuizIndex >= 0){
@@ -4571,6 +4990,7 @@ function guardarUsuarioAdminLuiz(){
     actual.rol = rol
     actual.tenantId = tenantId
     actual.password = password
+    actual.perfilId = perfilId
     if(!actual.fecha_creacion) actual.fecha_creacion = new Date().toISOString()
     if(!actual.estado) actual.estado = "activo"
     accion = "usuario_admin_luiz_editado"
@@ -4585,6 +5005,7 @@ function guardarUsuarioAdminLuiz(){
       password,
       rol,
       tenantId,
+      perfilId,
       estado: "activo",
       fecha_creacion: new Date().toISOString()
     })
@@ -4596,7 +5017,8 @@ function guardarUsuarioAdminLuiz(){
   registrarActividad(accion, {
     usuario,
     rol,
-    tenantId
+    tenantId,
+    perfilId
   }, { tenantId })
 }
 
@@ -4618,6 +5040,13 @@ function marcarNavActiva(vista){
 
 function aplicarRestriccionesPanelPorContexto(){
   const limitado = esModoAdminMovilLimitado()
+  const puedeReportes = usuarioPuedeVerVista("reportes")
+  const puedeDashboard = usuarioPuedeVerVista("dashboard")
+  const puedeConfig = usuarioPuedeVerVista("config")
+  const puedeUsuarios = usuarioPuedeVerVista("usuarios")
+  const puedeActividad = usuarioPuedeVerVista("actividad")
+  const navReportes = document.getElementById("navReportes")
+  const navDashboard = document.getElementById("navDashboard")
   const navConfig = document.getElementById("navConfig")
   const navUsuarios = document.getElementById("navUsuarios")
   const navActividad = document.getElementById("navActividad")
@@ -4625,9 +5054,11 @@ function aplicarRestriccionesPanelPorContexto(){
   const btnInstitucion = document.getElementById("btnInstitucion")
   const btnVolverLuizLabs = document.getElementById("btnVolverLuizLabs")
 
-  if(navConfig) navConfig.style.display = limitado ? "none" : ""
-  if(navUsuarios) navUsuarios.style.display = limitado ? "none" : ""
-  if(navActividad) navActividad.style.display = limitado ? "none" : ""
+  if(navReportes) navReportes.style.display = puedeReportes ? "" : "none"
+  if(navDashboard) navDashboard.style.display = puedeDashboard ? "" : "none"
+  if(navConfig) navConfig.style.display = (!limitado && puedeConfig) ? "" : "none"
+  if(navUsuarios) navUsuarios.style.display = (!limitado && puedeUsuarios) ? "" : "none"
+  if(navActividad) navActividad.style.display = (!limitado && puedeActividad) ? "" : "none"
   if(adminMobileNotice) adminMobileNotice.style.display = limitado ? "block" : "none"
 
   if(btnInstitucion){
@@ -4643,7 +5074,8 @@ function aplicarRestriccionesPanelPorContexto(){
     btnVolverLuizLabs.style.display = mostrar ? "inline-flex" : "none"
   }
 
-  if(limitado && !esVistaPermitidaEnAdminMovil(vistaAdminActual)){
+  const vistaPermitidaPorPerfil = usuarioPuedeVerVista(vistaAdminActual)
+  if((limitado && !esVistaPermitidaEnAdminMovil(vistaAdminActual)) || !vistaPermitidaPorPerfil){
     mostrarVista("dashboard")
   }
 }
@@ -5369,6 +5801,7 @@ async function cargarUsuariosAdminDesdeSupabase(){
 
 function renderUsuariosAdmin(){
   if(!tablaUsuariosAdmin) return
+  poblarPerfilesInstitucionales()
   const data = SYSTEM_USERS.concat(
     usuariosAdmin.filter(u =>
       !SYSTEM_USERS.some(s => s.usuario === u.usuario) &&
@@ -5377,18 +5810,21 @@ function renderUsuariosAdmin(){
   )
 
   if(!data.length){
-    tablaUsuariosAdmin.innerHTML = `<tr><td colspan="4">Sin usuarios creados.</td></tr>`
+    tablaUsuariosAdmin.innerHTML = `<tr><td colspan="5">Sin usuarios creados.</td></tr>`
     return
   }
 
   let html = ""
   data.forEach((u, idx)=>{
     const isSystem = !!u.system
+    const perfilId = String(perfilesUsuariosLocales?.[String(u.usuario || "").toLowerCase()] || "administrador")
+    const perfilNombre = obtenerPerfilPorId(perfilId)?.nombre || "Administrador"
     html += `
       <tr>
         <td>${u.nombre || ""}${isSystem ? `<span class="tag-system">SISTEMA</span>` : ""}</td>
         <td>${u.usuario || ""}</td>
         <td>${u.rol || ""}</td>
+        <td>${perfilNombre}</td>
         <td>
           <div class="table-actions">
             ${isSystem
@@ -5409,6 +5845,7 @@ function limpiarUsuarioAdmin(){
   userLogin.value = ""
   userPass.value = ""
   userRol.value = "administrador"
+  if(userPerfil) userPerfil.value = "administrador"
   editUsuarioIndex = -1
 }
 
@@ -5417,6 +5854,7 @@ async function guardarUsuarioAdmin(){
   const usuario = (userLogin.value || "").trim().toLowerCase()
   const clave = (userPass.value || "").trim()
   const rol = normalizarRolUsuario(userRol.value)
+  const perfilId = normalizarPerfilId(userPerfil?.value || "administrador") || "administrador"
 
   if(!nombre || !usuario || !clave){
     alert("Completa nombre, usuario y clave")
@@ -5424,6 +5862,11 @@ async function guardarUsuarioAdmin(){
   }
 
   const item = { nombre, usuario, clave, rol }
+  const perfil = obtenerPerfilPorId(perfilId)
+  if(!perfil || perfil.estado !== "activo"){
+    alert("Selecciona un perfil activo.")
+    return
+  }
   if(rol === ROLES_ADMIN.SUPERUSUARIO){
     alert("El rol superusuario es global y no se gestiona en este módulo institucional.")
     return
@@ -5464,8 +5907,10 @@ async function guardarUsuarioAdmin(){
   }
 
   await cargarUsuariosAdminDesdeSupabase()
+  perfilesUsuariosLocales[usuario] = perfilId
+  guardarLuizLabsEnStorage()
   limpiarUsuarioAdmin()
-  registrarActividad(accion, { usuario, rol }, { tenantId: tenantActivoId })
+  registrarActividad(accion, { usuario, rol, perfilId }, { tenantId: tenantActivoId })
 }
 
 function editarUsuarioAdmin(idx){
@@ -5475,6 +5920,10 @@ function editarUsuarioAdmin(idx){
   userLogin.value = u.usuario || ""
   userPass.value = u.clave || ""
   userRol.value = normalizarRolUsuario(u.rol)
+  if(userPerfil){
+    const perfil = String(perfilesUsuariosLocales?.[String(u.usuario || "").toLowerCase()] || "administrador")
+    userPerfil.value = perfil
+  }
   editUsuarioIndex = idx
 }
 
@@ -5492,6 +5941,8 @@ async function eliminarUsuarioAdmin(idx){
     return
   }
   await cargarUsuariosAdminDesdeSupabase()
+  delete perfilesUsuariosLocales[String(u.usuario || "").toLowerCase()]
+  guardarLuizLabsEnStorage()
   registrarActividad("usuario_admin_institucional_desactivado", {
     usuario: u.usuario || "",
     id: u.id
@@ -6116,11 +6567,17 @@ function resolverCredencialesAdmin(usuario, clave){
   }
 
   if(userLocal && String(userLocal.clave || "") === clave){
+    const perfilLocal = String(perfilesUsuariosLocales?.[String(userLocal.usuario || "").toLowerCase()] || "administrador")
+    const perfilDataLocal = obtenerPerfilPorId(perfilLocal)
+    if(!perfilDataLocal || String(perfilDataLocal.estado || "activo") !== "activo"){
+      return { valido: false, motivo: "perfil_inactivo" }
+    }
     return {
       valido: true,
       usuario: userLocal.usuario,
       rol: normalizarRolUsuario(userLocal.rol),
       tenantId: "",
+      perfilId: perfilLocal,
       esLegacy: false
     }
   }
@@ -6129,11 +6586,19 @@ function resolverCredencialesAdmin(usuario, clave){
     if(String(userLuiz.estado || "activo") !== "activo"){
       return { valido: false, motivo: "usuario_inactivo" }
     }
+    const perfilUser = String(userLuiz.perfilId || "administrador")
+    const perfilData = obtenerPerfilPorId(perfilUser)
+    if(normalizarRolUsuario(userLuiz.rol || ROLES_ADMIN.ADMINISTRADOR) === ROLES_ADMIN.ADMINISTRADOR){
+      if(!perfilData || String(perfilData.estado || "activo") !== "activo"){
+        return { valido: false, motivo: "perfil_inactivo" }
+      }
+    }
     return {
       valido: true,
       usuario: userLuiz.usuario,
       rol: normalizarRolUsuario(userLuiz.rol || ROLES_ADMIN.ADMINISTRADOR),
       tenantId: userLuiz.tenantId || "",
+      perfilId: perfilUser,
       esLegacy: false
     }
   }
@@ -6160,6 +6625,8 @@ function loginAccesoAdminInstitucional(){
   if(!resultado.valido){
     if(resultado.motivo === "usuario_inactivo"){
       setMensajeAccesoAdminInstitucional("Usuario inactivo.")
+    }else if(resultado.motivo === "perfil_inactivo"){
+      setMensajeAccesoAdminInstitucional("Perfil inactivo. Contacta a Luiz Labs.")
     }else{
       setMensajeAccesoAdminInstitucional("Credenciales inválidas.")
     }
@@ -6184,7 +6651,8 @@ function loginAccesoAdminInstitucional(){
     usuario: resultado.usuario,
     rol: resultado.rol,
     tenantId: tenant.id,
-    origen: "tenant_route"
+    origen: "tenant_route",
+    perfilId: resultado.perfilId || ""
   })
   registrarActividad("login_admin_institucional", {
     via: "acceso_administrativo_ruta",
@@ -6238,7 +6706,8 @@ function login(){
         usuario: resultado.usuario,
         rol: resultado.rol,
         tenantId: "",
-        origen: "staff_root"
+        origen: "staff_root",
+        perfilId: resultado.perfilId || ""
       })
       registrarActividad("login_admin", {
         via: "root",
@@ -6257,7 +6726,8 @@ function login(){
       usuario: resultado.usuario,
       rol: resultado.rol,
       tenantId: tenantActivoId,
-      origen: "tenant_route"
+      origen: "tenant_route",
+      perfilId: resultado.perfilId || ""
     })
     registrarActividad("login_admin", {
       via: "tenant_login",
@@ -6269,7 +6739,9 @@ function login(){
     mostrarVista("reportes")
     cargarDatos()
   } else {
-    loginMsg.innerText="Usuario o clave incorrecta"
+    loginMsg.innerText = resultado.motivo === "perfil_inactivo"
+      ? "Perfil inactivo. Contacta a Luiz Labs."
+      : "Usuario o clave incorrecta"
   }
 }
 
@@ -7188,6 +7660,7 @@ async function retirarAspirante(dni){
 }
 
 function mostrarVista(vista){
+  vista = aplicarPermisosVistasPorPerfil(vista)
   if(esModoAdminMovilLimitado() && !esVistaPermitidaEnAdminMovil(vista)){
     vista = "dashboard"
   }
