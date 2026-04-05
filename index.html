@@ -7622,7 +7622,11 @@ async function resolverCredencialesAdmin(usuario, clave, contexto = {}){
   const userLuiz = (usuariosAdminLuiz || []).find(u=>u.usuario === usuario)
   const authResultado = await autenticarAdminConSupabaseAuth(usuario, clave)
 
-  if(userLocal && (authResultado.ok || String(userLocal.clave || "") === clave)){
+  if(userLocal?.authUserId && !authResultado.ok){
+    return { valido: false, motivo: "clave_incorrecta" }
+  }
+
+  if(userLocal && (authResultado.ok || !userLocal?.authUserId && String(userLocal.clave || "") === clave)){
     const perfilLocal = String(perfilesUsuariosLocales?.[String(userLocal.usuario || "").toLowerCase()] || "administrador")
     const perfilDataLocal = obtenerPerfilPorId(perfilLocal)
     const rolLocal = normalizarRolUsuario(userLocal.rol)
@@ -7638,10 +7642,6 @@ async function resolverCredencialesAdmin(usuario, clave, contexto = {}){
       esLegacy: false,
       viaAuth: !!authResultado.ok
     }
-  }
-
-  if(userLocal?.authUserId && authResultado.intentado && !authResultado.ok){
-    return { valido: false, motivo: "clave_incorrecta" }
   }
 
   if(userLuiz && String(userLuiz.password || userLuiz.clave || "") === clave){
