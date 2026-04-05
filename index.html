@@ -4552,12 +4552,8 @@ async function cargarLuizLabsDesdeStorage(){
     : {}
 
   const remoto = await cargarLuizLabsDesdeSupabase()
-  const remotoTieneData = !!(remoto && (
-    (remoto.instituciones || []).length ||
-    (remoto.perfiles || []).length ||
-    Object.keys(remoto.userProfiles || {}).length
-  ))
-  if(remotoTieneData){
+  const remotoDisponible = !!remoto
+  if(remotoDisponible){
     institucionesFuente = remoto.instituciones || []
     perfilesFuente = remoto.perfiles || []
     userProfilesFuente = remoto.userProfiles || {}
@@ -4635,9 +4631,6 @@ async function cargarLuizLabsDesdeStorage(){
   migrarLogosInstitucionalesBase()
   sincronizarTenantsDesdeInstituciones()
   guardarLuizLabsEnStorage()
-  if(!remotoTieneData){
-    void sincronizarLuizLabsASupabase()
-  }
 }
 
 function sincronizarTenantsDesdeInstituciones(){
