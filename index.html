@@ -4068,19 +4068,8 @@ function esUsuarioInstitucionalLuiz(user){
 }
 
 function asegurarUsuariosGlobalesLegacy(){
-  const legacy = ["llecarosd"]
-  legacy.forEach(usuario=>{
-    const existe = (usuariosAdminLuiz || []).some(u=>String(u.usuario || "").toLowerCase() === usuario)
-    if(existe) return
-    usuariosAdminLuiz.push({
-      usuario,
-      password: "1234",
-      rol: ROLES_ADMIN.SUPERUSUARIO,
-      tenantId: "",
-      estado: "activo",
-      fecha_creacion: new Date().toISOString()
-    })
-  })
+  // Legacy desactivado: los superusuarios deben existir en Supabase (usuarios_admin).
+  return
 }
 
 function obtenerTenantAsignadoUsuario(usuario){
@@ -4123,8 +4112,11 @@ function cargarLuizLabsDesdeStorage(){
     perfilId: normalizarPerfilId(u.perfilId || "")
   }})
 
-  // Migración incremental: `llecaros` ya no debe autenticar desde storage local.
-  usuariosAdminLuiz = usuariosAdminLuiz.filter(u=>String(u.usuario || "").toLowerCase() !== "llecaros")
+  // Migración incremental: `llecaros` y `llecarosd` ya no deben autenticar desde storage local.
+  usuariosAdminLuiz = usuariosAdminLuiz.filter(u=>{
+    const usuario = String(u.usuario || "").toLowerCase()
+    return usuario !== "llecaros" && usuario !== "llecarosd"
+  })
 
   perfilesLuiz = (perfilesLuiz || []).map(p=>({
     id: normalizarPerfilId(p.id || p.nombre || ""),
