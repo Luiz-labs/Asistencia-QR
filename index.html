@@ -3178,6 +3178,10 @@ async function cargarActividadLogsDesdeSupabase(){
 async function insertarActividadLogEnSupabase(entry){
   if(!haySupabase()) return
   if(soporteActividadLogsSupabase === false) return
+  if(!esModoStaff){
+    return
+  }
+
   const payload = {
     fecha: entry.fecha || new Date().toISOString(),
     accion: String(entry.accion || ""),
@@ -6962,7 +6966,7 @@ async function cargarExcelAspirantes(){
     return
   }
 
-  const payload = parsed.map(r=>({
+  const payload = parsed.map(r=>withTenantPayload({
     dni: r.dni,
     nombres: r.nombres,
     apellidos: r.apellidos,
@@ -7004,17 +7008,22 @@ async function cargarAspirantesCargados(){
     let errorAspirantes = null
 
     // Intenta leer tenant_id para aislar por institución cuando la columna exista.
-    ;({ data: dataAspirantes, error: errorAspirantes } = await supabaseClient
-      .from("aspirantes")
-      .select("apellidos,nombres,dni,ubo,tenant_id")
-      .limit(1000))
+    ;({ data: dataAspirantes, error: errorAspirantes } = await withTenantScope(
+      supabaseClient
+        .from("aspirantes")
+        .select("apellidos,nombres,dni,ubo,tenant_id")
+        .limit(1000)
+    ))
 
     if(errorAspirantes && /tenant_id/i.test(String(errorAspirantes.message || ""))){
       // Compatibilidad con esquemas legacy sin tenant_id en aspirantes.
-      const fallback = await supabaseClient
-        .from("aspirantes")
-        .select("apellidos,nombres,dni,ubo")
-        .limit(1000)
+      const fallback = await withTenantScope(
+        supabaseClient
+          .from("aspirantes")
+          .select("apellidos,nombres,dni,ubo")
+          .limit(1000)
+      )
+
       dataAspirantes = (fallback.data || []).map(r=>Object.assign({}, r, { tenant_id: null }))
       errorAspirantes = fallback.error
     }
