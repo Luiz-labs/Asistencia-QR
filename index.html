@@ -5009,7 +5009,7 @@ function renderPanelLuizLabs(){
           <td>${u.dni || "-"}</td>
           <td>${u.correo || "-"}</td>
           <td>${u.celular || "-"}</td>
-          <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">LEGACY</span>` : ""}${esSupabase ? ` <span class="tag-system">SUPABASE</span>` : ""}</td>
+          <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">PROTEGIDO</span>` : ""}${esSupabase ? ` <span class="tag-system">SUPABASE</span>` : ""}</td>
           <td>${normalizarRolUsuario(u.rol)}</td>
           <td>${estadoUser ? "Activo" : "Inactivo"}</td>
           <td>${fechaUser || "-"}</td>
@@ -5065,7 +5065,7 @@ function renderPanelLuizLabs(){
           <td>${u.dni || "-"}</td>
           <td>${u.correo || "-"}</td>
           <td>${u.celular || "-"}</td>
-          <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">LEGACY</span>` : ""}</td>
+          <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">PROTEGIDO</span>` : ""}</td>
           <td>${u.rol || ""}</td>
           <td>${perfilNombre}</td>
           <td>${inst?.nombre || u.tenantId || ""}</td>
