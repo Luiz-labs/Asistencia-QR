@@ -6153,6 +6153,56 @@ function esTablaNoExiste(error){
   return /does not exist|42P01/i.test(String(error?.message || ""))
 }
 
+async function actualizarTenantScopeBackendReady(){
+  if(!MULTITENANT_MODE || !haySupabase()){
+    tenantScopeBackendReady = false
+    return tenantScopeBackendReady
+  }
+
+  const tablasTenant = [
+    "asistencias",
+    "asistencia_alertas",
+    "aspirantes",
+    "ubos_sedes",
+    "curso_configuracion",
+    "curso_secciones",
+    "curso_sedes_ubo"
+  ]
+
+  const checks = await Promise.all(tablasTenant.map(async (tabla)=>{
+    const { error } = await supabaseClient
+      .from(tabla)
+      .select("tenant_id")
+      .limit(1)
+
+    if(!error) return true
+    const msg = String(error.message || "")
+    if(esTablaNoExiste(error) || /tenant_id/i.test(msg)){
+      return false
+    }
+    console.warn(`No se pudo validar tenant_id en ${tabla}:`, msg)
+    return false
+  }))
+
+  tenantScopeBackendReady = checks.every(Boolean)
+  return tenantScopeBackendReady
+}
+
+async function asegurarUsuariosAdminPrevioLogin(usuario){
+  const user = String(usuario || "").trim().toLowerCase()
+  const yaCargado = user
+    ? (usuariosAdmin || []).some(u=>String(u.usuario || "").toLowerCase() === user)
+    : (usuariosAdmin || []).length > 0
+
+  if(yaCargado || !haySupabase()) return
+
+  try{
+    await cargarUsuariosAdminDesdeSupabase()
+  }catch(e){
+    console.warn("No se pudo recargar usuarios admin antes del login:", e?.message || e)
+  }
+}
+
 function esMovil(){
   const ua = navigator.userAgent || ""
   const touchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0
@@ -7430,6 +7480,7 @@ window.onload = async ()=>{
   renderTenantSelector()
   cargarSesionAdminDesdeStorage()
   aplicarAccesoDesdeRuta()
+  await actualizarTenantScopeBackendReady()
 
   try{
     aplicarLayout()
@@ -7525,7 +7576,48 @@ async function autenticarAdminConSupabaseAuth(usuario, clave){
   return { ok: false, intentado: true }
 }
 
-async function resolverCredencialesAdmin(usuario, clave){
+async function resolverCredencialesAdminViaRPC(usuario, clave, tenantId = ""){
+  if(!haySupabase()) return null
+  const tenant = String(tenantId || "").trim().toLowerCase() || null
+  const { data, error } = await supabaseClient.rpc("resolver_login_admin", {
+    p_usuario: String(usuario || "").trim().toLowerCase(),
+    p_clave: String(clave || ""),
+    p_tenant: tenant
+  })
+
+  if(error){
+    // Compatibilidad: si la RPC aún no existe, seguimos con el flujo actual.
+    if(/42883|does not exist|resolver_login_admin/i.test(String(error.message || ""))){
+      return null
+    }
+    console.warn("No se pudo autenticar por RPC:", error.message)
+    return null
+  }
+
+  const row = Array.isArray(data) ? data[0] : data
+  if(!row) return { valido: false, motivo: "credenciales_invalidas", viaRpc: true }
+
+  const rolNormalizado = normalizarRolUsuario(row.rol || "")
+  const perfilId = String(row.perfil_id || "administrador")
+  return {
+    valido: true,
+    usuario: String(row.usuario || "").trim().toLowerCase(),
+    rol: rolNormalizado,
+    tenantId: String(row.tenant_id || "").trim().toLowerCase(),
+    perfilId,
+    esLegacy: false,
+    viaAuth: true,
+    viaRpc: true
+  }
+}
+
+async function resolverCredencialesAdmin(usuario, clave, contexto = {}){
+  const tenantContexto = String(contexto?.tenantId || "").trim().toLowerCase()
+  const resultadoRpc = await resolverCredencialesAdminViaRPC(usuario, clave, tenantContexto)
+  if(resultadoRpc){
+    return resultadoRpc
+  }
+
   const userLocal = (usuariosAdmin || []).find(u=>u.usuario === usuario)
   const userLuiz = (usuariosAdminLuiz || []).find(u=>u.usuario === usuario)
   const authResultado = await autenticarAdminConSupabaseAuth(usuario, clave)
@@ -7584,13 +7676,14 @@ async function loginAccesoAdminInstitucional(){
 
   const usuario = String(tenantAdminUser?.value || "").trim().toLowerCase()
   const clave = String(tenantAdminPass?.value || "").trim()
+  await asegurarUsuariosAdminPrevioLogin(usuario)
   if(!usuario || !clave){
     setMensajeAccesoAdminInstitucional("Completa usuario y clave.")
     return
   }
 
   const tenant = obtenerTenantActivo()
-  const resultado = await resolverCredencialesAdmin(usuario, clave)
+  const resultado = await resolverCredencialesAdmin(usuario, clave, { tenantId: tenant.id, origen: "tenant_route" })
 
   if(!resultado.valido){
     if(resultado.motivo === "usuario_inactivo"){
@@ -7639,7 +7732,11 @@ async function loginAccesoAdminInstitucional(){
 async function login(){
   const usuario = (loginUser.value || "").trim().toLowerCase()
   const clave = (loginPass.value || "").trim()
-  const resultado = await resolverCredencialesAdmin(usuario, clave)
+  await asegurarUsuariosAdminPrevioLogin(usuario)
+  const resultado = await resolverCredencialesAdmin(usuario, clave, {
+    tenantId: esModoStaff ? "" : String(tenantActivoId || "").trim().toLowerCase(),
+    origen: esModoStaff ? "staff_root" : "tenant_route"
+  })
 
   if(!esModoStaff){
     const tenant = obtenerTenantActivo()
