@@ -3029,6 +3029,7 @@ let editUsuarioGlobalLuizIndex = -1
 let editPerfilLuizIndex = -1
 let soporteLuizLabsSupabase = null
 let soporteActividadLogsSupabase = null
+let soporteUsuariosLuizSupabase = null
 let syncLuizLabsEnCurso = null
 const SYSTEM_USERS = []
 const tutorialSteps = [
@@ -4498,6 +4499,172 @@ function mapearUsuariosBaseDesdeTenants(){
   return items
 }
 
+function rolUsuarioSupabaseDesdeApp(rol){
+  return normalizarRolUsuario(rol) === ROLES_ADMIN.SUPERUSUARIO ? "super_admin" : "administrador"
+}
+
+function mapearUsuarioLuizDesdeSupabase(u){
+  const nombreRaw = String(u?.nombre || "").trim()
+  const nombres = String(u?.nombres || "").trim() || nombreRaw.split(" ").slice(0,1).join(" ")
+  const apellidos = String(u?.apellidos || "").trim() || nombreRaw.split(" ").slice(1).join(" ")
+  return {
+    nombres,
+    apellidos,
+    dni: String(u?.dni || "").replace(/\D/g, ""),
+    correo: String(u?.correo || "").trim().toLowerCase(),
+    celular: String(u?.celular || "").replace(/\D/g, ""),
+    usuario: String(u?.usuario || "").trim().toLowerCase(),
+    password: String(u?.clave || ""),
+    rol: normalizarRolUsuario(u?.rol || ROLES_ADMIN.ADMINISTRADOR),
+    tenantId: String(u?.tenant_id || "").trim().toLowerCase(),
+    estado: u?.activo === false ? "inactivo" : "activo",
+    fecha_creacion: String(u?.created_at || u?.fecha_creacion || new Date().toISOString()),
+    perfilId: ""
+  }
+}
+
+async function cargarUsuariosLuizDesdeSupabase(){
+  if(!haySupabase()) return null
+  if(soporteUsuariosLuizSupabase === false) return null
+  let data = []
+  let error = null
+
+  ;({ data, error } = await supabaseClient
+    .from("usuarios_admin")
+    .select("id,nombre,nombres,apellidos,dni,correo,celular,usuario,clave,rol,activo,tenant_id,created_at")
+    .order("id", { ascending: true }))
+
+  if(error && /(tenant_id|nombres|apellidos|dni|correo|celular|created_at)/i.test(String(error.message || ""))){
+    const fallback = await supabaseClient
+      .from("usuarios_admin")
+      .select("id,nombre,usuario,clave,rol,activo")
+      .order("id", { ascending: true })
+    data = (fallback.data || []).map(u=>Object.assign({}, u, {
+      nombres: "",
+      apellidos: "",
+      dni: "",
+      correo: "",
+      celular: "",
+      tenant_id: null,
+      created_at: null
+    }))
+    error = fallback.error
+  }
+
+  if(error){
+    if(esTablaNoExiste(error)){
+      soporteUsuariosLuizSupabase = false
+      return null
+    }
+    console.warn("No se pudo cargar usuarios Luiz desde Supabase:", error.message)
+    return null
+  }
+
+  soporteUsuariosLuizSupabase = true
+  return (data || []).map(mapearUsuarioLuizDesdeSupabase)
+}
+
+async function guardarUsuarioLuizEnSupabase(user){
+  if(!haySupabase()) return true
+  if(soporteUsuariosLuizSupabase === false) return false
+  const usuario = String(user?.usuario || "").trim().toLowerCase()
+  if(!usuario) return false
+  const payload = {
+    nombre: `${String(user.nombres || "").trim()} ${String(user.apellidos || "").trim()}`.trim() || usuario,
+    nombres: String(user.nombres || "").trim(),
+    apellidos: String(user.apellidos || "").trim(),
+    dni: String(user.dni || "").replace(/\D/g, ""),
+    correo: String(user.correo || "").trim().toLowerCase(),
+    celular: String(user.celular || "").replace(/\D/g, ""),
+    usuario,
+    clave: String(user.password || user.clave || ""),
+    rol: rolUsuarioSupabaseDesdeApp(user.rol || ""),
+    activo: String(user.estado || "activo") !== "inactivo",
+    tenant_id: String(user.tenantId || "").trim().toLowerCase() || null
+  }
+  let { data: existe, error: findError } = await supabaseClient
+    .from("usuarios_admin")
+    .select("id")
+    .eq("usuario", usuario)
+    .limit(1)
+
+  if(findError){
+    console.warn("No se pudo verificar usuario Luiz en Supabase:", findError.message)
+    return false
+  }
+
+  if((existe || []).length){
+    let { error } = await supabaseClient
+      .from("usuarios_admin")
+      .update(payload)
+      .eq("usuario", usuario)
+    if(error && /(tenant_id|nombres|apellidos|dni|correo|celular)/i.test(String(error.message || ""))){
+      const fallback = await supabaseClient
+        .from("usuarios_admin")
+        .update({
+          nombre: payload.nombre,
+          usuario: payload.usuario,
+          clave: payload.clave,
+          rol: payload.rol,
+          activo: payload.activo
+        })
+        .eq("usuario", usuario)
+      error = fallback.error
+    }
+    if(error){
+      if(esTablaNoExiste(error)) soporteUsuariosLuizSupabase = false
+      console.warn("No se pudo actualizar usuario Luiz en Supabase:", error.message)
+      return false
+    }
+    soporteUsuariosLuizSupabase = true
+    return true
+  }
+
+  let { error: insertError } = await supabaseClient
+    .from("usuarios_admin")
+    .insert([payload])
+  if(insertError && /(tenant_id|nombres|apellidos|dni|correo|celular)/i.test(String(insertError.message || ""))){
+    const fallback = await supabaseClient
+      .from("usuarios_admin")
+      .insert([{
+        nombre: payload.nombre,
+        usuario: payload.usuario,
+        clave: payload.clave,
+        rol: payload.rol,
+        activo: payload.activo
+      }])
+    insertError = fallback.error
+  }
+  if(insertError){
+    if(esTablaNoExiste(insertError)) soporteUsuariosLuizSupabase = false
+    console.warn("No se pudo insertar usuario Luiz en Supabase:", insertError.message)
+    return false
+  }
+  soporteUsuariosLuizSupabase = true
+  return true
+}
+
+async function eliminarUsuarioLuizEnSupabase(usuario){
+  if(!haySupabase()) return true
+  if(soporteUsuariosLuizSupabase === false) return false
+  const user = String(usuario || "").trim().toLowerCase()
+  if(!user) return false
+  const { error } = await supabaseClient
+    .from("usuarios_admin")
+    .delete()
+    .eq("usuario", user)
+  if(error){
+    if(esTablaNoExiste(error)){
+      soporteUsuariosLuizSupabase = false
+      return false
+    }
+    console.warn("No se pudo eliminar usuario Luiz en Supabase:", error.message)
+    return false
+  }
+  soporteUsuariosLuizSupabase = true
+  return true
+}
+
 function esTenantProtegido(slug){
   return slug === "esbas-24" || slug === "bomberos-lurin-129"
 }
@@ -4542,7 +4709,7 @@ async function cargarLuizLabsDesdeStorage(){
     console.warn("No se pudo leer storage de Luiz Labs:", e)
   }
 
-  // `usuarios_admin` Luiz todavía vive en almacenamiento local en esta fase.
+  // Fallback local: se usa solo si no está disponible Supabase.
   usuariosAdminLuiz = Array.isArray(parsedLocal?.usuarios_admin) ? parsedLocal.usuarios_admin : []
 
   let institucionesFuente = Array.isArray(parsedLocal?.instituciones) ? parsedLocal.instituciones : []
@@ -4552,11 +4719,15 @@ async function cargarLuizLabsDesdeStorage(){
     : {}
 
   const remoto = await cargarLuizLabsDesdeSupabase()
+  const usuariosRemotos = await cargarUsuariosLuizDesdeSupabase()
   const remotoDisponible = !!remoto
   if(remotoDisponible){
     institucionesFuente = remoto.instituciones || []
     perfilesFuente = remoto.perfiles || []
     userProfilesFuente = remoto.userProfiles || {}
+  }
+  if(Array.isArray(usuariosRemotos)){
+    usuariosAdminLuiz = usuariosRemotos
   }
 
   institucionesLuiz = institucionesFuente
@@ -4587,12 +4758,6 @@ async function cargarLuizLabsDesdeStorage(){
     fecha_creacion: u.fecha_creacion || new Date().toISOString(),
     perfilId: normalizarPerfilId(u.perfilId || "")
   }})
-
-  // Migración incremental: `llecaros` y `llecarosd` ya no deben autenticar desde storage local.
-  usuariosAdminLuiz = usuariosAdminLuiz.filter(u=>{
-    const usuario = String(u.usuario || "").toLowerCase()
-    return usuario !== "llecaros" && usuario !== "llecarosd"
-  })
 
   perfilesLuiz = (perfilesLuiz || []).map(p=>({
     id: normalizarPerfilId(p.id || p.nombre || ""),
@@ -5034,7 +5199,7 @@ async function crearInstitucionLuizLabs(){
 
   const usuario = `admin@${slug}`
   const password = generarClaveTemporal(8)
-  usuariosAdminLuiz.push({
+  const nuevoAdmin = {
     usuario,
     password,
     rol: ROLES_ADMIN.ADMINISTRADOR,
@@ -5042,7 +5207,9 @@ async function crearInstitucionLuizLabs(){
     perfilId: "administrador",
     estado: "activo",
     fecha_creacion: new Date().toISOString()
-  })
+  }
+  usuariosAdminLuiz.push(nuevoAdmin)
+  await guardarUsuarioLuizEnSupabase(nuevoAdmin)
 
   sincronizarTenantsDesdeInstituciones()
   guardarLuizLabsEnStorage()
@@ -5145,7 +5312,7 @@ async function copiarEnlaceInstitucionLuizLabs(slug){
   }
 }
 
-function eliminarInstitucionLuizLabs(id){
+async function eliminarInstitucionLuizLabs(id){
   if(!puedeEntrarPanelLuizLabs()) return
   const idx = institucionesLuiz.findIndex(x=>x.id === id)
   if(idx < 0) return
@@ -5170,6 +5337,10 @@ function eliminarInstitucionLuizLabs(id){
   const nombreEliminado = inst.nombre
 
   institucionesLuiz.splice(idx, 1)
+  const usuariosEliminar = usuariosAdminLuiz.filter(u=>u.tenantId === inst.slug)
+  for(const u of usuariosEliminar){
+    await eliminarUsuarioLuizEnSupabase(u.usuario)
+  }
   usuariosAdminLuiz = usuariosAdminLuiz.filter(u=>u.tenantId !== inst.slug)
 
   const idxTenant = TENANTS.findIndex(t=>t.id === inst.slug)
@@ -5186,7 +5357,7 @@ function eliminarInstitucionLuizLabs(id){
   }, { tenantId: slugEliminado })
 }
 
-function regenerarClaveUsuarioAdminLuiz(idx){
+async function regenerarClaveUsuarioAdminLuiz(idx){
   if(!puedeEntrarPanelLuizLabs()) return
   const user = usuariosAdminLuiz[idx]
   if(!user) return
@@ -5197,6 +5368,7 @@ function regenerarClaveUsuarioAdminLuiz(idx){
   }
   const nuevaClave = generarClaveTemporal(8)
   user.password = nuevaClave
+  await guardarUsuarioLuizEnSupabase(user)
   guardarLuizLabsEnStorage()
   renderPanelLuizLabs()
   registrarActividad("usuario_clave_regenerada", {
@@ -5210,7 +5382,7 @@ function regenerarClaveUsuarioAdminLuiz(idx){
   )
 }
 
-function toggleEstadoUsuarioAdminLuiz(idx){
+async function toggleEstadoUsuarioAdminLuiz(idx){
   if(!puedeEntrarPanelLuizLabs()) return
   const user = usuariosAdminLuiz[idx]
   if(!user) return
@@ -5220,6 +5392,7 @@ function toggleEstadoUsuarioAdminLuiz(idx){
     return
   }
   user.estado = user.estado === "activo" ? "inactivo" : "activo"
+  await guardarUsuarioLuizEnSupabase(user)
   guardarLuizLabsEnStorage()
   renderPanelLuizLabs()
   registrarActividad("usuario_estado_actualizado", {
@@ -5229,7 +5402,7 @@ function toggleEstadoUsuarioAdminLuiz(idx){
   }, { tenantId: user.tenantId || "" })
 }
 
-function eliminarUsuarioAdminLuiz(idx){
+async function eliminarUsuarioAdminLuiz(idx){
   if(!puedeEntrarPanelLuizLabs()) return
   const user = usuariosAdminLuiz[idx]
   if(!user) return
@@ -5242,6 +5415,7 @@ function eliminarUsuarioAdminLuiz(idx){
   if(!ok) return
   const userEliminado = user.usuario
   const tenantUser = user.tenantId || ""
+  await eliminarUsuarioLuizEnSupabase(userEliminado)
   usuariosAdminLuiz.splice(idx, 1)
   guardarLuizLabsEnStorage()
   renderPanelLuizLabs()
@@ -5313,7 +5487,7 @@ function editarUsuarioGlobalLuiz(idx){
   if(luizGlobalUserPass) luizGlobalUserPass.value = user.password || ""
 }
 
-function toggleEstadoUsuarioGlobalLuiz(idx){
+async function toggleEstadoUsuarioGlobalLuiz(idx){
   if(!puedeEntrarPanelLuizLabs()) return
   const user = usuariosAdminLuiz[idx]
   if(!user || !esUsuarioGlobalAsistIA(user)) return
@@ -5322,6 +5496,7 @@ function toggleEstadoUsuarioGlobalLuiz(idx){
     return
   }
   user.estado = user.estado === "activo" ? "inactivo" : "activo"
+  await guardarUsuarioLuizEnSupabase(user)
   guardarLuizLabsEnStorage()
   renderPanelLuizLabs()
   registrarActividad("usuario_global_estado_actualizado", {
@@ -5330,7 +5505,7 @@ function toggleEstadoUsuarioGlobalLuiz(idx){
   })
 }
 
-function eliminarUsuarioGlobalLuiz(idx){
+async function eliminarUsuarioGlobalLuiz(idx){
   if(!puedeEntrarPanelLuizLabs()) return
   const user = usuariosAdminLuiz[idx]
   if(!user || !esUsuarioGlobalAsistIA(user)) return
@@ -5341,13 +5516,14 @@ function eliminarUsuarioGlobalLuiz(idx){
   const ok = confirm(`¿Eliminar usuario global "${user.usuario}"?`)
   if(!ok) return
   const usuarioEliminado = user.usuario
+  await eliminarUsuarioLuizEnSupabase(usuarioEliminado)
   usuariosAdminLuiz.splice(idx, 1)
   guardarLuizLabsEnStorage()
   renderPanelLuizLabs()
   registrarActividad("usuario_global_eliminado", { usuario: usuarioEliminado })
 }
 
-function guardarUsuarioGlobalLuiz(){
+async function guardarUsuarioGlobalLuiz(){
   if(!puedeEntrarPanelLuizLabs()) return
   const nombres = String(luizGlobalNombres?.value || "").trim()
   const apellidos = String(luizGlobalApellidos?.value || "").trim()
@@ -5436,6 +5612,8 @@ function guardarUsuarioGlobalLuiz(){
   }
 
   guardarLuizLabsEnStorage()
+  const userGuardado = usuariosAdminLuiz.find(u=>String(u.usuario || "").toLowerCase() === usuario)
+  if(userGuardado) await guardarUsuarioLuizEnSupabase(userGuardado)
   renderPanelLuizLabs()
   limpiarUsuarioGlobalLuizForm()
   registrarActividad(accion, { usuario, rol, dni })
@@ -5508,7 +5686,7 @@ function editarUsuarioAdminLuiz(idx){
   if(luizUserPerfil) luizUserPerfil.value = user.perfilId || "administrador"
 }
 
-function guardarUsuarioAdminLuiz(){
+async function guardarUsuarioAdminLuiz(){
   if(!puedeEntrarPanelLuizLabs()) return
   const nombres = String(luizUserNombres?.value || "").trim()
   const apellidos = String(luizUserApellidos?.value || "").trim()
@@ -5621,6 +5799,8 @@ function guardarUsuarioAdminLuiz(){
   }
 
   guardarLuizLabsEnStorage()
+  const userGuardado = usuariosAdminLuiz.find(u=>String(u.usuario || "").toLowerCase() === usuario)
+  if(userGuardado) await guardarUsuarioLuizEnSupabase(userGuardado)
   renderPanelLuizLabs()
   limpiarUsuarioAdminLuizForm()
   registrarActividad(accion, {
