@@ -398,6 +398,110 @@ input, select{
   min-width:0;
 }
 
+.login-screen{
+  background:#f2f2f7;
+}
+
+.login-head-wrap{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+.login-card{
+  position:relative;
+  background:#fff;
+  border-radius:18px;
+  border:1px solid rgba(16, 34, 68, 0.08);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.16),
+    0 10px 20px rgba(0, 0, 0, 0.09),
+    0 2px 6px rgba(0, 0, 0, 0.05);
+  transition:border-color .24s ease, box-shadow .24s ease, transform .24s ease;
+  isolation:isolate;
+}
+
+.login-card::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius:inherit;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .24s ease;
+  background:linear-gradient(130deg, rgba(92,169,255,.32), rgba(120,212,255,.2), rgba(92,169,255,.12));
+  filter:blur(1px);
+  z-index:-1;
+}
+
+@media (hover:hover) and (pointer:fine){
+  .login-card:hover{
+    border-color:rgba(92, 169, 255, 0.44);
+    box-shadow:
+      0 32px 62px rgba(13, 24, 52, 0.21),
+      0 12px 24px rgba(31, 78, 160, 0.16),
+      0 0 0 1px rgba(92, 169, 255, 0.26) inset;
+    transform:translateY(-2px);
+  }
+
+  .login-card:hover::before{
+    opacity:1;
+  }
+}
+
+.login-input-row{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+  align-items:stretch;
+  width:100%;
+}
+
+#loginScreen input{
+  border:1px solid #c6d3e8;
+  transition:border-color .24s ease, box-shadow .24s ease, background-color .24s ease;
+}
+
+#loginScreen input:focus,
+#loginScreen input:focus-visible{
+  border-color:#5ca9ff;
+  box-shadow:0 0 0 3px rgba(92, 169, 255, 0.22);
+  outline:none;
+}
+
+@media (prefers-color-scheme: dark){
+  .login-screen{
+    background:#161b24 !important;
+  }
+
+  .login-head-wrap h2,
+  .login-head-wrap p{
+    color:#b9c5dd !important;
+  }
+
+  .login-card{
+    background:#1f2634;
+    border-color:rgba(153, 176, 217, 0.22);
+    box-shadow:
+      0 26px 56px rgba(4, 7, 15, 0.58),
+      0 0 0 1px rgba(115, 149, 205, 0.16) inset;
+  }
+
+  #loginScreen input{
+    background:#253046;
+    border-color:#3f5376;
+    color:#e8eefc;
+  }
+
+  #loginScreen input::placeholder{
+    color:#9daecc;
+  }
+
+  #loginScreen button.secondary{
+    background:#2a3448;
+    color:#e1e9fb;
+  }
+}
+
 .login-tenant-head{
   display:inline-flex;
   align-items:center;
@@ -1855,10 +1959,10 @@ input, select{
   justify-content:center;
   align-items:center;
   background:#f2f2f7;
-">
+" class="login-screen">
 
   <!-- TITULO FUERA -->
-  <div style="text-align:center;margin-bottom:30px;">
+  <div class="login-head-wrap">
     <div class="login-tenant-head">
       <h1 id="tenantTituloLogin" style="margin:0;">XXIV Comandancia Departamental Lima Sur</h1>
     </div>
@@ -1867,7 +1971,7 @@ input, select{
   </div>
 
   <!-- CARD LOGIN -->
-  <div style="
+  <div class="login-card" style="
     background:white;
     padding:25px;
     border-radius:18px;
@@ -1886,13 +1990,7 @@ input, select{
     <h2 id="tenantCardTituloLogin" class="login-card-title">ESBAS 2026</h2>
 
     <!-- INPUTS EN LINEA -->
-    <div style="
-      display:flex;
-      gap:10px;
-      margin-bottom:15px;
-      align-items:stretch;
-      width:100%;
-    ">
+    <div class="login-input-row">
       <input id="loginUser" placeholder="Usuario" style="flex:1;">
       <input id="loginPass" type="password" placeholder="Clave" style="flex:1;">
     </div>
