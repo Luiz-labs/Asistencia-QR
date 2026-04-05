@@ -4690,6 +4690,11 @@ function esUsuarioProtegidoLuiz(usuario){
   return user === "llecarosd"
 }
 
+function puedeEditarDatosUsuarioProtegido(user){
+  const usuario = String(user?.usuario || "").trim().toLowerCase()
+  return usuario === "llecarosd"
+}
+
 function esUsuarioGlobalAsistIA(user){
   if(!user) return false
   const rol = normalizarRolUsuario(user.rol || "")
@@ -5011,7 +5016,10 @@ function renderPanelLuizLabs(){
           <td class="actions-col">
             <div class="table-actions luiz-actions">
               ${protegido
-                ? `<span class="hint">Protegido</span>`
+                ? `
+                  <button onclick="editarUsuarioGlobalLuiz(${idx})">Editar</button>
+                  <span class="hint">Protegido</span>
+                `
                 : esSupabase
                 ? `<span class="hint">Gestionado por Supabase</span>`
                 : `
@@ -5487,8 +5495,9 @@ function editarUsuarioGlobalLuiz(idx){
   if(!puedeEntrarPanelLuizLabs()) return
   const user = usuariosAdminLuiz[idx]
   if(!user || !esUsuarioGlobalAsistIA(user)) return
-  if(esUsuarioProtegidoLuiz(user.usuario)){
-    alert("Usuario legacy protegido.")
+  const protegidoEditable = esUsuarioProtegidoLuiz(user.usuario) && puedeEditarDatosUsuarioProtegido(user)
+  if(esUsuarioProtegidoLuiz(user.usuario) && !protegidoEditable){
+    alert("Usuario protegido.")
     return
   }
 
@@ -5570,11 +5579,16 @@ async function guardarUsuarioGlobalLuiz(){
     alert("En esta sección solo se gestionan superusuarios globales.")
     return
   }
-  if(esUsuarioProtegidoLuiz(usuario)){
-    alert("El usuario legacy está protegido y no se gestiona desde aquí.")
-    return
-  }
-  const usuarioSupabase = (usuariosAdmin || []).some(u=>String(u.usuario || "").toLowerCase() === usuario)
+  const usuarioActualEdicion = editUsuarioGlobalLuizIndex >= 0
+    ? String(usuariosAdminLuiz?.[editUsuarioGlobalLuizIndex]?.usuario || "").toLowerCase()
+    : ""
+  const usuarioSupabase = (usuariosAdmin || []).some(u=>{
+    const userDb = String(u.usuario || "").toLowerCase()
+    if(editUsuarioGlobalLuizIndex >= 0 && userDb === usuarioActualEdicion){
+      return false
+    }
+    return userDb === usuario
+  })
   if(usuarioSupabase){
     alert("Ese usuario ya existe en el panel de usuarios.")
     return
@@ -5585,6 +5599,14 @@ async function guardarUsuarioGlobalLuiz(){
     const actual = usuariosAdminLuiz[editUsuarioGlobalLuizIndex]
     if(!actual || !esUsuarioGlobalAsistIA(actual)){
       limpiarUsuarioGlobalLuizForm()
+      return
+    }
+    if(esUsuarioProtegidoLuiz(actual.usuario) && !puedeEditarDatosUsuarioProtegido(actual)){
+      alert("Usuario protegido.")
+      return
+    }
+    if(esUsuarioProtegidoLuiz(actual.usuario) && String(usuario || "").toLowerCase() !== String(actual.usuario || "").toLowerCase()){
+      alert("No puedes cambiar el usuario de esta cuenta protegida.")
       return
     }
     const duplicado = usuariosAdminLuiz.some((u, i)=>i !== editUsuarioGlobalLuizIndex && String(u.usuario || "").toLowerCase() === usuario)
@@ -5606,6 +5628,10 @@ async function guardarUsuarioGlobalLuiz(){
     if(!actual.estado) actual.estado = "activo"
     accion = "usuario_global_editado"
   }else{
+    if(esUsuarioProtegidoLuiz(usuario)){
+      alert("Ese usuario está reservado por el sistema.")
+      return
+    }
     const existe = usuariosAdminLuiz.some(u=>String(u.usuario || "").toLowerCase() === usuario)
     if(existe){
       alert("Ese usuario ya existe.")
