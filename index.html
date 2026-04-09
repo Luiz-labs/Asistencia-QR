@@ -1960,6 +1960,178 @@
         padding-bottom: calc(16px + env(safe-area-inset-bottom));
       }
     }
+
+    /* ===== UPGRADE VISUAL TIPO APP IPHONE ===== */
+
+    /* Fondo general un poco más fino */
+    body {
+      background:
+        radial-gradient(circle at top center, #f8fbff 0%, #eef2f7 58%, #e9edf5 100%);
+    }
+
+    /* Vista principal móvil */
+    #vistaMovilInicio {
+      max-width: 430px;
+      padding-top: calc(26px + env(safe-area-inset-top)) !important;
+      padding-bottom: calc(22px + env(safe-area-inset-bottom)) !important;
+      justify-content: flex-start;
+      gap: 18px;
+    }
+
+    /* Bloque marca superior */
+    #vistaMovilInicio .mobile-qr-brandline {
+      width: min(100%, 360px);
+      margin: 8px auto 0;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .mobile-qr-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      padding: 6px;
+      box-shadow:
+        0 10px 24px rgba(29, 62, 119, 0.14),
+        0 2px 8px rgba(29, 62, 119, 0.08);
+    }
+
+    .mobile-asistia-wordmark {
+      font-size: clamp(2.1rem, 8vw, 2.7rem);
+      letter-spacing: -0.6px;
+    }
+
+    .mobile-qr-title {
+      margin-top: 4px;
+      font-size: clamp(1.2rem, 5vw, 1.5rem);
+      line-height: 1.05;
+      font-weight: 750;
+      color: #233760;
+    }
+
+    .mobile-qr-subtitle {
+      margin-top: 4px;
+      font-size: clamp(1rem, 4.3vw, 1.16rem);
+      color: #6c7ea0;
+      font-weight: 500;
+    }
+
+    /* Tarjeta principal */
+    #vistaMovilInicio .mobile-step {
+      width: min(100%, 390px);
+      margin: 10px auto 0;
+      padding: 22px 18px 20px;
+      border-radius: 28px;
+      border: 1px solid rgba(190, 202, 225, 0.6);
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow:
+        0 24px 60px rgba(28, 44, 84, 0.10),
+        0 8px 22px rgba(28, 44, 84, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    /* Título de la tarjeta */
+    #vistaMovilInicio .mobile-step p {
+      margin-bottom: 14px;
+      font-size: clamp(1.05rem, 4.8vw, 1.25rem);
+      line-height: 1.28;
+      font-weight: 600;
+      color: #506381;
+    }
+
+    /* Input DNI */
+    #vistaMovilInicio input {
+      height: 58px;
+      margin: 10px 0 14px;
+      border-radius: 20px;
+      border: 1.5px solid #d7dfec;
+      background: rgba(248, 250, 253, 0.96);
+      box-shadow: inset 0 1px 2px rgba(34, 52, 86, 0.04);
+      font-size: 19px;
+      color: #1d2c49;
+    }
+
+    #vistaMovilInicio input::placeholder {
+      color: #a1aabd;
+    }
+
+    /* Botón principal */
+    #vistaMovilInicio button {
+      width: 100%;
+      min-height: 58px;
+      border-radius: 22px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      box-shadow:
+        0 16px 30px rgba(19, 98, 230, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    /* Footer */
+    #vistaMovilInicio .login-powered,
+    #vistaMovilInicio .mobile-powered,
+    #vistaMovilInicio .powered-by,
+    #vistaMovilInicio .footer-note {
+      margin-top: 4px;
+    }
+
+    /* Texto "Desarrollado por..." */
+    #vistaMovilInicio .dev-note,
+    #vistaMovilInicio .powered-note,
+    #vistaMovilInicio .login-footer,
+    #vistaMovilInicio .footer-text {
+      color: #99a6bf;
+    }
+
+    /* Botón acceso administrativo */
+    .tenant-admin-access-btn {
+      right: 18px;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      height: 42px;
+      padding: 0 16px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.84) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(206, 217, 235, 0.95);
+      box-shadow:
+        0 10px 24px rgba(29, 42, 71, 0.12),
+        0 3px 10px rgba(29, 42, 71, 0.07) !important;
+    }
+
+    /* Ajuste fino en pantallas pequeñas */
+    @media (max-width: 390px) {
+      #vistaMovilInicio {
+        padding-top: calc(22px + env(safe-area-inset-top)) !important;
+        gap: 16px;
+      }
+
+      #vistaMovilInicio .mobile-step {
+        border-radius: 24px;
+        padding: 20px 16px 18px;
+      }
+
+      #vistaMovilInicio input {
+        height: 54px;
+        font-size: 18px;
+      }
+
+      #vistaMovilInicio button {
+        min-height: 54px;
+        font-size: 18px;
+      }
+
+      .tenant-admin-access-btn {
+        height: 40px;
+        font-size: 12px;
+        padding: 0 14px;
+      }
+    }
   </style>
 </head>
 
