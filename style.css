@@ -110,11 +110,30 @@ h2 {
   box-sizing: border-box;
 }
 
-/* Dashboard desktop: grilla consistente tipo SaaS */
+/* KPI/dashboard: texto y números nunca rompen el card (p. ej. "Inasistencias") */
+#vistaDashboard .dashboard-flex-row .card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+#vistaDashboard .dashboard-flex-row .card h3,
+#vistaDashboard .dashboard-flex-row .card p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 100%;
+}
+
+#vistaDashboard .dashboard-flex-row .card h3 {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dashboard desktop: grilla consistente tipo SaaS (tracks pueden achicarse con el viewport) */
 @media (min-width: 1024px) {
   #vistaDashboard .dashboard-flex-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
     gap: 15px;
     align-items: stretch;
   }
@@ -254,30 +273,42 @@ h2 {
   position: fixed;
   z-index: 1400;
   display: none;
-  width: min(360px, calc(100vw - 26px));
-  max-width: calc(100vw - 26px);
-  left: 13px;
-  right: 13px;
+  box-sizing: border-box;
+  /* Evita 100vw “suelto” en iOS + safe area; el JS ya centra con left/top */
+  width: min(
+    360px,
+    calc(100vw - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
+  );
+  max-width: min(
+    360px,
+    calc(100vw - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
+  );
   background: #ffffff;
-  border: 1px solid #d7e1f2;
-  border-radius: 14px;
-  box-shadow: 0 24px 48px rgba(17, 36, 72, 0.2), 0 8px 18px rgba(17, 36, 72, 0.14);
-  padding: 14px;
+  border: 1px solid rgba(215, 225, 242, 0.95);
+  border-radius: 16px;
+  box-shadow:
+    0 24px 48px rgba(17, 36, 72, 0.14),
+    0 8px 18px rgba(17, 36, 72, 0.1);
+  padding: 16px;
   color: #1e2b47;
 }
 
 .tutorial-tooltip-title {
   font-size: 15px;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  letter-spacing: -0.15px;
+  line-height: 1.25;
 }
 
 .tutorial-tooltip-desc {
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: #4e628b;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   white-space: pre-line;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .tutorial-tooltip-foot {
@@ -285,18 +316,30 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .tutorial-tooltip-step {
   font-size: 12px;
   color: #6a7fa8;
   font-weight: 600;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .tutorial-tooltip-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.tutorial-tooltip-actions button {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .tutorial-spotlight-target {
@@ -308,7 +351,40 @@ h2 {
 
 @media (max-width: 760px) {
   #tutorialTooltip {
-    width: min(340px, calc(100vw - 20px));
+    width: min(
+      340px,
+      calc(100vw - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
+    );
+    max-width: min(
+      340px,
+      calc(100vw - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
+    );
+    padding: 14px 14px 12px;
+  }
+
+  .tutorial-tooltip-foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .tutorial-tooltip-step {
+    text-align: center;
+  }
+
+  .tutorial-tooltip-actions {
+    flex: none;
+    width: 100%;
+    justify-content: stretch;
+    gap: 8px;
+  }
+
+  .tutorial-tooltip-actions button {
+    flex: 1 1 calc(33.333% - 6px);
+    min-width: 0;
+    font-size: 12px;
+    padding: 0 8px;
+    height: 38px;
   }
 }
 
@@ -2272,6 +2348,7 @@ html {
   height: 100%;
   min-height: 100%;
   overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -2281,6 +2358,21 @@ body {
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   overflow-x: hidden;
+  max-width: 100%;
+}
+
+@supports (overflow: clip) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+}
+
+/* Panel principal: nada sobresale del viewport (scroll horizontal sigue dentro de .table-wrap) */
+#vistaDesktop,
+#vistaLuizLabs {
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* Pantallas principales */
