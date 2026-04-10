@@ -110,6 +110,20 @@ h2 {
   box-sizing: border-box;
 }
 
+/* Dashboard desktop: grilla consistente tipo SaaS */
+@media (min-width: 1024px) {
+  #vistaDashboard .dashboard-flex-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  #vistaDashboard .dashboard-flex-row .card {
+    height: 100%;
+  }
+}
+
 #luizInstNombre {
   min-width: min(260px, 100%);
   flex: 1 1 200px;
@@ -241,6 +255,9 @@ h2 {
   z-index: 1400;
   display: none;
   width: min(360px, calc(100vw - 26px));
+  max-width: calc(100vw - 26px);
+  left: 13px;
+  right: 13px;
   background: #ffffff;
   border: 1px solid #d7e1f2;
   border-radius: 14px;
@@ -2254,6 +2271,7 @@ select {
 html {
   height: 100%;
   min-height: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -2262,6 +2280,7 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+  overflow-x: hidden;
 }
 
 /* Pantallas principales */
@@ -2317,7 +2336,7 @@ body {
   max-width: 430px;
   padding-top: calc(26px + env(safe-area-inset-top)) !important;
   padding-bottom: calc(22px + env(safe-area-inset-bottom)) !important;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 18px;
 }
 
