@@ -1911,6 +1911,41 @@ select {
     overflow-x: hidden;
   }
 
+  /* Pulido visual premium (solo móvil) */
+  #vistaDesktop,
+  #vistaLuizLabs {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #vistaDesktop .card,
+  #vistaLuizLabs .card {
+    border-radius: 14px;
+    border-color: rgba(229, 229, 234, 0.9);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  #vistaDesktop h2,
+  #vistaLuizLabs h2 {
+    letter-spacing: -0.2px;
+  }
+
+  #vistaDesktop .card h3,
+  #vistaLuizLabs .card h3 {
+    letter-spacing: -0.15px;
+  }
+
+  /* Panel admin: más “app-like” y menos apretado */
+  #vistaDesktop .header,
+  #vistaLuizLabs .header {
+    padding: 10px 14px;
+    min-height: 0;
+  }
+
+  #vistaDesktop .header,
+  #vistaLuizLabs .header {
+    background: rgba(255, 255, 255, 0.92);
+  }
+
   #vistaDesktop>div:nth-child(2),
   #vistaLuizLabs>div:nth-child(2) {
     flex-direction: column;
@@ -1948,8 +1983,12 @@ select {
   #vistaDesktop .header-actions button,
   #vistaLuizLabs .header-actions button {
     min-width: 0;
-    flex: 1 1 auto;
+    /* 2 columnas “limpias” en móvil; evita botones ultra angostos */
+    flex: 1 1 calc(50% - 6px);
     max-width: 100%;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: -0.1px;
   }
 
   /* Header más compacto y legible en móvil */
@@ -1961,6 +2000,20 @@ select {
     padding: 0 10px;
     font-size: 12px;
     height: 36px;
+  }
+
+  /* Secundarios más “Apple-like” */
+  #vistaDesktop .header-actions button.secondary,
+  #vistaLuizLabs .header-actions button.secondary {
+    background: rgba(245, 245, 247, 0.85);
+    border-color: rgba(229, 229, 234, 0.95);
+  }
+
+  #vistaDesktop .header-actions button.secondary:active,
+  #vistaLuizLabs .header-actions button.secondary:active {
+    transform: none;
+    filter: none;
+    background: rgba(235, 235, 240, 0.95);
   }
 
   #tenantPanelTitulo,
@@ -1996,6 +2049,29 @@ select {
   /* Reportes: filtros realmente usables en iPhone/Android */
   #vistaReportes .card {
     max-width: 100%;
+    padding: 14px;
+  }
+
+  #vistaReportes .card[style*="margin-bottom"] {
+    margin-bottom: 14px !important;
+  }
+
+  #vistaReportes h2 {
+    margin-bottom: 10px;
+  }
+
+  #vistaReportes .card h3 {
+    font-size: 18px;
+  }
+
+  #vistaReportes .filtros {
+    gap: 10px;
+  }
+
+  #vistaReportes .filtros select,
+  #vistaReportes .filtros input {
+    height: 38px;
+    font-size: 13px;
   }
 
   #vistaReportes .filtros button {
@@ -2023,6 +2099,7 @@ select {
 
   #vistaReportes #tabla table {
     font-size: 12px;
+    line-height: 1.25;
   }
 
   #vistaReportes #tabla th,
@@ -2030,12 +2107,27 @@ select {
     padding: 9px 8px;
   }
 
+  #vistaReportes #tabla th {
+    font-size: 11px;
+    letter-spacing: 0.2px;
+    color: #4a5c7a;
+  }
+
+  #vistaReportes #tabla td {
+    color: #1f2f4c;
+  }
+
   .badge-alerta {
     padding: 3px 7px;
     font-size: 11px;
+    border-radius: 999px;
   }
 
   /* Dashboard: menos “escritorio comprimido”, más compacto */
+  #vistaDashboard .card {
+    padding: 14px;
+  }
+
   #vistaDashboard .dashboard-flex-row {
     gap: 10px;
   }
@@ -2049,6 +2141,11 @@ select {
     line-height: 1.05;
   }
 
+  #vistaDashboard .dashboard-flex-row h3 + p {
+    margin-top: 4px;
+    color: #5b6c8a;
+  }
+
   #vistaDashboard .dashboard-flex-row p {
     font-size: 12px;
   }
@@ -2056,16 +2153,27 @@ select {
   #semaforoInfo {
     font-size: 12px !important;
     line-height: 1.35;
+    background: rgba(245, 245, 247, 0.8);
+    border: 1px solid rgba(229, 229, 234, 0.9);
+    padding: 10px 10px;
+    border-radius: 12px;
   }
 
   #riesgoInfo {
     font-size: 12px !important;
     line-height: 1.35;
+    color: #5b6c8a;
   }
 
   #topUbo p {
     font-size: 13px;
     line-height: 1.25;
+  }
+
+  /* Botones del panel: más sutiles en móvil (sin cambiar funcionalidad) */
+  #vistaDesktop button,
+  #vistaLuizLabs button {
+    box-shadow: 0 6px 14px rgba(15, 88, 216, 0.12);
   }
 
   .config-row select,
