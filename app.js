@@ -53,8 +53,9 @@ const ROLES_ADMIN = Object.freeze({
     SUPERUSUARIO: "superusuario",
     ADMINISTRADOR: "administrador"
 })
-const TENANTS = [
-    {
+/** Registro de tenants (slug → config). Mutado en runtime al sincronizar con Luiz-Labs (nuevas instituciones). */
+const TENANTS = {
+    "esbas-24": {
         id: "esbas-24",
         nombre: "XXIV Comandancia Departamental Lima Sur",
         linea: "Incorporación y ESBAS",
@@ -63,7 +64,7 @@ const TENANTS = [
         habilitado: true,
         usuariosSistema: []
     },
-    {
+    "bomberos-lurin-129": {
         id: "bomberos-lurin-129",
         nombre: "Bomberos Lurín 129",
         linea: "Módulo institucional",
@@ -72,7 +73,18 @@ const TENANTS = [
         habilitado: false,
         usuariosSistema: []
     }
-]
+}
+
+function listaTenantsOrdenada() {
+    return Object.values(TENANTS).sort((a, b) =>
+        String(a.nombre || "").localeCompare(String(b.nombre || ""), "es")
+    )
+}
+
+function primerTenantFallback() {
+    const vals = Object.values(TENANTS)
+    return vals.length ? vals[0] : null
+}
 let tenantActivoId = ""
 let esModoStaff = true
 let accesoDirectoInstitucion = false
@@ -495,13 +507,11 @@ function poblarFiltroTenantLogsGlobal() {
     if (!el) return
     const prev = el.value || ""
     let html = `<option value="">Todas las instituciones</option>`
-    TENANTS.slice()
-        .sort((a, b) => String(a.nombre || "").localeCompare(String(b.nombre || "")))
-        .forEach(t => {
-            html += `<option value="${t.id}">${t.nombre}</option>`
-        })
+    listaTenantsOrdenada().forEach(t => {
+        html += `<option value="${t.id}">${t.nombre}</option>`
+    })
     el.innerHTML = html
-    if (prev && TENANTS.some(t => t.id === prev)) {
+    if (prev && TENANTS[prev]) {
         el.value = prev
     }
 }
@@ -793,7 +803,7 @@ function obtenerNombreTenantUI(tenantId) {
     if (!id) return "Plataforma asistIA"
     const instLuiz = (institucionesLuiz || []).find(x => String(x.slug || "") === id)
     if (instLuiz?.nombre) return instLuiz.nombre
-    const tenant = TENANTS.find(t => String(t.id || "") === id)
+    const tenant = TENANTS[id]
     return tenant?.nombre || id
 }
 
@@ -1358,7 +1368,7 @@ function leerLogoInstitucionalArchivo(file) {
 
 function migrarLogosInstitucionalesBase() {
     institucionesLuiz.forEach(inst => {
-        const tenantBase = TENANTS.find(t => t.id === inst.slug)
+        const tenantBase = TENANTS[inst.slug]
         if (!tenantBase) return
         const logoInst = normalizarLogoInstitucion(inst.logo)
         const logoBase = normalizarLogoInstitucion(tenantBase.logo)
@@ -1533,7 +1543,7 @@ async function sincronizarLuizLabsASupabase() {
 }
 
 function mapearInstitucionesBaseDesdeTenants() {
-    return TENANTS.map(t => ({
+    return Object.values(TENANTS).map(t => ({
         id: t.id,
         nombre: t.nombre,
         slug: t.id,
@@ -1545,7 +1555,7 @@ function mapearInstitucionesBaseDesdeTenants() {
 
 function mapearUsuariosBaseDesdeTenants() {
     const items = []
-    TENANTS.forEach(t => {
+    Object.values(TENANTS).forEach(t => {
         const user = (t.usuariosSistema || [])[0]
         if (!user) return
         items.push({
@@ -1888,7 +1898,7 @@ function sincronizarTenantsDesdeInstituciones() {
         bySlug[inst.slug] = inst
     })
 
-    TENANTS.forEach(t => {
+    Object.values(TENANTS).forEach(t => {
         const inst = bySlug[t.id]
         if (inst) {
             t.nombre = inst.nombre
@@ -1898,9 +1908,8 @@ function sincronizarTenantsDesdeInstituciones() {
     })
 
     institucionesLuiz.forEach(inst => {
-        const exists = TENANTS.find(t => t.id === inst.slug)
-        if (exists) return
-        TENANTS.push({
+        if (TENANTS[inst.slug]) return
+        TENANTS[inst.slug] = {
             id: inst.slug,
             nombre: inst.nombre,
             linea: "Módulo institucional",
@@ -1908,7 +1917,7 @@ function sincronizarTenantsDesdeInstituciones() {
             logo: obtenerLogoInstitucion(inst),
             habilitado: inst.estado === "activo",
             usuariosSistema: []
-        })
+        }
     })
 }
 
@@ -2430,9 +2439,8 @@ async function eliminarInstitucionLuizLabs(id) {
     }
     usuariosAdminLuiz = usuariosAdminLuiz.filter(u => u.tenantId !== inst.slug)
 
-    const idxTenant = TENANTS.findIndex(t => t.id === inst.slug)
-    if (idxTenant >= 0) {
-        TENANTS.splice(idxTenant, 1)
+    if (TENANTS[inst.slug]) {
+        delete TENANTS[inst.slug]
     }
 
     guardarLuizLabsEnStorage()
@@ -2988,7 +2996,9 @@ function normalizarPathname(pathname) {
         path = "/" + path
     }
     path = path.replace(/\/{2,}/g, "/")
-    if (path === "/index.html") {
+    // /esbas-24/index.html → /esbas-24/ (mismo documento SPA)
+    path = path.replace(/\/index\.html$/i, "/")
+    if (path === "/") {
         return "/"
     }
     if (path !== "/" && !path.endsWith("/")) {
@@ -2998,8 +3008,6 @@ function normalizarPathname(pathname) {
 }
 
 function obtenerRutaTenant(id) {
-    if (id === "esbas-24") return "/esbas-24/"
-    if (id === "bomberos-lurin-129") return "/bomberos-lurin-129/"
     const clean = String(id || "").trim().replace(/^\/+|\/+$/g, "")
     return clean ? `/${clean}/` : "/"
 }
@@ -3008,7 +3016,7 @@ function resolverAccesoDesdeRuta() {
     const path = normalizarPathname(window.location.pathname)
     if (path !== "/") {
         const slug = path.replace(/^\/|\/$/g, "")
-        const tenant = TENANTS.find(t => t.id === slug)
+        const tenant = TENANTS[slug]
         if (tenant) {
             return { staff: false, tenantId: tenant.id }
         }
@@ -3067,7 +3075,8 @@ function aplicarAccesoDesdeRuta() {
 }
 
 function obtenerTenantActivo() {
-    return TENANTS.find(t => t.id === tenantActivoId) || null
+    const id = String(tenantActivoId || "").trim()
+    return id ? (TENANTS[id] || null) : null
 }
 
 function asignarTenantActivo(id) {
@@ -3077,7 +3086,7 @@ function asignarTenantActivo(id) {
 }
 
 function aplicarTenantEnUI() {
-    const tenant = obtenerTenantActivo() || TENANTS[0]
+    const tenant = obtenerTenantActivo() || primerTenantFallback()
     const titulo = esModoStaff ? "asistIA" : (tenant?.nombre || "Panel ESBAS")
     const linea = esModoStaff ? "Control Inteligente de Asistencia" : (tenant?.linea || "Incorporación y ESBAS")
     const curso = esModoStaff ? "Plataforma asistIA" : (tenant?.curso || "Instrucción ESBAS")
@@ -3116,7 +3125,7 @@ function aplicarTenantEnUI() {
 function renderTenantSelector() {
     if (!tenantGrid) return
     let html = ""
-    TENANTS.forEach(t => {
+    listaTenantsOrdenada().forEach(t => {
         const disabled = !t.habilitado
         const btnClass = disabled ? "secondary" : ""
         const btnText = disabled ? "Próximamente" : "Ingresar"
@@ -3142,7 +3151,7 @@ function renderTenantSelector() {
 }
 
 function seleccionarCliente(id) {
-    const tenant = TENANTS.find(t => t.id === id)
+    const tenant = TENANTS[id]
     if (!tenant) {
         alert("Cliente no válido")
         return
