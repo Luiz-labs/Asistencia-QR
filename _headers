@@ -1,0 +1,40 @@
+# Cloudflare Pages — control de caché (sin tocar la app)
+#
+# Por qué: el HTML es la “fuente de verdad” que enlaza a app.js/style.css.
+# Si el documento queda cacheado, el cliente sigue usando una copia vieja aunque el deploy sea nuevo.
+# Mejor que ?v= manual: Cache-Control correcto en el servidor, sin cambiar URLs.
+#
+# Reglas: los patrones combinan; si un header se repite, se unen. Por eso en rutas de archivos
+# usamos "! Cache-Control" para sustituir el valor heredado de "/*".
+#
+# Compatibilidad SPA: las peticiones a /esbas-24/, /bomberos-lurin-129/, etc. siguen siendo la misma
+# URL; solo cambian cabeceras de respuesta. _redirects no se modifica.
+
+/*
+
+  Cache-Control: no-cache, must-revalidate
+
+/style.css
+
+  ! Cache-Control
+  Cache-Control: public, max-age=0, must-revalidate
+
+/app.js
+
+  ! Cache-Control
+  Cache-Control: public, max-age=0, must-revalidate
+
+/asistIA_logo.png
+
+  ! Cache-Control
+  Cache-Control: public, max-age=86400, must-revalidate
+
+/24_logo.png
+
+  ! Cache-Control
+  Cache-Control: public, max-age=86400, must-revalidate
+
+/B129logo.png
+
+  ! Cache-Control
+  Cache-Control: public, max-age=86400, must-revalidate
