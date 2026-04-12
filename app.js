@@ -175,11 +175,7 @@ Solo administras usuarios de esta institución.`
     }
 ]
 
-const SECTION_TO_UBO_FIELD = {
-    A: "seccion_a_ubo",
-    B: "seccion_b_ubo",
-    C: "seccion_c_ubo"
-}
+// SECTION_TO_UBO_FIELD legacy definition removed
 
 function enlazarIdsGlobales() {
     document.querySelectorAll("[id]").forEach(el => {
@@ -4269,10 +4265,8 @@ async function cargarSedesUbo() {
 }
 
 async function cargarSeccionesCursoDesdeSupabase() {
-    const { data, error } = await supabaseClient
-        .from("curso_secciones")
-        .select("*")
-        .eq("curso_id", 1)
+    let q = withTenantScope(supabaseClient.from("curso_secciones").select("*"))
+    const { data, error } = await q
         .order("seccion", { ascending: true })
 
     if (error) {
@@ -4290,10 +4284,8 @@ async function cargarSeccionesCursoDesdeSupabase() {
 }
 
 async function cargarSedesCursoDesdeSupabase() {
-    const { data, error } = await supabaseClient
-        .from("curso_sedes_ubo")
-        .select("*")
-        .eq("curso_id", 1)
+    let q = withTenantScope(supabaseClient.from("curso_sedes_ubo").select("*"))
+    const { data, error } = await q
         .order("seccion", { ascending: true })
 
     if (error) {
@@ -4452,10 +4444,8 @@ async function aplicarCursoEnUI(cfg) {
 }
 
 async function cargarConfigCurso() {
-    const { data, error } = await supabaseClient
-        .from("curso_configuracion")
-        .select("*")
-        .eq("id", 1)
+    let q = withTenantScope(supabaseClient.from("curso_configuracion").select("*"))
+    const { data, error } = await q
         .maybeSingle()
 
     if (error) {
@@ -5353,17 +5343,12 @@ async function guardarAsistencia() {
             return
         }
 
-        const uboSede = cursoConfigCache[SECTION_TO_UBO_FIELD[seccion]]
         const radio = Number(cursoConfigCache?.radio_m || 50)
 
-        if (!uboSede) {
-            setMensaje(`⚠ No hay UBO sede configurada para Sección ${seccion}`, "error")
-            return
-        }
+        const sedesAsignadas = cursoSedesUbo.filter(s => String(s.seccion).toUpperCase() === String(seccion).toUpperCase() && s.ubo)
 
-        const sede = ubosSedeCache.find(x => String(x.ubo) === String(uboSede))
-        if (!sede || sede.lat == null || sede.lng == null) {
-            setMensaje(`⚠ La UBO sede ${uboSede} no tiene coordenadas`, "error")
+        if (sedesAsignadas.length === 0) {
+            setMensaje(`⚠ No hay UBO sede configurada para Sección ${seccion}`, "error")
             return
         }
 
@@ -5375,12 +5360,42 @@ async function guardarAsistencia() {
             return
         }
 
-        const dist = distanciaMetros(
-            Number(coords.latitude), Number(coords.longitude),
-            Number(sede.lat), Number(sede.lng)
-        )
+        let enRango = false
+        let detalleErrorUbos = []
+        let menorDistancia = Infinity
+        let uboMasCercano = null
 
-        if (dist > radio) {
+        for (const asignada of sedesAsignadas) {
+            const uboSedeReq = asignada.ubo
+            const sedeCache = ubosSedeCache.find(x => String(x.ubo) === String(uboSedeReq))
+
+            if (!sedeCache || sedeCache.lat == null || sedeCache.lng == null) {
+                detalleErrorUbos.push(`La UBO sede ${uboSedeReq} no tiene coordenadas`)
+                continue
+            }
+
+            const dist = distanciaMetros(
+                Number(coords.latitude), Number(coords.longitude),
+                Number(sedeCache.lat), Number(sedeCache.lng)
+            )
+
+            if (dist <= radio) {
+                enRango = true
+                break
+            }
+
+            if (dist < menorDistancia) {
+                menorDistancia = dist
+                uboMasCercano = uboSedeReq
+            }
+        }
+
+        if (!enRango) {
+            if (uboMasCercano === null) {
+                setMensaje(`⚠ ${detalleErrorUbos[0] || "No hay UBO válida con coordenadas"}`, "error")
+                return
+            }
+
             await registrarAlerta({
                 fecha: fechaHoy,
                 hora: horaHoy,
@@ -5389,16 +5404,16 @@ async function guardarAsistencia() {
                 ubo: uboValor,
                 seccion,
                 tipo: "fuera_rango_gps",
-                detalle: `Fuera de rango (${Math.round(dist)}m de UBO ${uboSede}, radio ${radio}m)`,
+                detalle: `Fuera de rango (${Math.round(menorDistancia)}m de UBO ${uboMasCercano}, radio ${radio}m)`,
                 device_id: deviceId,
                 lat: Number(coords.latitude),
                 lng: Number(coords.longitude),
-                ubo_sede: String(uboSede),
-                distancia_m: Math.round(dist),
+                ubo_sede: String(uboMasCercano),
+                distancia_m: Math.round(menorDistancia),
                 radio_m: radio
             })
 
-            alert("⚠ Usted se encuentra fuera del rango de la UBO sede. No se permite marcar asistencia.")
+            alert("⚠ Usted se encuentra fuera del rango de la(s) UBO(s) sede(s). No se permite marcar asistencia.")
             setMensaje("⚠ Fuera de rango GPS. Registro bloqueado.", "error")
             return
         }
@@ -6170,39 +6185,31 @@ async function guardarCurso() {
         mapSedes[x.seccion] = x.ubo
     })
 
-    const payload = {
-        id: 1,
+    const payload = withTenantPayload({
         nombre_curso: (cursoNombre.value || "").toUpperCase() || null,
         fecha_inicio: cursoInicio.value || null,
         fecha_fin: cursoFin.value || null,
-        seccion_a_ubo: mapSedes["A"] || null,
-        seccion_b_ubo: mapSedes["B"] || null,
-        seccion_c_ubo: mapSedes["C"] || null,
         radio_m: Number(cursoRadio.value || 50),
         gps_activo: !!toggleGPS.checked
-    }
+    })
 
     const { error, data } = await supabaseClient
         .from("curso_configuracion")
-        .upsert(payload, { onConflict: "id" })
+        .upsert(payload, { onConflict: "tenant_id" })
         .select()
         .single()
 
     if (error) {
         if (/nombre_curso/i.test(String(error.message || ""))) {
-            const payloadSinNombre = {
-                id: 1,
+            const payloadSinNombre = withTenantPayload({
                 fecha_inicio: cursoInicio.value || null,
                 fecha_fin: cursoFin.value || null,
-                seccion_a_ubo: mapSedes["A"] || null,
-                seccion_b_ubo: mapSedes["B"] || null,
-                seccion_c_ubo: mapSedes["C"] || null,
                 radio_m: Number(cursoRadio.value || 50),
                 gps_activo: !!toggleGPS.checked
-            }
+            })
             const { error: errorSinNombre, data: dataSinNombre } = await supabaseClient
                 .from("curso_configuracion")
-                .upsert(payloadSinNombre, { onConflict: "id" })
+                .upsert(payloadSinNombre, { onConflict: "tenant_id" })
                 .select()
                 .single()
             if (errorSinNombre) {
@@ -6323,29 +6330,23 @@ async function guardarSeccionCurso() {
     let persistioEnDb = false
     try {
         if (oldSeccion && oldSeccion !== item.seccion) {
-            await supabaseClient
-                .from("curso_secciones")
-                .delete()
-                .eq("curso_id", 1)
-                .eq("seccion", oldSeccion)
+            let q = withTenantScope(supabaseClient.from("curso_secciones").delete())
+            await q.eq("seccion", oldSeccion)
         }
 
-        const { error: errorDeleteActual } = await supabaseClient
-            .from("curso_secciones")
-            .delete()
-            .eq("curso_id", 1)
+        let qAct = withTenantScope(supabaseClient.from("curso_secciones").delete())
+        const { error: errorDeleteActual } = await qAct
             .eq("seccion", item.seccion)
         if (errorDeleteActual && !esTablaNoExiste(errorDeleteActual)) {
             throw errorDeleteActual
         }
 
-        const payloadSeccion = {
-            curso_id: 1,
+        const payloadSeccion = withTenantPayload({
             seccion: item.seccion,
             modalidad: item.modalidad,
             hora_inicio: item.hora_inicio,
             dias: item.dias
-        }
+        })
 
         let { error } = await supabaseClient
             .from("curso_secciones")
@@ -6354,12 +6355,11 @@ async function guardarSeccionCurso() {
         if (error && /dias/i.test(String(error.message || ""))) {
             ({ error } = await supabaseClient
                 .from("curso_secciones")
-                .insert([{
-                    curso_id: 1,
+                .insert([withTenantPayload({
                     seccion: item.seccion,
                     modalidad: item.modalidad,
                     hora_inicio: item.hora_inicio
-                }]))
+                })]))
         }
 
         if (error) {
@@ -6429,10 +6429,8 @@ async function eliminarSeccionCurso(idx) {
 
     try {
         if (seccion) {
-            const { error } = await supabaseClient
-                .from("curso_secciones")
-                .delete()
-                .eq("curso_id", 1)
+            let qDel = withTenantScope(supabaseClient.from("curso_secciones").delete())
+            const { error } = await qDel
                 .eq("seccion", seccion)
 
             if (error && !esTablaNoExiste(error)) {
@@ -6580,32 +6578,28 @@ async function guardarSedeUbo() {
     let erroresGuardado = 0
     try {
         if (oldSeccion && !seccionesObjetivo.includes(oldSeccion)) {
-            await supabaseClient
-                .from("curso_sedes_ubo")
-                .delete()
-                .eq("curso_id", 1)
+            let qSede = withTenantScope(supabaseClient.from("curso_sedes_ubo").delete())
+            await qSede.eq("curso_id", 1)
                 .eq("seccion", oldSeccion)
         }
 
         for (const sec of seccionesObjetivo) {
-            const { error: errorDeleteActual } = await supabaseClient
-                .from("curso_sedes_ubo")
-                .delete()
+            let qActSede = withTenantScope(supabaseClient.from("curso_sedes_ubo").delete())
+            const { error: errorDeleteActual } = await qActSede
                 .eq("curso_id", 1)
                 .eq("seccion", sec)
             if (errorDeleteActual && !esTablaNoExiste(errorDeleteActual)) {
                 throw errorDeleteActual
             }
 
-            const payloadSede = {
-                curso_id: 1,
+            const payloadSede = withTenantPayload({
                 seccion: sec,
                 ubo: uboValor,
                 modalidad: modalidadValor,
                 hora_inicio: horaValor,
                 dias,
                 todos_dias: todosDias
-            }
+            })
 
             let { error } = await supabaseClient
                 .from("curso_sedes_ubo")
@@ -6614,13 +6608,12 @@ async function guardarSedeUbo() {
             if (error && /(dias|todos_dias)/i.test(String(error.message || ""))) {
                 ({ error } = await supabaseClient
                     .from("curso_sedes_ubo")
-                    .insert([{
-                        curso_id: 1,
+                    .insert([withTenantPayload({
                         seccion: sec,
                         ubo: uboValor,
                         modalidad: modalidadValor,
                         hora_inicio: horaValor
-                    }]))
+                    })]))
             }
 
             if (error) {
@@ -6698,10 +6691,8 @@ async function eliminarSedeUbo(idx) {
 
     try {
         if (seccion) {
-            const { error } = await supabaseClient
-                .from("curso_sedes_ubo")
-                .delete()
-                .eq("curso_id", 1)
+            let qDelSede = withTenantScope(supabaseClient.from("curso_sedes_ubo").delete())
+            const { error } = await qDelSede
                 .eq("seccion", seccion)
 
             if (error && !esTablaNoExiste(error)) {
@@ -6802,7 +6793,8 @@ async function limpiarCurso() {
     }
 
     try {
-        const { error } = await supabaseClient.from("curso_secciones").delete().eq("curso_id", 1)
+        let qClrSec = withTenantScope(supabaseClient.from("curso_secciones").delete())
+        const { error } = await qClrSec.neq("seccion", "DUMMY_HACK_DELETE_ALL")
         if (error && !esTablaNoExiste(error)) {
             console.warn("No se pudo limpiar curso_secciones:", error.message)
             mostrarMsgCursoModulo(
@@ -6823,7 +6815,8 @@ async function limpiarCurso() {
     }
 
     try {
-        const { error } = await supabaseClient.from("curso_sedes_ubo").delete().eq("curso_id", 1)
+        let qClrSede = withTenantScope(supabaseClient.from("curso_sedes_ubo").delete())
+        const { error } = await qClrSede.neq("seccion", "DUMMY_HACK_DELETE_ALL")
         if (error && !esTablaNoExiste(error)) {
             console.warn("No se pudo limpiar curso_sedes_ubo:", error.message)
             mostrarMsgCursoModulo(
