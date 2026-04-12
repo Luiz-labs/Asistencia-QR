@@ -275,14 +275,10 @@ h2 {
   display: none;
   box-sizing: border-box;
   /* Evita 100vw “suelto” en iOS + safe area; el JS ya centra con left/top */
-  width: min(
-    360px,
-    calc(100vw - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
-  );
-  max-width: min(
-    360px,
-    calc(100vw - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
-  );
+  width: min(360px,
+      calc(100vw - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  max-width: min(360px,
+      calc(100vw - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
   background: #ffffff;
   border: 1px solid rgba(215, 225, 242, 0.95);
   border-radius: 16px;
@@ -351,14 +347,10 @@ h2 {
 
 @media (max-width: 760px) {
   #tutorialTooltip {
-    width: min(
-      340px,
-      calc(100vw - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
-    );
-    max-width: min(
-      340px,
-      calc(100vw - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
-    );
+    width: min(340px,
+        calc(100vw - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+    max-width: min(340px,
+        calc(100vw - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
     padding: 14px 14px 12px;
   }
 
@@ -851,6 +843,10 @@ select {
   border-radius: 10px;
   background: rgba(24, 92, 188, 0.08);
   border: 1px solid rgba(24, 92, 188, 0.18);
+}
+
+.course-edit-banner[hidden] {
+  display: none !important;
 }
 
 .course-edit-badge {
@@ -2095,6 +2091,7 @@ select {
 
 /* Solo teléfonos: sidebar apilado. Tablets (≥601px) mantienen layout tipo escritorio. */
 @media (max-width: 600px) {
+
   html,
   body {
     overflow-x: hidden;
@@ -2330,7 +2327,7 @@ select {
     line-height: 1.05;
   }
 
-  #vistaDashboard .dashboard-flex-row h3 + p {
+  #vistaDashboard .dashboard-flex-row h3+p {
     margin-top: 4px;
     color: #5b6c8a;
   }
@@ -2458,6 +2455,7 @@ body {
 }
 
 @supports (overflow: clip) {
+
   html,
   body {
     overflow-x: clip;

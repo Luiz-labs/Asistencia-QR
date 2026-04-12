@@ -6186,6 +6186,7 @@ async function guardarCurso() {
     })
 
     const payload = withTenantPayload({
+        id: 1,
         nombre_curso: (cursoNombre.value || "").toUpperCase() || null,
         fecha_inicio: cursoInicio.value || null,
         fecha_fin: cursoFin.value || null,
@@ -6195,13 +6196,14 @@ async function guardarCurso() {
 
     const { error, data } = await supabaseClient
         .from("curso_configuracion")
-        .upsert(payload, { onConflict: "tenant_id" })
+        .upsert(payload, { onConflict: "id" })
         .select()
         .single()
 
     if (error) {
         if (/nombre_curso/i.test(String(error.message || ""))) {
             const payloadSinNombre = withTenantPayload({
+                id: 1,
                 fecha_inicio: cursoInicio.value || null,
                 fecha_fin: cursoFin.value || null,
                 radio_m: Number(cursoRadio.value || 50),
@@ -6209,7 +6211,7 @@ async function guardarCurso() {
             })
             const { error: errorSinNombre, data: dataSinNombre } = await supabaseClient
                 .from("curso_configuracion")
-                .upsert(payloadSinNombre, { onConflict: "tenant_id" })
+                .upsert(payloadSinNombre, { onConflict: "id" })
                 .select()
                 .single()
             if (errorSinNombre) {
@@ -6342,6 +6344,7 @@ async function guardarSeccionCurso() {
         }
 
         const payloadSeccion = withTenantPayload({
+            curso_id: 1,
             seccion: item.seccion,
             modalidad: item.modalidad,
             hora_inicio: item.hora_inicio,
@@ -6356,6 +6359,7 @@ async function guardarSeccionCurso() {
             ({ error } = await supabaseClient
                 .from("curso_secciones")
                 .insert([withTenantPayload({
+                    curso_id: 1,
                     seccion: item.seccion,
                     modalidad: item.modalidad,
                     hora_inicio: item.hora_inicio
@@ -6593,6 +6597,7 @@ async function guardarSedeUbo() {
             }
 
             const payloadSede = withTenantPayload({
+                curso_id: 1,
                 seccion: sec,
                 ubo: uboValor,
                 modalidad: modalidadValor,
@@ -6609,6 +6614,7 @@ async function guardarSedeUbo() {
                 ({ error } = await supabaseClient
                     .from("curso_sedes_ubo")
                     .insert([withTenantPayload({
+                        curso_id: 1,
                         seccion: sec,
                         ubo: uboValor,
                         modalidad: modalidadValor,
