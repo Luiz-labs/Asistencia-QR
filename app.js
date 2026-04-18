@@ -2553,6 +2553,20 @@ async function eliminarInstitucionLuizLabs(id) {
         `Esta acción también eliminará su usuario admin asociado.`
     )
     if (!ok) return
+
+    if (haySupabase()) {
+        const { error } = await supabaseClient
+            .from('instituciones_luiz')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error("Error al eliminar institución:", error);
+            alert("No se pudo eliminar la institución de la base de datos.");
+            return;
+        }
+    }
+
     const slugEliminado = inst.slug
     const nombreEliminado = inst.nombre
 
