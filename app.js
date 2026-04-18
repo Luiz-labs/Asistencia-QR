@@ -5543,7 +5543,7 @@ async function guardarAsistencia() {
             lat = Number(coords.latitude);
             lng = Number(coords.longitude);
         }
-    } catch(e) {}
+    } catch (e) { }
 
     const { data, error } = await supabaseClient.rpc('rpc_registrar_asistencia', {
         p_dni: dniRegistro,
@@ -7030,12 +7030,74 @@ tenantAdminUser?.addEventListener("keydown", (e) => {
     }
 })
 
+let debounceTimerAutocompletar = null;
+
+async function procesarAutocompletadoDni(dniValue) {
+    const dniLimpio = (dniValue || "").replace(/\D/g, "").slice(0, 8);
+    if (dniLimpio.length === 8) {
+        clearTimeout(debounceTimerAutocompletar);
+        debounceTimerAutocompletar = setTimeout(async () => {
+            if (!haySupabase() || !tenantActivoId) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('aspirantes')
+                    .select('nombres, apellidos, ubo')
+                    .eq('dni', dniLimpio)
+                    .eq('tenant_id', tenantActivoId)
+                    .single();
+
+                if (data && !error) {
+                    nombres.value = data.nombres || "";
+                    apellidos.value = data.apellidos || "";
+                    ubo.value = data.ubo || "";
+
+                    nombres.readOnly = true;
+                    apellidos.readOnly = true;
+                    ubo.readOnly = true;
+                    if (ubo.tagName === "SELECT") ubo.disabled = true;
+
+                    nombres.style.backgroundColor = "#f0f4f8";
+                    apellidos.style.backgroundColor = "#f0f4f8";
+                    ubo.style.backgroundColor = "#f0f4f8";
+                    setMensaje("");
+                } else {
+                    limpiarCamposAspirante();
+                    setMensaje("⚠ El DNI ingresado no existe en el padrón de la institución.", "warning");
+                }
+            } catch (e) {
+                console.error("Error al autocompletar aspirante:", e);
+                limpiarCamposAspirante();
+            }
+        }, 300);
+    } else {
+        limpiarCamposAspirante();
+        setMensaje("");
+    }
+}
+
+function limpiarCamposAspirante() {
+    nombres.value = "";
+    apellidos.value = "";
+    ubo.value = "";
+
+    nombres.readOnly = false;
+    apellidos.readOnly = false;
+    ubo.readOnly = false;
+    if (ubo.tagName === "SELECT") ubo.disabled = false;
+
+    nombres.style.backgroundColor = "";
+    apellidos.style.backgroundColor = "";
+    ubo.style.backgroundColor = "";
+}
+
 mobileDni?.addEventListener("input", () => {
     mobileDni.value = mobileDni.value.replace(/\D/g, "").slice(0, 8)
+    procesarAutocompletadoDni(mobileDni.value)
 })
 
 mobileDniInicio?.addEventListener("input", () => {
     mobileDniInicio.value = mobileDniInicio.value.replace(/\D/g, "").slice(0, 8)
+    procesarAutocompletadoDni(mobileDniInicio.value)
 })
 
 mobileDni?.addEventListener("keydown", (e) => {
