@@ -5448,44 +5448,7 @@ async function guardarAsistencia() {
         return
     }
 
-    let alertaDniDispositivo = false
-    let alertaDispositivoNoHabitual = false
-    let dispositivoHabitual = ""
-
-    try {
-        const { data: historialDevice } = await withTenantScope(
-            supabaseClient
-                .from("asistencias")
-                .select("dni,fecha,hora")
-                .eq("device_id", deviceId)
-                .order("fecha", { ascending: true })
-                .order("hora", { ascending: true })
-        )
-
-        const dniVistos = new Set((historialDevice || []).map(x => (x.dni || "").trim()).filter(Boolean))
-        alertaDniDispositivo = dniVistos.size > 0 && !dniVistos.has(dniRegistro)
-    } catch (e) {
-        console.warn("No se pudo validar DNI por dispositivo:", e)
-    }
-
-    try {
-        const { data: historialDni } = await withTenantScope(
-            supabaseClient
-                .from("asistencias")
-                .select("device_id,fecha,hora")
-                .eq("dni", dniRegistro)
-                .order("fecha", { ascending: true })
-                .order("hora", { ascending: true })
-        )
-
-        const historial = (historialDni || []).filter(x => (x.device_id || "").trim())
-        if (historial.length) {
-            dispositivoHabitual = String(historial[0].device_id)
-            alertaDispositivoNoHabitual = dispositivoHabitual !== deviceId
-        }
-    } catch (e) {
-        console.warn("No se pudo validar dispositivo habitual por DNI:", e)
-    }
+    // Lógica local de dispositivos y duplicados delegada a la RPC rpc_registrar_asistencia
 
     if (cursoConfigCache?.gps_activo) {
         if (cursoConfigCache.fecha_inicio && fechaHoy < cursoConfigCache.fecha_inicio) {
@@ -5574,56 +5537,41 @@ async function guardarAsistencia() {
         }
     }
 
-    const payloadAsistencia = withTenantPayload({
-        dni: dniRegistro,
-        nombre: nombreCompleto,
-        ubo: uboValor,
-        seccion: seccion,
-        fecha: fechaHoy,
-        hora: horaHoy,
-        device_id: deviceId
-    })
-    const { error } = await supabaseClient.from("asistencias").insert([payloadAsistencia])
+    let lat = 0, lng = 0;
+    try {
+        if (typeof coords !== 'undefined' && coords) {
+            lat = Number(coords.latitude);
+            lng = Number(coords.longitude);
+        }
+    } catch(e) {}
+
+    const { data, error } = await supabaseClient.rpc('rpc_registrar_asistencia', {
+        p_dni: dniRegistro,
+        p_tenant_id: tenantActivoId,
+        p_seccion: seccion,
+        p_latitud: lat,
+        p_longitud: lng,
+        p_device_id: deviceId,
+        p_timestamp_local: new Date().toISOString()
+    });
 
     if (error) {
-        setMensaje("⚠ Ya registraste hoy", "error")
-        return
+        console.error("Error RPC asistencia:", error);
+        setMensaje("⚠ Error de comunicación con el servidor", "error");
+        return;
     }
 
-    if (alertaDniDispositivo) {
-        await registrarAlerta({
-            fecha: fechaHoy,
-            hora: horaHoy,
-            dni: dniRegistro,
-            nombre: nombreCompleto,
-            ubo: uboValor,
-            seccion,
-            tipo: "dni_distinto_dispositivo",
-            detalle: "DNI no visto previamente en este dispositivo",
-            device_id: deviceId
-        })
+    if (!data.success) {
+        setMensaje(`⚠ ${data.message}`, "error");
+        return;
+    }
 
-        alert("⚠ Este DNI no estaba previamente registrado en este dispositivo móvil.")
-        setMensaje("✅ Registrado con alerta: DNI nuevo para este dispositivo", "warning")
+    if (data.warning) {
+        const warnMsgs = Array.isArray(data.warnings) ? data.warnings.join(" | ") : "Atención requerida";
+        alert(`⚠ Atención: ${warnMsgs}`);
+        setMensaje(`✅ Registrado con alerta: ${warnMsgs}`, "warning");
     } else {
-        setMensaje("✅ Registrado", "ok")
-    }
-
-    if (alertaDispositivoNoHabitual) {
-        await registrarAlerta({
-            fecha: fechaHoy,
-            hora: horaHoy,
-            dni: dniRegistro,
-            nombre: nombreCompleto,
-            ubo: uboValor,
-            seccion,
-            tipo: "dni_en_otro_dispositivo",
-            detalle: `Dispositivo no habitual. Habitual: ${dispositivoHabitual}`,
-            device_id: deviceId
-        })
-
-        alert("⚠ Está registrando su asistencia en otro dispositivo no habitual.")
-        setMensaje("✅ Registrado con alerta: dispositivo no habitual", "warning")
+        setMensaje("✅ Registrado", "ok");
     }
 
     nombres.value = ""
