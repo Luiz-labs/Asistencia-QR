@@ -5611,9 +5611,6 @@ async function scanQR() {
             const tokenQR = obtenerCursoTokenDesdeTextoQR(code.data) || obtenerCursoTokenDesdeURL()
             console.log("Token extraído:", tokenQR)
             console.log("Tenant activo:", tenantActivoId)
-            if (!tokenQR) {
-                alert(`DEBUG: token vacío\nQR raw: ${String(code.data || "")}\nTenant: ${tenantActivoId || "-"}`)
-            }
             const cursoValido = await resolverCursoPorToken(tokenQR)
             console.log("Curso válido:", cursoValido)
             console.log("cursoQRValido:", cursoQRValido)
@@ -5621,10 +5618,6 @@ async function scanQR() {
                 `DEBUG QR raw: ${String(code.data || "")}\nDEBUG token: ${tokenQR || "(vacío)"}\nDEBUG tenant: ${tenantActivoId || "-"}\nDEBUG cursoValido: ${cursoValido}\nDEBUG cursoQRValido: ${cursoQRValido}`,
                 cursoValido ? "warning" : "error"
             )
-
-            if (tokenQR && !cursoValido) {
-                alert(`DEBUG: token no validado en Supabase: ${tokenQR} tenant: ${tenantActivoId || "-"}`)
-            }
 
             if (!cursoValido || !cursoQRValido) {
                 setMensaje("⚠ Acceso no válido. Escanee el código QR oficial del curso.", "error")
@@ -5639,7 +5632,6 @@ async function scanQR() {
             vistaMovil.style.display = "none"
             formulario.style.display = "block"
             aplicarVisibilidadAccesoAdminInstitucional()
-            alert("DEBUG: curso válido pero no abrió formulario")
 
             return
         }
