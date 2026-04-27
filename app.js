@@ -234,6 +234,7 @@ let cursoActualId = 1
 let cursoBaseActual = null
 let cursoQRValido = false
 let validacionCursoAspirante = { dni: "", permitido: true, legacy: false, bloqueado: false }
+let inputDniFocusLockUntil = 0
 const SYSTEM_USERS = []
 const tutorialSteps = [
     {
@@ -3715,7 +3716,20 @@ function setMensaje(texto, tipo = "") {
 
 function estaInputDniMovilActivo() {
     const activeId = String(document.activeElement?.id || "")
-    return activeId === "mobileDni" || activeId === "mobileDniInicio"
+    if (activeId === "mobileDni" || activeId === "mobileDniInicio") return true
+    return Date.now() < inputDniFocusLockUntil
+}
+
+function activarLockInputDniMovil(ms = 450) {
+    inputDniFocusLockUntil = Date.now() + ms
+}
+
+function liberarLockInputDniMovilConEspera(ms = 180) {
+    window.setTimeout(() => {
+        const activeId = String(document.activeElement?.id || "")
+        if (activeId === "mobileDni" || activeId === "mobileDniInicio") return
+        inputDniFocusLockUntil = 0
+    }, ms)
 }
 
 function esDomingoLima(fecha = new Date()) {
@@ -7417,6 +7431,22 @@ mobileDni?.addEventListener("input", () => {
 mobileDniInicio?.addEventListener("input", () => {
     mobileDniInicio.value = mobileDniInicio.value.replace(/\D/g, "").slice(0, 8)
     procesarAutocompletadoDni(mobileDniInicio.value)
+})
+
+mobileDni?.addEventListener("focus", () => {
+    activarLockInputDniMovil()
+})
+
+mobileDniInicio?.addEventListener("focus", () => {
+    activarLockInputDniMovil()
+})
+
+mobileDni?.addEventListener("blur", () => {
+    liberarLockInputDniMovilConEspera()
+})
+
+mobileDniInicio?.addEventListener("blur", () => {
+    liberarLockInputDniMovilConEspera()
 })
 
 mobileDni?.addEventListener("keydown", (e) => {
