@@ -1,3 +1,5 @@
-# Cloudflare Pages: SPA — sirve siempre index.html con 200 sin cambiar la URL visible.
-# Permite refresh y deep links en /esbas-24/, /bomberos-lurin-129/, etc.
-/*    /index.html   200
+# asistencia (vista pública)
+/*/asistencia/*     /asistencia/index.html   200
+
+# fallback SPA principal
+/*                   /index.html             200

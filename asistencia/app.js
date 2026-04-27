@@ -139,6 +139,7 @@ async function resolverCursoPorToken(token) {
         cursoQRValido = true
         return true
     } catch (e) {
+        setMensaje(`⚠ Error validando curso: ${e?.message || e}`, "error")
         cursoQRValido = false
         return false
     }
@@ -366,47 +367,67 @@ async function iniciarEscaneo() {
         scanQR()
     } catch (err) {
         cerrarScanner()
-        setMensaje("⚠ No se pudo abrir la cámara", "error")
+        setMensaje(`⚠ No se pudo abrir la cámara: ${err?.message || err}`, "error")
     }
 }
 
 async function scanQR() {
     if (!scanningActivo || !video || !canvas) return
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
 
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-        ctx.drawImage(video, 0, 0)
-
-        const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
-        const code = window.jsQR ? window.jsQR(img.data, img.width, img.height) : null
-
-        if (code) {
-            cerrarScanner()
-
-            const tokenQR = obtenerCursoTokenDesdeTextoQR(code.data) || obtenerCursoTokenDesdeURL()
-            const cursoValido = await resolverCursoPorToken(tokenQR)
-
-            if (!cursoValido || !cursoQRValido) {
-                setMensaje("Acceso no válido. Escanee el código QR oficial del curso.", "error")
-                formulario.style.display = "none"
-                mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
-                return
-            }
-
-            await cargarConfigCurso()
-            setMensaje("")
-            renderSeccionesMovil()
-            if (stepIngreso) stepIngreso.style.display = "none"
-            if (stepScan) stepScan.style.display = "none"
-            formulario.style.display = "flex"
+    try {
+        const ctx = canvas.getContext("2d")
+        if (!ctx) {
+            setMensaje("⚠ No se pudo iniciar el lector QR.", "error")
             return
         }
-    }
 
-    window.requestAnimationFrame(scanQR)
+        if (!window.jsQR) {
+            cerrarScanner()
+            setMensaje("⚠ La librería QR no está disponible.", "error")
+            return
+        }
+
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth
+            canvas.height = video.videoHeight
+            ctx.drawImage(video, 0, 0)
+
+            const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
+            const code = window.jsQR(img.data, img.width, img.height)
+
+            if (code) {
+                cerrarScanner()
+                setMensaje("QR detectado", "warning")
+
+                const tokenQR = obtenerCursoTokenDesdeTextoQR(code.data) || obtenerCursoTokenDesdeURL()
+                setMensaje(`Token extraído: ${tokenQR || "(vacío)"}`, tokenQR ? "warning" : "error")
+
+                const cursoValido = await resolverCursoPorToken(tokenQR)
+
+                if (!cursoValido || !cursoQRValido) {
+                    setMensaje(`Acceso no válido. Escanee el código QR oficial del curso.`, "error")
+                    formulario.style.display = "none"
+                    mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
+                    return
+                }
+
+                setMensaje("Curso validado", "warning")
+                setMensaje("Cargando configuración del curso", "warning")
+                await cargarConfigCurso()
+                renderSeccionesMovil()
+                if (stepIngreso) stepIngreso.style.display = "none"
+                if (stepScan) stepScan.style.display = "none"
+                formulario.style.display = "flex"
+                setMensaje("Formulario listo", "ok")
+                return
+            }
+        }
+
+        window.requestAnimationFrame(scanQR)
+    } catch (error) {
+        cerrarScanner()
+        setMensaje(`⚠ Error en escaneo QR: ${error?.message || error}`, "error")
+    }
 }
 
 function volverInicio() {
