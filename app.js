@@ -5306,6 +5306,34 @@ function logout() {
 /* QR */
 let stream, seccion = ""
 
+function renderSeccionesMovil() {
+    const container = document.getElementById("mobileSectionsContainer")
+    if (!container) return
+
+    // Cada ingreso al formulario debe exigir selección explícita.
+    seccion = ""
+    seleccionarBotonSeccion("")
+
+    // Limpiamos previo
+    container.innerHTML = ""
+
+    if (!cursoSecciones || cursoSecciones.length === 0) {
+        container.innerHTML = `<p style="color:#666;font-size:14px;padding:10px;">No hay secciones configuradas para este curso.</p>`
+        return
+    }
+
+    const nombre = cursoConfigCache?.nombre_curso || "Curso"
+    let html = `<p style="font-size:14px;color:#555;margin-bottom:4px;font-weight:700;text-transform:uppercase;">${nombre}</p>`
+    html += "<p style=\"font-size:13px;color:#777;margin-bottom:12px;\">Selecciona tu sección para registrar asistencia</p>"
+    cursoSecciones.forEach(sec => {
+        const d = Array.isArray(sec.dias) ? sec.dias.join(", ") : ""
+        const label = `Sección ${sec.seccion} (${d} ${sec.modalidad})`
+        html += `<button class="mobile-section-btn" data-seccion="${sec.seccion}" onclick="setSeccion('${sec.seccion}')">${label}</button>`
+    })
+
+    container.innerHTML = html
+}
+
 function ingresarMovilInicio() {
     const input = document.getElementById("mobileDniInicio")
     const dniLimpio = (input?.value || "").replace(/\D/g, "").slice(0, 8)
@@ -5378,6 +5406,7 @@ function scanQR() {
         if (code) {
             cerrarScanner()
 
+            renderSeccionesMovil()
             vistaMovil.style.display = "none"
             formulario.style.display = "block"
             aplicarVisibilidadAccesoAdminInstitucional()

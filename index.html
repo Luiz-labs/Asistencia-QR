@@ -175,13 +175,7 @@
     <input id="apellidos" placeholder="Apellidos">
     <input id="ubo" placeholder="UBO" inputmode="numeric" pattern="[0-9]*" maxlength="4">
 
-    <p>Selecciona tu sección</p>
-
-    <button class="mobile-section-btn" data-seccion="A" onclick="setSeccion('A')">Sección A (Martes y Jueves
-      Presencial)</button>
-    <button class="mobile-section-btn" data-seccion="B" onclick="setSeccion('B')">Sección B (Sábados
-      Presencial)</button>
-    <button class="mobile-section-btn" data-seccion="C" onclick="setSeccion('C')">Sección C (Sábados Virtual)</button>
+    <div id="mobileSectionsContainer" class="mobile-sections-container"></div>
 
     <div class="mobile-actions">
       <button class="mobile-primary" onclick="guardarAsistencia()">REGISTRAR ASISTENCIA</button>
@@ -758,8 +752,8 @@
             </div>
 
             <div class="config-actions course-footer-actions">
-              <p class="hint course-footer-hint">Guarda nombre, fechas, radio y enlaces de UBO por sección (A/B/C). Las
-                secciones y sedes se gestionan arriba.</p>
+              <p class="hint course-footer-hint">Guarda nombre, fechas, radio y configuraciones generales del curso. Las
+                secciones y sedes se gestionan en los módulos superiores.</p>
               <p id="msgCursoFooter" class="course-inline-msg" role="status" aria-live="polite"></p>
               <div class="course-footer-actions-row">
                 <button type="button" onclick="guardarCurso()">Guardar curso</button>

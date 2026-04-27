@@ -1672,6 +1672,13 @@ select {
   gap: 8px;
 }
 
+.mobile-sections-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 15px 0;
+}
+
 .mobile-section-btn {
   background: #eef2f9 !important;
   color: #243451 !important;
