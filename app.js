@@ -232,6 +232,7 @@ let soporteCursosSupabase = null
 let syncLuizLabsEnCurso = null
 let cursoActualId = 1
 let cursoBaseActual = null
+let cursoQRValido = false
 let validacionCursoAspirante = { dni: "", permitido: true, legacy: false, bloqueado: false }
 const SYSTEM_USERS = []
 const tutorialSteps = [
@@ -3493,6 +3494,7 @@ function obtenerCursoTokenDesdeURL() {
 
 async function resolverCursoDesdeURL() {
     const token = obtenerCursoTokenDesdeURL()
+    cursoQRValido = false
     if (!token || !haySupabase()) return false
     if (soporteCursosSupabase === false) return false
 
@@ -3513,21 +3515,28 @@ async function resolverCursoDesdeURL() {
         if (error) {
             if (esTablaNoExiste(error)) {
                 soporteCursosSupabase = false
+                cursoQRValido = false
                 return false
             }
             console.warn("No se pudo resolver curso desde URL:", error.message)
+            cursoQRValido = false
             return false
         }
 
         soporteCursosSupabase = true
         const row = Array.isArray(data) ? data[0] : null
-        if (!row?.id) return false
+        if (!row?.id) {
+            cursoQRValido = false
+            return false
+        }
 
         cursoActualId = Number(row.id || 1) || 1
+        cursoQRValido = true
         console.log("Curso detectado por QR:", cursoActualId)
         return true
     } catch (e) {
         console.warn("Error resolviendo curso desde URL:", e?.message || e)
+        cursoQRValido = false
         return false
     }
 }
@@ -5635,6 +5644,11 @@ async function guardarAsistencia() {
 
     if (!dniRegistro) {
         setMensaje("⚠ DNI no válido", "error")
+        return
+    }
+
+    if (!cursoQRValido) {
+        setMensaje("⚠ Acceso no válido. Escanee el código QR del curso.", "error")
         return
     }
 
