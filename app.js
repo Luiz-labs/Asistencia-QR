@@ -3693,6 +3693,7 @@ function aplicarRangoMesActualEnFiltros() {
 }
 
 function mostrarPasoMovil(paso) {
+    console.log("mostrarPasoMovil llamado desde:", paso)
     if (estaInputDniMovilActivo()) return
     const elIngreso = document.getElementById("mobileStepIngreso")
     const elScan = document.getElementById("mobileStepScan")
@@ -3718,6 +3719,19 @@ function estaInputDniMovilActivo() {
     const activeId = String(document.activeElement?.id || "")
     if (activeId === "mobileDni" || activeId === "mobileDniInicio") return true
     return Date.now() < inputDniFocusLockUntil
+}
+
+function hayCampoEditableActivo() {
+    const active = document.activeElement
+    const tag = String(active?.tagName || "").toUpperCase()
+    if (tag === "TEXTAREA" || tag === "SELECT") return true
+    if (tag !== "INPUT") return false
+    const type = String(active?.type || "").toLowerCase()
+    return !["button", "submit", "reset", "checkbox", "radio", "file"].includes(type)
+}
+
+function estaEnFlujoMovilPublico() {
+    return getVistaActiva() === "mobile" && !puedeEntrarPanelAdmin() && !puedeEntrarPanelLuizLabs()
 }
 
 function activarLockInputDniMovil(ms = 450) {
@@ -4876,6 +4890,7 @@ function cerrarScanner() {
 }
 
 function aplicarLayout() {
+    console.trace("aplicarLayout ejecutado")
     if (estaInputDniMovilActivo()) {
         actualizarBotonesVista()
         return
@@ -5067,7 +5082,13 @@ window.onload = async () => {
     }
 
     try {
-        aplicarLayout()
+        if (estaEnFlujoMovilPublico()) {
+            actualizarBotonesVista()
+            aplicarVisibilidadAccesoAdminInstitucional()
+            actualizarInfoSesionHeader()
+        } else {
+            aplicarLayout()
+        }
     } catch (e) {
         console.error("Error aplicando layout final:", e)
     }
@@ -7434,18 +7455,24 @@ mobileDniInicio?.addEventListener("input", () => {
 })
 
 mobileDni?.addEventListener("focus", () => {
+    console.log("FOCUS DNI", "mobileDni")
     activarLockInputDniMovil()
 })
 
 mobileDniInicio?.addEventListener("focus", () => {
+    console.log("FOCUS DNI", "mobileDniInicio")
     activarLockInputDniMovil()
 })
 
-mobileDni?.addEventListener("blur", () => {
+mobileDni?.addEventListener("blur", (event) => {
+    console.log("BLUR DNI", "mobileDni", "relatedTarget:", event.relatedTarget)
+    console.trace("blur detectado")
     liberarLockInputDniMovilConEspera()
 })
 
-mobileDniInicio?.addEventListener("blur", () => {
+mobileDniInicio?.addEventListener("blur", (event) => {
+    console.log("BLUR DNI", "mobileDniInicio", "relatedTarget:", event.relatedTarget)
+    console.trace("blur detectado")
     liberarLockInputDniMovilConEspera()
 })
 
@@ -7474,13 +7501,13 @@ secCursoNombre?.addEventListener("input", () => {
 })
 
 window.addEventListener("resize", () => {
-    if (estaInputDniMovilActivo()) return
+    if (estaInputDniMovilActivo() || hayCampoEditableActivo()) return
     clearTimeout(resizeTimer)
     resizeTimer = setTimeout(aplicarLayout, 160)
 })
 
 window.addEventListener("orientationchange", () => {
-    if (estaInputDniMovilActivo()) return
+    if (estaInputDniMovilActivo() || hayCampoEditableActivo()) return
     clearTimeout(resizeTimer)
     resizeTimer = setTimeout(aplicarLayout, 120)
 })
