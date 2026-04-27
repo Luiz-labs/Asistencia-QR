@@ -3513,6 +3513,8 @@ async function resolverCursoPorToken(token) {
     if (soporteCursosSupabase === false) return false
 
     try {
+        const tenantLimpio = String(tenantActivoId || "").trim().replace(/\/$/, "")
+        console.log("Tenant limpio:", tenantLimpio)
         let q = supabaseClient
             .from("cursos")
             .select("id,tenant_id,estado")
@@ -3520,8 +3522,8 @@ async function resolverCursoPorToken(token) {
             .eq("estado", "activo")
             .limit(1)
 
-        if (tenantActivoId) {
-            q = q.eq("tenant_id", String(tenantActivoId || "").trim().toLowerCase())
+        if (tenantLimpio) {
+            q = q.ilike("tenant_id", tenantLimpio)
         }
 
         const { data, error } = await q
