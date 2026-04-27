@@ -3499,7 +3499,11 @@ function obtenerCursoTokenDesdeTextoQR(raw) {
         const url = new URL(text)
         return String(url.searchParams.get("curso") || "").trim()
     } catch (e) {
-        return text
+        const match = text.match(/[?&]curso=([^&#\s]+)/i)
+        if (match?.[1]) {
+            return decodeURIComponent(String(match[1] || "").trim())
+        }
+        return ""
     }
 }
 
@@ -4877,6 +4881,8 @@ function aplicarLayout() {
     const elBtnInstitucion = document.getElementById("btnInstitucion")
     const elBtnVolverLuizLabs = document.getElementById("btnVolverLuizLabs")
     const vista = getVistaActiva()
+    const activeId = String(document.activeElement?.id || "")
+    const inputDniMovilEnUso = activeId === "mobileDni" || activeId === "mobileDniInicio"
 
     // --- Lógica de Title Dinámico ---
     if (!accesoDirectoInstitucion) {
@@ -4925,10 +4931,12 @@ function aplicarLayout() {
             if (elLogin) elLogin.style.display = "none"
             if (elDesktop) elDesktop.style.display = "none"
             if (elLuizLabs) elLuizLabs.style.display = "none"
-            if (elMovilInicio) elMovilInicio.style.display = dniMovil ? "none" : "flex"
-            if (elMovil) elMovil.style.display = dniMovil ? "block" : "none"
+            if (!inputDniMovilEnUso) {
+                if (elMovilInicio) elMovilInicio.style.display = dniMovil ? "none" : "flex"
+                if (elMovil) elMovil.style.display = dniMovil ? "block" : "none"
+            }
 
-            if (elFormulario && elFormulario.style.display !== "block") {
+            if (!inputDniMovilEnUso && elFormulario && elFormulario.style.display !== "block") {
                 mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
             }
         }
@@ -5611,10 +5619,14 @@ async function scanQR() {
 
         if (code) {
             cerrarScanner()
-            console.log("QR detectado:", code.data)
+            console.log("QR raw:", code.data)
 
-            const tokenQR = obtenerCursoTokenDesdeTextoQR(code.data)
+            const tokenQR = obtenerCursoTokenDesdeTextoQR(code.data) || obtenerCursoTokenDesdeURL()
+            console.log("Token extraído:", tokenQR)
+            console.log("Tenant activo:", tenantActivoId)
             const cursoValido = await resolverCursoPorToken(tokenQR)
+            console.log("Curso válido:", cursoValido)
+            console.log("cursoQRValido:", cursoQRValido)
 
             if (!cursoValido || !cursoQRValido) {
                 setMensaje("⚠ Acceso no válido. Escanee el código QR oficial del curso.", "error")
