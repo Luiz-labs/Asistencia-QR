@@ -1,5 +1,10 @@
-# asistencia (vista pública)
-/*/asistencia/*     /asistencia/index.html   200
+# asistencia (ESBAS específico)
+/esbas-24/asistencia       /asistencia/index.html   200
+/esbas-24/asistencia/      /asistencia/index.html   200
+/esbas-24/asistencia/*     /asistencia/index.html   200
+
+# asistencia (multi-tenant general)
+/*/asistencia/*            /asistencia/index.html   200
 
 # fallback SPA principal
-/*                   /index.html             200
+/*                         /index.html              200
