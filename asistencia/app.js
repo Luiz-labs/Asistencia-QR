@@ -9,8 +9,6 @@ let tenantActivoId = ""
 let cursoActualId = 1
 let cursoQRValido = false
 let dniMovil = ""
-let scanningActivo = false
-let stream = null
 let seccion = ""
 let cursoConfigCache = null
 let cursoSecciones = []
@@ -19,18 +17,13 @@ let validacionCursoAspirante = { dni: "", permitido: true, legacy: false, bloque
 
 let tenantLabel
 let stepIngreso
-let stepScan
 let formulario
 let mobileDniInicio
-let mobileDni
 let nombres
 let apellidos
 let ubo
 let mensaje
 let mobileSectionsContainer
-let scanOverlay
-let video
-let canvas
 
 function haySupabase() {
     return !!supabaseClient
@@ -39,18 +32,13 @@ function haySupabase() {
 function enlazarIds() {
     tenantLabel = document.getElementById("tenantLabel")
     stepIngreso = document.getElementById("stepIngreso")
-    stepScan = document.getElementById("stepScan")
     formulario = document.getElementById("formulario")
     mobileDniInicio = document.getElementById("mobileDniInicio")
-    mobileDni = document.getElementById("mobileDni")
     nombres = document.getElementById("nombres")
     apellidos = document.getElementById("apellidos")
     ubo = document.getElementById("ubo")
     mensaje = document.getElementById("mensaje")
     mobileSectionsContainer = document.getElementById("mobileSectionsContainer")
-    scanOverlay = document.getElementById("scanOverlay")
-    video = document.getElementById("video")
-    canvas = document.getElementById("canvas")
 }
 
 function detectarTenantDesdeRuta() {
@@ -82,7 +70,6 @@ function setMensaje(texto, tipo = "") {
 
 function mostrarPasoMovil(paso) {
     if (stepIngreso) stepIngreso.style.display = paso === "ingreso" ? "flex" : "none"
-    if (stepScan) stepScan.style.display = paso === "scan" ? "flex" : "none"
 }
 
 function limpiarDni(valor = "") {
@@ -139,7 +126,6 @@ async function resolverCursoPorToken(token) {
         cursoQRValido = true
         return true
     } catch (e) {
-        setMensaje(`⚠ Error validando curso: ${e?.message || e}`, "error")
         cursoQRValido = false
         return false
     }
@@ -300,28 +286,7 @@ function renderSeccionesMovil() {
     })
 }
 
-function abrirScanner() {
-    if (scanningActivo || !scanOverlay || !video) return
-    scanningActivo = true
-    scanOverlay.style.display = "flex"
-    video.style.display = "block"
-}
-
-function detenerCamara() {
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop())
-        stream = null
-    }
-}
-
-function cerrarScanner() {
-    scanningActivo = false
-    detenerCamara()
-    if (scanOverlay) scanOverlay.style.display = "none"
-    if (video) video.style.display = "none"
-}
-
-function ingresarMovilInicio() {
+async function ingresarMovilInicio() {
     const dniLimpio = limpiarDni(mobileDniInicio?.value)
     if (mobileDniInicio) mobileDniInicio.value = dniLimpio
 
@@ -330,111 +295,27 @@ function ingresarMovilInicio() {
         return
     }
 
-    dniMovil = dniLimpio
-    if (mobileDni) mobileDni.value = dniLimpio
-    setMensaje("")
-    mostrarPasoMovil("scan")
-}
-
-function ingresarMovil() {
-    const dniLimpio = limpiarDni(mobileDni?.value)
-    if (mobileDni) mobileDni.value = dniLimpio
-
-    if (!dniLimpio) {
-        setMensaje("⚠ Ingresa tu DNI para continuar", "error")
+    if (!cursoQRValido) {
+        setMensaje("Acceso no válido. Escanee el código QR oficial del curso.", "error")
         return
     }
 
     dniMovil = dniLimpio
-    setMensaje("")
-    mostrarPasoMovil("scan")
-}
-
-async function iniciarEscaneo() {
-    if (!dniMovil) {
-        setMensaje("⚠ Primero ingresa tu DNI", "error")
-        mostrarPasoMovil("ingreso")
-        return
-    }
-
     try {
-        abrirScanner()
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" }
-        })
-        video.srcObject = stream
-        await video.play()
-        scanQR()
-    } catch (err) {
-        cerrarScanner()
-        setMensaje(`⚠ No se pudo abrir la cámara: ${err?.message || err}`, "error")
-    }
-}
-
-async function scanQR() {
-    if (!scanningActivo || !video || !canvas) return
-
-    try {
-        const ctx = canvas.getContext("2d")
-        if (!ctx) {
-            setMensaje("⚠ No se pudo iniciar el lector QR.", "error")
-            return
-        }
-
-        if (!window.jsQR) {
-            cerrarScanner()
-            setMensaje("⚠ La librería QR no está disponible.", "error")
-            return
-        }
-
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            canvas.width = video.videoWidth
-            canvas.height = video.videoHeight
-            ctx.drawImage(video, 0, 0)
-
-            const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
-            const code = window.jsQR(img.data, img.width, img.height)
-
-            if (code) {
-                cerrarScanner()
-                setMensaje("QR detectado", "warning")
-
-                const tokenQR = obtenerCursoTokenDesdeTextoQR(code.data) || obtenerCursoTokenDesdeURL()
-                setMensaje(`Token extraído: ${tokenQR || "(vacío)"}`, tokenQR ? "warning" : "error")
-
-                const cursoValido = await resolverCursoPorToken(tokenQR)
-
-                if (!cursoValido || !cursoQRValido) {
-                    setMensaje(`Acceso no válido. Escanee el código QR oficial del curso.`, "error")
-                    formulario.style.display = "none"
-                    mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
-                    return
-                }
-
-                setMensaje("Curso validado", "warning")
-                setMensaje("Cargando configuración del curso", "warning")
-                await cargarConfigCurso()
-                renderSeccionesMovil()
-                if (stepIngreso) stepIngreso.style.display = "none"
-                if (stepScan) stepScan.style.display = "none"
-                formulario.style.display = "flex"
-                setMensaje("Formulario listo", "ok")
-                return
-            }
-        }
-
-        window.requestAnimationFrame(scanQR)
+        await cargarConfigCurso()
+        renderSeccionesMovil()
+        setMensaje("")
+        if (stepIngreso) stepIngreso.style.display = "none"
+        formulario.style.display = "flex"
     } catch (error) {
-        cerrarScanner()
-        setMensaje(`⚠ Error en escaneo QR: ${error?.message || error}`, "error")
+        setMensaje("⚠ No se pudo preparar el formulario de asistencia.", "error")
     }
 }
 
 function volverInicio() {
-    cerrarScanner()
     formulario.style.display = "none"
-    if (mobileDni) mobileDni.value = dniMovil
-    mostrarPasoMovil(dniMovil ? "scan" : "ingreso")
+    if (mobileDniInicio) mobileDniInicio.value = dniMovil
+    mostrarPasoMovil("ingreso")
     setMensaje("")
 }
 
@@ -452,9 +333,6 @@ async function procesarAutocompletadoDni(dniValue) {
 
     if (mobileDniInicio && document.activeElement === mobileDniInicio) {
         mobileDniInicio.value = dniLimpio
-    }
-    if (mobileDni && document.activeElement === mobileDni) {
-        mobileDni.value = dniLimpio
     }
 
     if (dniLimpio.length !== 8) {
@@ -544,7 +422,7 @@ function limpiarCamposAspirante(resetValidacion = true) {
 }
 
 async function guardarAsistencia() {
-    const dniRegistro = limpiarDni(dniMovil || mobileDni?.value)
+    const dniRegistro = limpiarDni(dniMovil || mobileDniInicio?.value)
     const nombresValor = String(nombres.value || "").trim()
     const apellidosValor = String(apellidos.value || "").trim()
     const uboValor = String(ubo.value || "").replace(/\D/g, "")
@@ -619,20 +497,13 @@ async function guardarAsistencia() {
 
 function bindEventos() {
     document.getElementById("btnIngresarInicio")?.addEventListener("click", ingresarMovilInicio)
-    document.getElementById("btnContinuarScan")?.addEventListener("click", ingresarMovil)
-    document.getElementById("btnEscanear")?.addEventListener("click", iniciarEscaneo)
     document.getElementById("btnRegistrar")?.addEventListener("click", guardarAsistencia)
     document.getElementById("btnVolver")?.addEventListener("click", volverInicio)
-    document.getElementById("btnCerrarScanner")?.addEventListener("click", cerrarScanner)
 
     mobileDniInicio?.addEventListener("input", () => procesarAutocompletadoDni(mobileDniInicio.value))
-    mobileDni?.addEventListener("input", () => procesarAutocompletadoDni(mobileDni.value))
 
     mobileDniInicio?.addEventListener("keydown", (event) => {
         if (event.key === "Enter") ingresarMovilInicio()
-    })
-    mobileDni?.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") ingresarMovil()
     })
 }
 
@@ -653,9 +524,14 @@ async function init() {
         return
     }
 
-    await resolverCursoDesdeURL()
-    await cargarConfigCurso()
+    const cursoValido = await resolverCursoDesdeURL()
     mostrarPasoMovil("ingreso")
+
+    if (!cursoValido || !cursoQRValido) {
+        setMensaje("Acceso no válido. Escanee el código QR oficial del curso.", "error")
+        if (mobileDniInicio) mobileDniInicio.disabled = true
+        document.getElementById("btnIngresarInicio")?.setAttribute("disabled", "disabled")
+    }
 }
 
 window.addEventListener("load", () => {

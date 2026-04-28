@@ -27,15 +27,6 @@
         <button id="btnIngresarInicio" class="primary-btn" type="button">Continuar</button>
       </section>
 
-      <section id="stepScan" class="step-block" style="display:none;">
-        <p class="step-copy">DNI validado. Continúa con el escaneo del QR.</p>
-        <input id="mobileDni" class="text-input" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
-        <div class="step-actions">
-          <button id="btnContinuarScan" class="secondary-btn" type="button">Actualizar DNI</button>
-          <button id="btnEscanear" class="primary-btn" type="button">Escanear QR</button>
-        </div>
-      </section>
-
       <section id="formulario" class="step-block" style="display:none;">
         <p class="step-copy">Completa y confirma tu registro</p>
         <input id="nombres" class="text-input" placeholder="Nombres" autocomplete="off">
@@ -52,20 +43,7 @@
     </section>
   </main>
 
-  <div id="scanOverlay" class="scan-overlay">
-    <div class="scan-card">
-      <div class="scan-head">
-        <strong>Escanear QR</strong>
-        <button id="btnCerrarScanner" class="scan-close" type="button" aria-label="Cerrar escáner">×</button>
-      </div>
-      <video id="video" autoplay playsinline muted></video>
-      <p class="scan-copy">Apunta la cámara al código QR oficial del curso</p>
-    </div>
-  </div>
-  <canvas id="canvas" style="display:none;"></canvas>
-
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <script src="/asistencia/app.js"></script>
 </body>
 </html>
