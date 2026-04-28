@@ -3159,9 +3159,11 @@ function obtenerRutaTenant(id) {
 function resolverAccesoDesdeRuta() {
     const path = normalizarPathname(window.location.pathname)
     if (path !== "/") {
-        const slug = path.replace(/^\/|\/$/g, "")
+        const segments = path.replace(/^\/|\/$/g, "").split("/").filter(Boolean)
+        const slug = String(segments[0] || "").trim()
+        const subruta = String(segments[1] || "").trim().toLowerCase()
         const tenant = TENANTS[slug]
-        if (tenant) {
+        if (tenant && (!subruta || subruta === "backoffice")) {
             return { staff: false, tenantId: tenant.id }
         }
     }

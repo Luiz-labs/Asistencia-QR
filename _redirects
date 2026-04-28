@@ -2,5 +2,11 @@
 /*/asistencia/*     /asistencia/index.html   200!
 /*/asistencia       /asistencia/index.html   200!
 
+# backoffice institucional
+/esbas-24/backoffice/*  /esbas-24/backoffice/index.html   200!
+/esbas-24/backoffice    /esbas-24/backoffice/index.html   200!
+/*/backoffice/*         /index.html                        200!
+/*/backoffice           /index.html                        200!
+
 # fallback SPA
 /*                  /index.html              200
