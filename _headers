@@ -1,18 +1,38 @@
-# Cloudflare Pages — control de caché (sin tocar la app)
-#
-# Por qué: el HTML es la “fuente de verdad” que enlaza a app.js/style.css.
-# Si el documento queda cacheado, el cliente sigue usando una copia vieja aunque el deploy sea nuevo.
-# Mejor que ?v= manual: Cache-Control correcto en el servidor, sin cambiar URLs.
-#
-# Reglas: los patrones combinan; si un header se repite, se unen. Por eso en rutas de archivos
-# usamos "! Cache-Control" para sustituir el valor heredado de "/*".
-#
-# Compatibilidad SPA: las peticiones a /esbas-24/, /bomberos-lurin-129/, etc. siguen siendo la misma
-# URL; solo cambian cabeceras de respuesta. _redirects no se modifica.
-
 /*
 
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+/index.html
+
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+/asistencia/index.html
+
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+/esbas-24/*
+
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+/esbas-24/backoffice/*
+
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+/esbas-24/asistencia/*
+
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+  Pragma: no-cache
+  Expires: 0
 
 /style.css
 
