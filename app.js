@@ -3168,6 +3168,21 @@ function resolverAccesoDesdeRuta() {
     return { staff: true, tenantId: "" }
 }
 
+function redirigirRutaPublicaLegadaCurso() {
+    const path = normalizarPathname(window.location.pathname)
+    const params = new URLSearchParams(window.location.search || "")
+    const cursoToken = String(params.get("curso") || "").trim()
+    if (!cursoToken) return false
+    if (path === "/" || /\/asistencia\/|\/backoffice\//i.test(path)) return false
+
+    const slug = path.replace(/^\/|\/$/g, "")
+    if (!slug || !TENANTS[slug]) return false
+
+    const destino = `/${slug}/asistencia/${window.location.search || ""}`
+    window.location.replace(destino)
+    return true
+}
+
 function aplicarAccesoDesdeRuta() {
     const acceso = resolverAccesoDesdeRuta()
     esModoStaff = acceso.staff
@@ -5023,6 +5038,7 @@ function actualizarEstadoChecks() {
 }
 
 window.onload = async () => {
+    if (redirigirRutaPublicaLegadaCurso()) return
     enlazarIdsGlobales()
     await cargarLuizLabsDesdeStorage()
     renderTenantSelector()
