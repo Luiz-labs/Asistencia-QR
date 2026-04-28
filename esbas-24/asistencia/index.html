@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>asistIA Asistencia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/asistencia/style.css">
+</head>
+<body>
+  <main class="public-shell">
+    <section id="asistenciaApp" class="public-card">
+      <div class="brand-block">
+        <img class="brand-logo" src="/asistIA_logo.png" alt="asistIA">
+        <div>
+          <h1 class="brand-title">asist<span>IA</span></h1>
+          <p class="brand-subtitle">Marcación de asistencia</p>
+          <p id="tenantLabel" class="tenant-label"></p>
+        </div>
+      </div>
+
+      <section id="stepIngreso" class="step-block">
+        <p class="step-copy">Ingresa tu DNI para continuar</p>
+        <input id="mobileDniInicio" class="text-input" placeholder="Ingrese DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off">
+        <button id="btnIngresarInicio" class="primary-btn" type="button">Continuar</button>
+      </section>
+
+      <section id="formulario" class="step-block" style="display:none;">
+        <p class="step-copy">Completa y confirma tu registro</p>
+        <input id="nombres" class="text-input" placeholder="Nombres" autocomplete="off">
+        <input id="apellidos" class="text-input" placeholder="Apellidos" autocomplete="off">
+        <input id="ubo" class="text-input" placeholder="UBO" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">
+        <div id="mobileSectionsContainer" class="mobile-sections-container"></div>
+        <div class="step-actions">
+          <button id="btnRegistrar" class="primary-btn" type="button">Registrar asistencia</button>
+          <button id="btnVolver" class="secondary-btn" type="button">Volver</button>
+        </div>
+      </section>
+
+      <p id="mensaje" class="message-box"></p>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
