@@ -254,6 +254,88 @@ h2 {
   text-align: right;
 }
 
+.cuenta-separator {
+  height: 1px;
+  background: #e3e9f5;
+  margin: 12px 0;
+}
+
+.cuenta-logout-btn {
+  width: 100%;
+  height: 42px;
+  background: #fff;
+  color: #dc2626 !important;
+  border: 1px solid #fee2e2 !important;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cuenta-logout-btn:hover {
+  background: #fef2f2;
+  border-color: #fecaca !important;
+}
+
+/* Header User Profile Button */
+.user-profile-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.user-profile-toggle:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.02);
+}
+
+.user-profile-toggle .user-info-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.user-profile-toggle .user-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+.user-profile-toggle .user-role {
+  font-size: 11px;
+  font-weight: 600;
+  color: #2563eb;
+  text-transform: capitalize;
+}
+
+.user-profile-toggle .chevron {
+  font-size: 10px;
+  color: #86868b;
+  margin-top: 2px;
+}
+
+@keyframes modalFadeSlide {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cuenta-modal-card {
+  animation: modalFadeSlide 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @media (max-width: 760px) {
   .cuenta-modal-card {
     width: min(94vw, 380px);

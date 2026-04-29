@@ -123,14 +123,25 @@ function toggleByPermission(permission, elementId, displayStyle = 'block') {
 }
 
 function renderCurrentUserInfo() {
-    const nameEl = document.getElementById('currentUserName');
-    const roleEl = document.getElementById('currentUserRole');
+    const ids = [
+        { name: 'currentUserName', role: 'currentUserRole' },
+        { name: 'currentUserNameLuiz', role: 'currentUserRoleLuiz' }
+    ];
+    
     if (window.currentProfile) {
-        if (nameEl) nameEl.textContent = window.currentProfile.full_name;
-        if (roleEl) roleEl.textContent = window.currentProfile.role;
+        ids.forEach(set => {
+            const nameEl = document.getElementById(set.name);
+            const roleEl = document.getElementById(set.role);
+            if (nameEl) nameEl.textContent = window.currentProfile.full_name;
+            if (roleEl) roleEl.textContent = window.currentProfile.role;
+        });
     } else {
-        if (nameEl) nameEl.textContent = '';
-        if (roleEl) roleEl.textContent = '';
+        ids.forEach(set => {
+            const nameEl = document.getElementById(set.name);
+            const roleEl = document.getElementById(set.role);
+            if (nameEl) nameEl.textContent = '';
+            if (roleEl) roleEl.textContent = '';
+        });
     }
 }
 
@@ -1293,10 +1304,7 @@ function poblarPerfilesInstitucionales() {
 }
 
 function actualizarBotonCuentaSidebar() {
-    const mostrar = haySesionAdminActiva()
-    document.querySelectorAll("[data-account-btn]").forEach(el => {
-        el.style.display = mostrar ? "inline-flex" : "none"
-    })
+    // Obsoleto: el acceso a cuenta ahora está unificado en el header
 }
 
 function renderCuentaModalDetalle() {
@@ -1308,6 +1316,7 @@ function renderCuentaModalDetalle() {
 
     const sesion = obtenerSesionAdminActiva()
     const usuario = String(sesion.usuario || "").trim() || "-"
+    const nombre = window.currentProfile?.full_name || "Usuario AsistIA"
     const rolUI = obtenerNombreRolUI(sesion.rol)
     const tenantUI = obtenerNombreTenantUI(sesion.tenantId)
     const perfilUI = esSuperusuarioActivo()
@@ -1315,22 +1324,33 @@ function renderCuentaModalDetalle() {
         : (obtenerPerfilUsuarioActivo()?.nombre || "Administrador")
 
     cuentaModalBody.innerHTML = `
-    <div class="cuenta-row">
-      <span class="cuenta-key">👤 Usuario</span>
-      <span class="cuenta-value">${usuario}</span>
+    <div style="text-align:center; margin-bottom: 20px;">
+        <div style="width: 60px; height: 60px; background: #f0f4ff; color: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 24px; font-weight: 700;">
+            ${nombre.charAt(0).toUpperCase()}
+        </div>
+        <h4 style="margin:0; font-size: 16px; color: #1d1d1f;">${nombre}</h4>
+        <p style="margin:2px 0 0; font-size: 13px; color: #86868b;">${usuario}</p>
     </div>
+
     <div class="cuenta-row">
-      <span class="cuenta-key">🔐 Rol</span>
+      <span class="cuenta-key">🔐 Rol Técnico</span>
       <span class="cuenta-value">${rolUI}</span>
     </div>
     <div class="cuenta-row">
-      <span class="cuenta-key">🛡️ Perfil</span>
+      <span class="cuenta-key">🛡️ Perfil Funcional</span>
       <span class="cuenta-value">${perfilUI}</span>
     </div>
     <div class="cuenta-row">
-      <span class="cuenta-key">🏢 Entorno</span>
+      <span class="cuenta-key">🏢 Institución</span>
       <span class="cuenta-value">${tenantUI}</span>
     </div>
+
+    <div class="cuenta-separator"></div>
+
+    <button class="cuenta-logout-btn" onclick="logout()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        Cerrar sesión
+    </button>
   `
 }
 
@@ -7955,3 +7975,13 @@ document.addEventListener("change", (e) => {
         actualizarEstadoDiasSede()
     }
 })
+
+// ESC key to close modal
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('cuentaModal');
+        if (modal && modal.style.display === 'flex') {
+            cerrarCuentaModal();
+        }
+    }
+});

@@ -223,18 +223,16 @@
         <strong id="tenantPanelTitulo">ESBAS Panel Administrativo</strong>
       </div>
       <div class="header-actions">
-        <div
-          style="display:flex; flex-direction:column; align-items:flex-end; margin-right: 15px; font-size: 12px; justify-content:center; line-height: 1.2;">
-          <strong id="currentUserName" style="color: #333;"></strong>
-          <span id="currentUserRole" style="color: #2563eb; text-transform: capitalize;"></span>
+        <div id="btnAbrirCuenta" class="user-profile-toggle" onclick="abrirCuentaModal()">
+          <div class="user-info-text">
+            <strong id="currentUserName" class="user-name"></strong>
+            <span id="currentUserRole" class="user-role"></span>
+          </div>
+          <span class="chevron">▾</span>
         </div>
         <button id="btnInstitucion" onclick="volverSeleccionCliente()" class="secondary">Institución</button>
-        <button id="btnVolverLuizLabs" onclick="irPanelPrincipalLuizLabs()" class="secondary"
-          style="display:none;">Panel principal</button>
+        <button id="btnVolverLuizLabs" onclick="irPanelPrincipalLuizLabs()" class="secondary" style="display:none;">Panel principal</button>
         <button id="btnTutorial" onclick="iniciarTutorial(true)" class="secondary">Ver tutorial</button>
-        <button id="btnForzarMovil" onclick="setVistaManual('mobile')" class="secondary view-switch">Ver móvil</button>
-        <button id="btnVistaAutoDesktop" onclick="setVistaManual('auto')" class="secondary view-switch"
-          title="Automático: usa detección de dispositivo para decidir vista móvil o escritorio.">Automático</button>
         <button onclick="logout()" class="secondary">Salir</button>
       </div>
     </div>
@@ -242,8 +240,6 @@
     <div style="display:flex;min-height:calc(100vh - 60px);">
 
       <div class="sidebar">
-        <button class="sidebar-account-btn secondary" onclick="abrirCuentaModal()" style="display:none;"
-          data-account-btn>👤 Cuenta</button>
         <p id="navReportes" class="nav-item active" data-view="reportes" data-permission="reportsView"
           onclick="mostrarVista('reportes')">📄 Reportes
         </p>
@@ -843,14 +839,19 @@
         <strong>asistIA - Gestión de Instituciones</strong>
       </div>
       <div class="header-actions">
+        <div id="btnAbrirCuentaLuiz" class="user-profile-toggle" onclick="abrirCuentaModal()">
+          <div class="user-info-text">
+            <strong id="currentUserNameLuiz" class="user-name"></strong>
+            <span id="currentUserRoleLuiz" class="user-role"></span>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
         <button onclick="logout()" class="secondary">Salir</button>
       </div>
     </div>
 
     <div style="display:flex;min-height:calc(100vh - 60px);">
       <div class="sidebar">
-        <button class="sidebar-account-btn secondary" onclick="abrirCuentaModal()" style="display:none;"
-          data-account-btn>👤 Cuenta</button>
         <p id="luizNavInstituciones" class="nav-item active" onclick="mostrarVistaLuizLabs('instituciones')">🏢
           Instituciones</p>
         <p id="luizNavUsuarios" class="nav-item" onclick="mostrarVistaLuizLabs('usuarios')">👥 Usuarios</p>
