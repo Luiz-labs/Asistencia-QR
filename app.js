@@ -141,6 +141,20 @@ function renderCurrentUserInfo() {
     });
 }
 
+function enlazarAccionesCuentaHeader() {
+    const btnCuenta = document.getElementById("btnAbrirCuenta")
+    const btnCuentaLuiz = document.getElementById("btnAbrirCuentaLuiz")
+    const btnLogout = document.getElementById("btnHeaderLogout")
+    const btnLogoutLuiz = document.getElementById("btnHeaderLogoutLuiz")
+    const btnCuentaLogout = document.getElementById("btnCuentaLogout")
+
+    if (btnCuenta) btnCuenta.onclick = abrirCuentaModal
+    if (btnCuentaLuiz) btnCuentaLuiz.onclick = abrirCuentaModal
+    if (btnLogout) btnLogout.onclick = logout
+    if (btnLogoutLuiz) btnLogoutLuiz.onclick = logout
+    if (btnCuentaLogout) btnCuentaLogout.onclick = logout
+}
+
 async function bootstrapAuthorizedApp() {
     await loadCurrentProfile();
     applyRolePermissions();
@@ -299,6 +313,7 @@ function normalizarCorreoProvisionAdmin(usuario, correo = "") {
 }
 
 function resetEstadoSesionAdminUI() {
+    cerrarCuentaModal()
     cerrarTutorial()
     limpiarSesionAdminActiva()
 
@@ -1268,11 +1283,12 @@ function renderCuentaModalDetalle() {
 
     <div class="cuenta-separator"></div>
 
-    <button class="cuenta-logout-btn" onclick="logout()">
+    <button id="btnCuentaLogout" class="cuenta-logout-btn" onclick="logout()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         Cerrar sesión
     </button>
   `
+    enlazarAccionesCuentaHeader()
 }
 
 function abrirCuentaModal() {
@@ -1296,6 +1312,8 @@ function cerrarCuentaModalPorBackdrop(e) {
 }
 
 function renderInfoSesionHeader() {
+    renderCurrentUserInfo()
+    enlazarAccionesCuentaHeader()
     actualizarBotonCuentaSidebar()
     if (cuentaModal?.style?.display === "flex") {
         renderCuentaModalDetalle()
@@ -5211,6 +5229,7 @@ window.onload = async () => {
     if (redirigirRutaPublicaLegadaCurso()) return
     if (redirigirRutaBackofficeLegada()) return
     enlazarIdsGlobales()
+    enlazarAccionesCuentaHeader()
     await cargarLuizLabsDesdeStorage()
     renderTenantSelector()
     cargarSesionAdminDesdeStorage()
