@@ -323,6 +323,54 @@ function haySupabase() {
     return !!supabaseClient
 }
 
+function normalizarCorreoProvisionAdmin(usuario, correo = "") {
+    const correoLimpio = String(correo || "").trim().toLowerCase()
+    if (correoLimpio && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoLimpio)) {
+        return correoLimpio
+    }
+    const usuarioLimpio = String(usuario || "").trim().toLowerCase()
+    return usuarioLimpio ? `${usuarioLimpio}@asistia.local` : ""
+}
+
+async function provisionarUsuarioAdminSeguro(payload = {}) {
+    if (!haySupabase()) {
+        throw new Error("Supabase no está disponible.")
+    }
+
+    const { data: sessionWrap, error: sessionError } = await supabaseClient.auth.getSession()
+    const session = sessionWrap?.session || null
+    if (sessionError || !session?.access_token) {
+        throw new Error("Necesitas una sesión válida para provisionar usuarios.")
+    }
+
+    const body = {
+        usuario: String(payload.usuario || "").trim().toLowerCase(),
+        clave: String(payload.clave || "").trim(),
+        correo: normalizarCorreoProvisionAdmin(payload.usuario, payload.correo),
+        tenant_id: String(payload.tenant_id || "").trim().toLowerCase(),
+        rol: normalizarRolUsuario(payload.rol || ROLES_ADMIN.ADMINISTRADOR),
+        nombres: String(payload.nombres || "").trim(),
+        apellidos: String(payload.apellidos || "").trim(),
+        dni: String(payload.dni || "").replace(/\D/g, ""),
+        celular: String(payload.celular || "").replace(/\D/g, ""),
+        perfil_id: normalizarPerfilId(payload.perfil_id || "administrador") || "administrador",
+        previous_usuario: String(payload.previous_usuario || "").trim().toLowerCase(),
+        activo: payload.activo !== false
+    }
+
+    const { data, error } = await supabaseClient.functions.invoke("provision-admin-user", {
+        body
+    })
+
+    if (error) {
+        throw new Error(error.message || "No se pudo provisionar el usuario.")
+    }
+    if (!data?.ok) {
+        throw new Error(data?.error || "No se pudo provisionar el usuario.")
+    }
+    return data
+}
+
 function mapearActividadSupabaseALocal(row) {
     let detalle = row?.detalle || {}
     if (typeof detalle === "string") {
@@ -2986,7 +3034,16 @@ async function guardarUsuarioAdminLuiz() {
         alert("Ese usuario ya existe como usuario del sistema.")
         return
     }
-    const usuarioSupabase = (usuariosAdmin || []).some(u => String(u.usuario || "").toLowerCase() === usuario)
+    const usuarioActualEdicion = editUsuarioLuizIndex >= 0
+        ? String(usuariosAdminLuiz?.[editUsuarioLuizIndex]?.usuario || "").toLowerCase()
+        : ""
+    const usuarioSupabase = (usuariosAdmin || []).some(u => {
+        const userDb = String(u.usuario || "").toLowerCase()
+        if (editUsuarioLuizIndex >= 0 && userDb === usuarioActualEdicion) {
+            return false
+        }
+        return userDb === usuario
+    })
     if (usuarioSupabase) {
         alert("Ese usuario ya existe en el panel de usuarios.")
         return
@@ -3003,8 +3060,9 @@ async function guardarUsuarioAdminLuiz() {
     }
 
     let accion = "usuario_admin_luiz_creado"
+    const actual = editUsuarioLuizIndex >= 0 ? usuariosAdminLuiz[editUsuarioLuizIndex] : null
+    const previousUsuario = String(actual?.usuario || "").trim().toLowerCase()
     if (editUsuarioLuizIndex >= 0) {
-        const actual = usuariosAdminLuiz[editUsuarioLuizIndex]
         if (!actual) {
             limpiarUsuarioAdminLuizForm()
             return
@@ -3020,19 +3078,6 @@ async function guardarUsuarioAdminLuiz() {
             alert("Ya existe un usuario con ese nombre.")
             return
         }
-
-        actual.usuario = usuario
-        actual.nombres = nombres
-        actual.apellidos = apellidos
-        actual.dni = dni
-        actual.correo = correo
-        actual.celular = celular
-        actual.rol = rol
-        actual.tenantId = tenantId
-        actual.password = password
-        actual.perfilId = perfilId
-        if (!actual.fecha_creacion) actual.fecha_creacion = new Date().toISOString()
-        if (!actual.estado) actual.estado = "activo"
         accion = "usuario_admin_luiz_editado"
     } else {
         const existe = usuariosAdminLuiz.some(u => u.usuario === usuario)
@@ -3040,25 +3085,55 @@ async function guardarUsuarioAdminLuiz() {
             alert("Ese usuario ya existe.")
             return
         }
-        usuariosAdminLuiz.push({
+    }
+
+    try {
+        await provisionarUsuarioAdminSeguro({
+            usuario,
+            clave: password,
+            correo,
+            tenant_id: tenantId,
+            rol,
             nombres,
             apellidos,
             dni,
-            correo,
             celular,
-            usuario,
-            password,
-            rol,
-            tenantId,
-            perfilId,
-            estado: "activo",
-            fecha_creacion: new Date().toISOString()
+            perfil_id: perfilId,
+            previous_usuario: previousUsuario,
+            activo: true
         })
+    } catch (error) {
+        alert(`No se pudo provisionar usuario: ${error.message}`)
+        return
     }
 
+    const draftUser = {
+        nombres,
+        apellidos,
+        dni,
+        correo: normalizarCorreoProvisionAdmin(usuario, correo),
+        celular,
+        usuario,
+        password,
+        rol,
+        tenantId,
+        perfilId,
+        estado: "activo",
+        fecha_creacion: actual?.fecha_creacion || new Date().toISOString()
+    }
+
+    if (editUsuarioLuizIndex >= 0) {
+        usuariosAdminLuiz[editUsuarioLuizIndex] = draftUser
+    } else {
+        usuariosAdminLuiz.push(draftUser)
+    }
+
+    if (previousUsuario && previousUsuario !== usuario) {
+        delete perfilesUsuariosLocales[previousUsuario]
+    }
+    perfilesUsuariosLocales[usuario] = perfilId
     guardarLuizLabsEnStorage()
-    const userGuardado = usuariosAdminLuiz.find(u => String(u.usuario || "").toLowerCase() === usuario)
-    if (userGuardado) await guardarUsuarioLuizEnSupabase(userGuardado)
+    await cargarUsuariosAdminDesdeSupabase()
     renderPanelLuizLabs()
     limpiarUsuarioAdminLuizForm()
     registrarActividad(accion, {
@@ -4249,18 +4324,6 @@ async function guardarUsuarioAdmin() {
         return
     }
 
-    const item = {
-        nombre: `${nombres} ${apellidos}`.trim(),
-        nombres,
-        apellidos,
-        dni,
-        correo,
-        celular,
-        usuario,
-        clave,
-        rol,
-        tenant_id: tenantActivoId || null
-    }
     const perfil = obtenerPerfilPorId(perfilId)
     if (!perfil || perfil.estado !== "activo") {
         alert("Selecciona un perfil activo.")
@@ -4270,27 +4333,16 @@ async function guardarUsuarioAdmin() {
         alert("El rol superusuario es global y no se gestiona en este módulo institucional.")
         return
     }
+    if (!tenantActivoId) {
+        alert("No hay institución activa para asignar el usuario.")
+        return
+    }
     let accion = "usuario_admin_institucional_creado"
+    const original = editUsuarioIndex >= 0 ? usuariosAdmin[editUsuarioIndex] : null
+    const previousUsuario = String(original?.usuario || "").trim().toLowerCase()
     if (editUsuarioIndex >= 0) {
-        const original = usuariosAdmin[editUsuarioIndex]
         if (!original?.id) {
             alert("No se encontró el usuario a editar")
-            return
-        }
-        let { error } = await supabaseClient
-            .from("usuarios_admin")
-            .update(item)
-            .eq("id", original.id)
-        if (error && /(tenant_id|nombres|apellidos|dni|correo|celular)/i.test(String(error.message || ""))) {
-            const itemFallback = { nombre: `${nombres} ${apellidos}`.trim(), usuario, clave, rol }
-            const fallback = await supabaseClient
-                .from("usuarios_admin")
-                .update(itemFallback)
-                .eq("id", original.id)
-            error = fallback.error
-        }
-        if (error) {
-            alert(`No se pudo actualizar: ${error.message}`)
             return
         }
         accion = "usuario_admin_institucional_editado"
@@ -4304,22 +4356,32 @@ async function guardarUsuarioAdmin() {
             alert("Ese usuario ya existe")
             return
         }
-        let { error } = await supabaseClient
-            .from("usuarios_admin")
-            .insert([{ ...item, activo: true }])
-        if (error && /(tenant_id|nombres|apellidos|dni|correo|celular)/i.test(String(error.message || ""))) {
-            const fallback = await supabaseClient
-                .from("usuarios_admin")
-                .insert([{ nombre: `${nombres} ${apellidos}`.trim(), usuario, clave, rol, activo: true }])
-            error = fallback.error
-        }
-        if (error) {
-            alert(`No se pudo crear usuario: ${error.message}`)
-            return
-        }
+    }
+
+    try {
+        await provisionarUsuarioAdminSeguro({
+            usuario,
+            clave,
+            correo,
+            tenant_id: tenantActivoId,
+            rol,
+            nombres,
+            apellidos,
+            dni,
+            celular,
+            perfil_id: perfilId,
+            previous_usuario: previousUsuario,
+            activo: true
+        })
+    } catch (error) {
+        alert(`No se pudo provisionar usuario: ${error.message}`)
+        return
     }
 
     await cargarUsuariosAdminDesdeSupabase()
+    if (previousUsuario && previousUsuario !== usuario) {
+        delete perfilesUsuariosLocales[previousUsuario]
+    }
     perfilesUsuariosLocales[usuario] = perfilId
     guardarLuizLabsEnStorage()
     limpiarUsuarioAdmin()
