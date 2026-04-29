@@ -440,53 +440,82 @@
             Usuarios de la institución
           </h2>
 
-          <div class="card config-card">
-            <h3>Perfiles de Acceso</h3>
-            <div class="config-grid">
-              <div>
-                <label for="userNombres">Nombres</label>
-                <input id="userNombres" placeholder="Nombres">
+          <div id="formUsuarioAdmin" class="user-form-card">
+            <div class="form-header">
+              <h3 id="tituloFormUsuarioAdmin">Crear usuario institucional <span id="badgeEditUsuarioAdmin" class="edit-badge" style="display:none;">Editando</span></h3>
+              <p id="subtituloFormUsuarioAdmin">Define credenciales, perfil y datos de contacto</p>
+            </div>
+            <div class="form-body">
+              <div class="form-section">
+                <span class="form-section-title">A. Identidad</span>
+                <div class="form-grid">
+                  <div class="form-group field-md">
+                    <label for="userNombres">Nombres</label>
+                    <input id="userNombres" placeholder="Ej. Juan">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="userApellidos">Apellidos</label>
+                    <input id="userApellidos" placeholder="Ej. Pérez">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="userDni">DNI</label>
+                    <input id="userDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+                  </div>
+                </div>
               </div>
-              <div>
-                <label for="userApellidos">Apellidos</label>
-                <input id="userApellidos" placeholder="Apellidos">
+
+              <div class="form-section">
+                <span class="form-section-title">B. Acceso y Perfil</span>
+                <div class="form-grid">
+                  <div class="form-group field-md">
+                    <label for="userLogin">Usuario</label>
+                    <input id="userLogin" placeholder="usuario">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="userPass">Clave</label>
+                    <input id="userPass" type="password" placeholder="••••••••">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="userRol">Rol Sistema</label>
+                    <select id="userRol">
+                      <option value="administrador">Administrador</option>
+                    </select>
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="userPerfil">Perfil Funcional</label>
+                    <select id="userPerfil"></select>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label for="userDni">DNI</label>
-                <input id="userDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
-              </div>
-              <div>
-                <label for="userCorreo">Correo</label>
-                <input id="userCorreo" placeholder="correo@dominio.com" type="email">
-              </div>
-              <div>
-                <label for="userCelular">Celular</label>
-                <input id="userCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
-              </div>
-              <div>
-                <label for="userLogin">Usuario</label>
-                <input id="userLogin" placeholder="usuario">
-              </div>
-              <div>
-                <label for="userPass">Clave</label>
-                <input id="userPass" type="password" placeholder="clave">
-              </div>
-              <div>
-                <label for="userRol">Rol</label>
-                <select id="userRol">
-                  <option value="administrador">Administrador</option>
-                </select>
-              </div>
-              <div>
-                <label for="userPerfil">Perfil</label>
-                <select id="userPerfil"></select>
+
+              <div class="form-section">
+                <span class="form-section-title">C. Contacto</span>
+                <div class="form-grid">
+                  <div class="form-group field-xl">
+                    <label for="userCorreo">Correo</label>
+                    <input id="userCorreo" placeholder="correo@dominio.com" type="email">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="userCelular">Celular</label>
+                    <input id="userCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="config-actions">
+            <div class="form-actions-bar">
               <button onclick="guardarUsuarioAdmin()">Guardar Usuario</button>
+              <button class="secondary" onclick="generarClaveUsuarioAdmin()">Generar clave</button>
+              <button class="secondary icon-btn-with-text" id="btnCopiarClaveAdmin" onclick="copiarClaveUsuarioAdmin()" title="Copiar clave">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="9" y="3" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
+                  <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
+                </svg>
+                <span>Copiar</span>
+              </button>
               <button class="secondary" onclick="cancelarEdicionUsuarioAdmin()">Cancelar edición</button>
               <button class="secondary" onclick="limpiarUsuarioAdmin()">Limpiar</button>
             </div>
+          </div>
 
             <!-- BUSCADOR Y FILTROS PRO -->
             <div class="user-search-bar">
@@ -887,56 +916,78 @@
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l2.236 2.236m-2.236-2.236l2.236-2.236"></path></svg>
               Usuarios globales LuizLabs
             </h2>
-            <div class="config-grid" style="margin-bottom:10px;">
-              <div>
-                <label for="luizGlobalNombres">Nombres</label>
-                <input id="luizGlobalNombres" placeholder="Nombres">
+          <div id="formUsuarioGlobalLuiz" class="user-form-card">
+            <div class="form-header">
+              <h3 id="tituloFormUsuarioGlobal">Crear usuario global <span id="badgeEditUsuarioGlobal" class="edit-badge" style="display:none;">Editando</span></h3>
+              <p id="subtituloFormUsuarioGlobal">Define credenciales de superusuario para LuizLabs</p>
+            </div>
+            <div class="form-body">
+              <div class="form-section">
+                <span class="form-section-title">A. Identidad</span>
+                <div class="form-grid">
+                  <div class="form-group field-md">
+                    <label for="luizGlobalNombres">Nombres</label>
+                    <input id="luizGlobalNombres" placeholder="Ej. Luiz">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizGlobalApellidos">Apellidos</label>
+                    <input id="luizGlobalApellidos" placeholder="Ej. Labs">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizGlobalDni">DNI</label>
+                    <input id="luizGlobalDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+                  </div>
+                </div>
               </div>
-              <div>
-                <label for="luizGlobalApellidos">Apellidos</label>
-                <input id="luizGlobalApellidos" placeholder="Apellidos">
+
+              <div class="form-section">
+                <span class="form-section-title">B. Acceso</span>
+                <div class="form-grid">
+                  <div class="form-group field-md">
+                    <label for="luizGlobalUserNombre">Usuario</label>
+                    <input id="luizGlobalUserNombre" placeholder="superusuario">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizGlobalUserRol">Rol</label>
+                    <select id="luizGlobalUserRol">
+                      <option value="superusuario">Superusuario</option>
+                    </select>
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizGlobalUserPass">Clave</label>
+                    <input id="luizGlobalUserPass" placeholder="••••••••">
+                  </div>
+                </div>
               </div>
-              <div>
-                <label for="luizGlobalDni">DNI</label>
-                <input id="luizGlobalDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
-              </div>
-              <div>
-                <label for="luizGlobalCorreo">Correo</label>
-                <input id="luizGlobalCorreo" placeholder="correo@dominio.com" type="email">
-              </div>
-              <div>
-                <label for="luizGlobalCelular">Celular</label>
-                <input id="luizGlobalCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*"
-                  maxlength="15">
-              </div>
-              <div>
-                <label for="luizGlobalUserNombre">Usuario</label>
-                <input id="luizGlobalUserNombre" placeholder="superusuario">
-              </div>
-              <div>
-                <label for="luizGlobalUserRol">Rol</label>
-                <select id="luizGlobalUserRol">
-                  <option value="superusuario">Superusuario</option>
-                </select>
-              </div>
-              <div>
-                <label for="luizGlobalUserPass">Clave</label>
-                <input id="luizGlobalUserPass" placeholder="Clave global">
+
+              <div class="form-section">
+                <span class="form-section-title">C. Contacto</span>
+                <div class="form-grid">
+                  <div class="form-group field-xl">
+                    <label for="luizGlobalCorreo">Correo</label>
+                    <input id="luizGlobalCorreo" placeholder="correo@dominio.com" type="email">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizGlobalCelular">Celular</label>
+                    <input id="luizGlobalCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="table-actions" style="margin-bottom:10px;">
+            <div class="form-actions-bar">
               <button onclick="guardarUsuarioGlobalLuiz()">Guardar usuario global</button>
               <button class="secondary" onclick="generarClaveUsuarioGlobalLuiz()">Generar clave</button>
-              <button class="icon-btn" onclick="copiarClaveUsuarioGlobalLuiz()" title="Copiar clave global"
-                aria-label="Copiar clave global">
+              <button class="secondary icon-btn-with-text" id="btnCopiarClaveGlobal" onclick="copiarClaveUsuarioGlobalLuiz()" title="Copiar clave global" aria-label="Copiar clave global">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <rect x="9" y="3" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
                   <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
                 </svg>
+                <span>Copiar</span>
               </button>
               <button class="secondary" onclick="cancelarEdicionUsuarioGlobalLuiz()">Cancelar edición</button>
               <button class="secondary" onclick="limpiarUsuarioGlobalLuizForm()">Limpiar</button>
             </div>
+          </div>
 
             <!-- BUSCADOR Y CONTADOR GLOBAL -->
             <div class="user-search-bar">
@@ -968,63 +1019,86 @@
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
               Usuarios admin por institución
             </h2>
-            <div class="config-grid" style="margin-bottom:10px;">
-              <div>
-                <label for="luizUserNombres">Nombres</label>
-                <input id="luizUserNombres" placeholder="Nombres">
+          <div id="formUsuarioAdminLuiz" class="user-form-card">
+            <div class="form-header">
+              <h3 id="tituloFormUsuarioAdminLuiz">Crear administrador institucional <span id="badgeEditUsuarioAdminLuiz" class="edit-badge" style="display:none;">Editando</span></h3>
+              <p id="subtituloFormUsuarioAdminLuiz">Asigna un administrador a una institución específica</p>
+            </div>
+            <div class="form-body">
+              <div class="form-section">
+                <span class="form-section-title">A. Identidad</span>
+                <div class="form-grid">
+                  <div class="form-group field-md">
+                    <label for="luizUserNombres">Nombres</label>
+                    <input id="luizUserNombres" placeholder="Ej. Pedro">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizUserApellidos">Apellidos</label>
+                    <input id="luizUserApellidos" placeholder="Ej. Ramírez">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizUserDni">DNI</label>
+                    <input id="luizUserDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+                  </div>
+                </div>
               </div>
-              <div>
-                <label for="luizUserApellidos">Apellidos</label>
-                <input id="luizUserApellidos" placeholder="Apellidos">
+
+              <div class="form-section">
+                <span class="form-section-title">B. Acceso y Destino</span>
+                <div class="form-grid">
+                  <div class="form-group field-md">
+                    <label for="luizUserNombre">Usuario</label>
+                    <input id="luizUserNombre" placeholder="admin@institucion">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizUserPass">Clave</label>
+                    <input id="luizUserPass" placeholder="••••••••">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizUserTenant">Institución</label>
+                    <select id="luizUserTenant"></select>
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizUserRol">Rol</label>
+                    <select id="luizUserRol">
+                      <option value="administrador">Administrador</option>
+                    </select>
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizUserPerfil">Perfil</label>
+                    <select id="luizUserPerfil"></select>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label for="luizUserDni">DNI</label>
-                <input id="luizUserDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
-              </div>
-              <div>
-                <label for="luizUserCorreo">Correo</label>
-                <input id="luizUserCorreo" placeholder="correo@dominio.com" type="email">
-              </div>
-              <div>
-                <label for="luizUserCelular">Celular</label>
-                <input id="luizUserCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
-              </div>
-              <div>
-                <label for="luizUserNombre">Usuario</label>
-                <input id="luizUserNombre" placeholder="admin@institucion">
-              </div>
-              <div>
-                <label for="luizUserRol">Rol</label>
-                <select id="luizUserRol">
-                  <option value="administrador">Administrador</option>
-                </select>
-              </div>
-              <div>
-                <label for="luizUserTenant">Institución</label>
-                <select id="luizUserTenant"></select>
-              </div>
-              <div>
-                <label for="luizUserPass">Clave</label>
-                <input id="luizUserPass" placeholder="Clave temporal">
-              </div>
-              <div>
-                <label for="luizUserPerfil">Perfil</label>
-                <select id="luizUserPerfil"></select>
+
+              <div class="form-section">
+                <span class="form-section-title">C. Contacto</span>
+                <div class="form-grid">
+                  <div class="form-group field-xl">
+                    <label for="luizUserCorreo">Correo</label>
+                    <input id="luizUserCorreo" placeholder="correo@dominio.com" type="email">
+                  </div>
+                  <div class="form-group field-md">
+                    <label for="luizUserCelular">Celular</label>
+                    <input id="luizUserCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="table-actions" style="margin-bottom:10px;">
+            <div class="form-actions-bar">
               <button onclick="guardarUsuarioAdminLuiz()">Guardar usuario</button>
               <button class="secondary" onclick="generarClaveUsuarioLuiz()">Generar clave</button>
-              <button class="icon-btn" onclick="copiarClaveUsuarioLuiz()" title="Copiar clave"
-                aria-label="Copiar clave">
+              <button class="secondary icon-btn-with-text" id="btnCopiarClaveLuiz" onclick="copiarClaveUsuarioLuiz()" title="Copiar clave" aria-label="Copiar clave">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <rect x="9" y="3" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
                   <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
                 </svg>
+                <span>Copiar</span>
               </button>
               <button class="secondary" onclick="cancelarEdicionUsuarioAdminLuiz()">Cancelar edición</button>
               <button class="secondary" onclick="limpiarUsuarioAdminLuizForm()">Limpiar</button>
             </div>
+          </div>
 
             <!-- BUSCADOR Y FILTROS ADMIN POR INST -->
             <div class="user-search-bar">

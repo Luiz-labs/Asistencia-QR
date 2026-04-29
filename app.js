@@ -150,7 +150,7 @@ let cursoSecciones = []
 let cursoSedesUbo = []
 let editSeccionCursoIndex = -1
 let editSedeUboIndex = -1
-let editUsuarioIndex = -1
+let editUsuarioIndex = null
 let usuariosAdmin = []
 let cacheReportes = []
 let cacheDashboard = []
@@ -222,8 +222,8 @@ let institucionesLuiz = []
 let usuariosAdminLuiz = []
 let perfilesLuiz = []
 let perfilesUsuariosLocales = {}
-let editUsuarioLuizIndex = -1
-let editUsuarioGlobalLuizIndex = -1
+let editUsuarioAdminLuizIndex = null
+let editUsuarioGlobalLuizIndex = null
 let editPerfilLuizIndex = -1
 let soporteLuizLabsSupabase = null
 let soporteActividadLogsSupabase = null
@@ -2418,7 +2418,7 @@ function renderPanelLuizLabs() {
         const perfilId = String(u.perfilId || "administrador").toLowerCase()
         let matchesPerfil = true
         if (filterPerfilAdmin !== "todos") {
-            matchesPerfil = perfilId.includes(filterPerfilAdmin)
+            matchesPerfil = perfilId.includes(filterPerfil)
         }
         
         return matchesSearch && matchesPerfil
@@ -2876,16 +2876,61 @@ async function eliminarUsuarioAdminLuiz(idx) {
     }, { tenantId: tenantUser })
 }
 
+function actualizarBotonCopiado(btnId) {
+    const btn = document.getElementById(btnId)
+    if (!btn) return
+    const span = btn.querySelector("span")
+    if (!span) return
+    const originalText = span.innerText
+    span.innerText = "Copiado ✓"
+    btn.classList.add("btn-copied")
+    setTimeout(() => {
+        span.innerText = originalText
+        btn.classList.remove("btn-copied")
+    }, 1500)
+}
+
+function generarClaveUsuarioAdmin() {
+    const pass = Math.random().toString(36).slice(-8)
+    if (userPass) {
+        userPass.value = pass
+        userPass.type = "text"
+    }
+}
+
+async function copiarClaveUsuarioAdmin() {
+    const pass = String(userPass?.value || "").trim()
+    if (!pass) return
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(pass)
+            actualizarBotonCopiado("btnCopiarClaveAdmin")
+            return
+        }
+    } catch (e) {
+        console.warn(e)
+    }
+    window.prompt("Copia la clave:", pass)
+}
+
 function limpiarUsuarioGlobalLuizForm() {
-    editUsuarioGlobalLuizIndex = -1
     if (luizGlobalNombres) luizGlobalNombres.value = ""
     if (luizGlobalApellidos) luizGlobalApellidos.value = ""
     if (luizGlobalDni) luizGlobalDni.value = ""
     if (luizGlobalCorreo) luizGlobalCorreo.value = ""
     if (luizGlobalCelular) luizGlobalCelular.value = ""
     if (luizGlobalUserNombre) luizGlobalUserNombre.value = ""
-    if (luizGlobalUserRol) luizGlobalUserRol.value = ROLES_ADMIN.SUPERUSUARIO
     if (luizGlobalUserPass) luizGlobalUserPass.value = ""
+    if (luizGlobalUserRol) luizGlobalUserRol.value = "superusuario"
+    editUsuarioGlobalLuizIndex = null
+
+    // UI Reset
+    const card = document.getElementById("formUsuarioGlobalLuiz")
+    if (card) card.classList.remove("edit-mode")
+    const badge = document.getElementById("badgeEditUsuarioGlobal")
+    if (badge) badge.style.display = "none"
+    const sub = document.getElementById("subtituloFormUsuarioGlobal")
+    if (sub) sub.innerText = "Define credenciales de superusuario para LuizLabs"
 }
 
 function cancelarEdicionUsuarioGlobalLuiz() {
@@ -2899,14 +2944,11 @@ function generarClaveUsuarioGlobalLuiz() {
 
 async function copiarClaveUsuarioGlobalLuiz() {
     const clave = String(luizGlobalUserPass?.value || "").trim()
-    if (!clave) {
-        alert("No hay clave global para copiar.")
-        return
-    }
+    if (!clave) return
     try {
         if (navigator.clipboard?.writeText) {
             await navigator.clipboard.writeText(clave)
-            alert("Clave global copiada.")
+            actualizarBotonCopiado("btnCopiarClaveGlobal")
             return
         }
     } catch (e) {
@@ -2914,29 +2956,37 @@ async function copiarClaveUsuarioGlobalLuiz() {
     }
     const soporte = window.prompt("Copia esta clave:", clave)
     if (soporte !== null) {
-        alert("Clave lista para copiar.")
+        // alert ya no es necesario con el feedback visual
     }
 }
 
 function editarUsuarioGlobalLuiz(idx) {
     if (!puedeEntrarPanelLuizLabs()) return
-    const user = usuariosAdminLuiz[idx]
-    if (!user || !esUsuarioGlobalAsistIA(user)) return
-    const protegidoEditable = esUsuarioProtegidoLuiz(user.usuario) && puedeEditarDatosUsuarioProtegido(user)
-    if (esUsuarioProtegidoLuiz(user.usuario) && !protegidoEditable) {
+    const u = (usuariosAdminLuiz || [])[idx]
+    if (!u || !esUsuarioGlobalAsistIA(u)) return
+    const protegidoEditable = esUsuarioProtegidoLuiz(u.usuario) && puedeEditarDatosUsuarioProtegido(u)
+    if (esUsuarioProtegidoLuiz(u.usuario) && !protegidoEditable) {
         alert("Usuario protegido.")
         return
     }
 
+    if (luizGlobalNombres) luizGlobalNombres.value = u.nombres || u.nombre || ""
+    if (luizGlobalApellidos) luizGlobalApellidos.value = u.apellidos || ""
+    if (luizGlobalDni) luizGlobalDni.value = u.dni || ""
+    if (luizGlobalCorreo) luizGlobalCorreo.value = u.correo || ""
+    if (luizGlobalCelular) luizGlobalCelular.value = u.celular || ""
+    if (luizGlobalUserNombre) luizGlobalUserNombre.value = u.usuario || ""
+    if (luizGlobalUserPass) luizGlobalUserPass.value = u.clave || ""
+    if (luizGlobalUserRol) luizGlobalUserRol.value = normalizarRolUsuario(u.rol)
     editUsuarioGlobalLuizIndex = idx
-    if (luizGlobalNombres) luizGlobalNombres.value = user.nombres || ""
-    if (luizGlobalApellidos) luizGlobalApellidos.value = user.apellidos || ""
-    if (luizGlobalDni) luizGlobalDni.value = user.dni || ""
-    if (luizGlobalCorreo) luizGlobalCorreo.value = user.correo || ""
-    if (luizGlobalCelular) luizGlobalCelular.value = user.celular || ""
-    if (luizGlobalUserNombre) luizGlobalUserNombre.value = user.usuario || ""
-    if (luizGlobalUserRol) luizGlobalUserRol.value = ROLES_ADMIN.SUPERUSUARIO
-    if (luizGlobalUserPass) luizGlobalUserPass.value = user.password || ""
+
+    // UI Edit Mode
+    const card = document.getElementById("formUsuarioGlobalLuiz")
+    if (card) card.classList.add("edit-mode")
+    const badge = document.getElementById("badgeEditUsuarioGlobal")
+    if (badge) badge.style.display = "inline-block"
+    const sub = document.getElementById("subtituloFormUsuarioGlobal")
+    if (sub) sub.innerText = `Modificando datos de superusuario: ${u.usuario}`
 }
 
 async function toggleEstadoUsuarioGlobalLuiz(idx) {
@@ -3006,12 +3056,12 @@ async function guardarUsuarioGlobalLuiz() {
         alert("En esta sección solo se gestionan superusuarios globales.")
         return
     }
-    const usuarioActualEdicion = editUsuarioGlobalLuizIndex >= 0
+    const usuarioActualEdicion = editUsuarioGlobalLuizIndex !== null
         ? String(usuariosAdminLuiz?.[editUsuarioGlobalLuizIndex]?.usuario || "").toLowerCase()
         : ""
     const usuarioSupabase = (usuariosAdmin || []).some(u => {
         const userDb = String(u.usuario || "").toLowerCase()
-        if (editUsuarioGlobalLuizIndex >= 0 && userDb === usuarioActualEdicion) {
+        if (editUsuarioGlobalLuizIndex !== null && userDb === usuarioActualEdicion) {
             return false
         }
         return userDb === usuario
@@ -3022,7 +3072,7 @@ async function guardarUsuarioGlobalLuiz() {
     }
 
     let accion = "usuario_global_creado"
-    if (editUsuarioGlobalLuizIndex >= 0) {
+    if (editUsuarioGlobalLuizIndex !== null) {
         const actual = usuariosAdminLuiz[editUsuarioGlobalLuizIndex]
         if (!actual || !esUsuarioGlobalAsistIA(actual)) {
             limpiarUsuarioGlobalLuizForm()
@@ -3089,17 +3139,25 @@ async function guardarUsuarioGlobalLuiz() {
 }
 
 function limpiarUsuarioAdminLuizForm() {
-    editUsuarioLuizIndex = -1
     if (luizUserNombres) luizUserNombres.value = ""
     if (luizUserApellidos) luizUserApellidos.value = ""
     if (luizUserDni) luizUserDni.value = ""
     if (luizUserCorreo) luizUserCorreo.value = ""
     if (luizUserCelular) luizUserCelular.value = ""
     if (luizUserNombre) luizUserNombre.value = ""
-    if (luizUserRol) luizUserRol.value = ROLES_ADMIN.ADMINISTRADOR
-    if (luizUserTenant) luizUserTenant.value = ""
     if (luizUserPass) luizUserPass.value = ""
+    if (luizUserTenant) luizUserTenant.value = ""
+    if (luizUserRol) luizUserRol.value = "administrador"
     if (luizUserPerfil) luizUserPerfil.value = "administrador"
+    editUsuarioAdminLuizIndex = null
+
+    // UI Reset
+    const card = document.getElementById("formUsuarioAdminLuiz")
+    if (card) card.classList.remove("edit-mode")
+    const badge = document.getElementById("badgeEditUsuarioAdminLuiz")
+    if (badge) badge.style.display = "none"
+    const sub = document.getElementById("subtituloFormUsuarioAdminLuiz")
+    if (sub) sub.innerText = "Asigna un administrador a una institución específica"
 }
 
 function cancelarEdicionUsuarioAdminLuiz() {
@@ -3107,52 +3165,57 @@ function cancelarEdicionUsuarioAdminLuiz() {
 }
 
 function generarClaveUsuarioLuiz() {
-    if (!luizUserPass) return
-    luizUserPass.value = generarClaveTemporal(8)
+    const pass = Math.random().toString(36).slice(-8)
+    if (luizUserPass) {
+        luizUserPass.value = pass
+        luizUserPass.type = "text"
+    }
 }
 
 async function copiarClaveUsuarioLuiz() {
     const clave = String(luizUserPass?.value || "").trim()
-    if (!clave) {
-        alert("No hay clave para copiar. Genera o ingresa una primero.")
-        return
-    }
+    if (!clave) return
     try {
         if (navigator.clipboard?.writeText) {
             await navigator.clipboard.writeText(clave)
-            alert("Clave copiada.")
+            actualizarBotonCopiado("btnCopiarClaveLuiz")
             return
         }
     } catch (e) {
-        console.warn("No se pudo copiar clave:", e)
+        console.warn(e)
     }
-    const soporte = window.prompt("Copia esta clave:", clave)
-    if (soporte !== null) {
-        alert("Clave lista para copiar.")
-    }
+    window.prompt("Copia la clave:", clave)
 }
 
 function editarUsuarioAdminLuiz(idx) {
     if (!puedeEntrarPanelLuizLabs()) return
-    const user = usuariosAdminLuiz[idx]
-    if (!user) return
-    if (!esUsuarioInstitucionalLuiz(user)) return
-    if (esUsuarioProtegidoLuiz(user.usuario)) {
+    const u = (usuariosAdminLuiz || [])[idx]
+    if (!u) return
+    if (!esUsuarioInstitucionalLuiz(u)) return
+    if (esUsuarioProtegidoLuiz(u.usuario)) {
         alert("El usuario legacy está protegido y no se edita desde este módulo.")
         return
     }
 
-    editUsuarioLuizIndex = idx
-    if (luizUserNombres) luizUserNombres.value = user.nombres || ""
-    if (luizUserApellidos) luizUserApellidos.value = user.apellidos || ""
-    if (luizUserDni) luizUserDni.value = user.dni || ""
-    if (luizUserCorreo) luizUserCorreo.value = user.correo || ""
-    if (luizUserCelular) luizUserCelular.value = user.celular || ""
-    if (luizUserNombre) luizUserNombre.value = user.usuario || ""
-    if (luizUserRol) luizUserRol.value = normalizarRolUsuario(user.rol)
-    if (luizUserTenant) luizUserTenant.value = user.tenantId || ""
-    if (luizUserPass) luizUserPass.value = user.password || ""
-    if (luizUserPerfil) luizUserPerfil.value = user.perfilId || "administrador"
+    if (luizUserNombres) luizUserNombres.value = u.nombres || u.nombre || ""
+    if (luizUserApellidos) luizUserApellidos.value = u.apellidos || ""
+    if (luizUserDni) luizUserDni.value = u.dni || ""
+    if (luizUserCorreo) luizUserCorreo.value = u.correo || ""
+    if (luizUserCelular) luizUserCelular.value = u.celular || ""
+    if (luizUserNombre) luizUserNombre.value = u.usuario || ""
+    if (luizUserPass) luizUserPass.value = u.clave || ""
+    if (luizUserTenant) luizUserTenant.value = u.tenantId || ""
+    if (luizUserRol) luizUserRol.value = normalizarRolUsuario(u.rol)
+    if (luizUserPerfil) luizUserPerfil.value = u.perfilId || "administrador"
+    editUsuarioAdminLuizIndex = idx
+
+    // UI Edit Mode
+    const card = document.getElementById("formUsuarioAdminLuiz")
+    if (card) card.classList.add("edit-mode")
+    const badge = document.getElementById("badgeEditUsuarioAdminLuiz")
+    if (badge) badge.style.display = "inline-block"
+    const sub = document.getElementById("subtituloFormUsuarioAdminLuiz")
+    if (sub) sub.innerText = `Modificando datos de: ${u.usuario}`
 }
 
 async function guardarUsuarioAdminLuiz() {
@@ -3198,12 +3261,12 @@ async function guardarUsuarioAdminLuiz() {
         alert("Ese usuario ya existe como usuario del sistema.")
         return
     }
-    const usuarioActualEdicion = editUsuarioLuizIndex >= 0
-        ? String(usuariosAdminLuiz?.[editUsuarioLuizIndex]?.usuario || "").toLowerCase()
+    const usuarioActualEdicion = editUsuarioAdminLuizIndex !== null
+        ? String(usuariosAdminLuiz?.[editUsuarioAdminLuizIndex]?.usuario || "").toLowerCase()
         : ""
     const usuarioSupabase = (usuariosAdmin || []).some(u => {
         const userDb = String(u.usuario || "").toLowerCase()
-        if (editUsuarioLuizIndex >= 0 && userDb === usuarioActualEdicion) {
+        if (editUsuarioAdminLuizIndex !== null && userDb === usuarioActualEdicion) {
             return false
         }
         return userDb === usuario
@@ -3224,9 +3287,9 @@ async function guardarUsuarioAdminLuiz() {
     }
 
     let accion = "usuario_admin_luiz_creado"
-    const actual = editUsuarioLuizIndex >= 0 ? usuariosAdminLuiz[editUsuarioLuizIndex] : null
+    const actual = editUsuarioAdminLuizIndex !== null ? usuariosAdminLuiz[editUsuarioAdminLuizIndex] : null
     const previousUsuario = String(actual?.usuario || "").trim().toLowerCase()
-    if (editUsuarioLuizIndex >= 0) {
+    if (editUsuarioAdminLuizIndex !== null) {
         if (!actual) {
             limpiarUsuarioAdminLuizForm()
             return
@@ -3237,7 +3300,7 @@ async function guardarUsuarioAdminLuiz() {
             return
         }
 
-        const duplicado = usuariosAdminLuiz.some((u, i) => i !== editUsuarioLuizIndex && u.usuario === usuario)
+        const duplicado = usuariosAdminLuiz.some((u, i) => i !== editUsuarioAdminLuizIndex && u.usuario === usuario)
         if (duplicado) {
             alert("Ya existe un usuario con ese nombre.")
             return
@@ -3287,8 +3350,8 @@ async function guardarUsuarioAdminLuiz() {
         fecha_creacion: actual?.fecha_creacion || new Date().toISOString()
     }
 
-    if (editUsuarioLuizIndex >= 0) {
-        usuariosAdminLuiz[editUsuarioLuizIndex] = draftUser
+    if (editUsuarioAdminLuizIndex !== null) {
+        usuariosAdminLuiz[editUsuarioAdminLuizIndex] = draftUser
     } else {
         usuariosAdminLuiz.push(draftUser)
     }
@@ -4500,11 +4563,19 @@ function limpiarUsuarioAdmin() {
     if (userDni) userDni.value = ""
     if (userCorreo) userCorreo.value = ""
     if (userCelular) userCelular.value = ""
-    userLogin.value = ""
-    userPass.value = ""
-    userRol.value = "administrador"
+    if (userLogin) userLogin.value = ""
+    if (userPass) userPass.value = ""
+    if (userRol) userRol.value = "administrador"
     if (userPerfil) userPerfil.value = "administrador"
-    editUsuarioIndex = -1
+    editUsuarioIndex = null
+
+    // UI Reset
+    const card = document.getElementById("formUsuarioAdmin")
+    if (card) card.classList.remove("edit-mode")
+    const badge = document.getElementById("badgeEditUsuarioAdmin")
+    if (badge) badge.style.display = "none"
+    const sub = document.getElementById("subtituloFormUsuarioAdmin")
+    if (sub) sub.innerText = "Define credenciales, perfil y datos de contacto"
 }
 
 function cancelarEdicionUsuarioAdmin() {
@@ -4554,9 +4625,9 @@ async function guardarUsuarioAdmin() {
         return
     }
     let accion = "usuario_admin_institucional_creado"
-    const original = editUsuarioIndex >= 0 ? usuariosAdmin[editUsuarioIndex] : null
+    const original = editUsuarioIndex !== null ? usuariosAdmin[editUsuarioIndex] : null
     const previousUsuario = String(original?.usuario || "").trim().toLowerCase()
-    if (editUsuarioIndex >= 0) {
+    if (editUsuarioIndex !== null) {
         if (!original?.id) {
             alert("No se encontró el usuario a editar")
             return
@@ -4621,6 +4692,14 @@ function editarUsuarioAdmin(idx) {
         userPerfil.value = perfil
     }
     editUsuarioIndex = idx
+
+    // UI Edit Mode
+    const card = document.getElementById("formUsuarioAdmin")
+    if (card) card.classList.add("edit-mode")
+    const badge = document.getElementById("badgeEditUsuarioAdmin")
+    if (badge) badge.style.display = "inline-block"
+    const sub = document.getElementById("subtituloFormUsuarioAdmin")
+    if (sub) sub.innerText = `Modificando datos de: ${u.usuario}`
 }
 
 async function eliminarUsuarioAdmin(idx) {
