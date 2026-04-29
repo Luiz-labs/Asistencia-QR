@@ -28,9 +28,6 @@
     <p class="tenant-caption">Selecciona la institución para continuar</p>
     <div id="tenantGrid" class="tenant-grid"></div>
     <p class="tenant-note">Puedes cambiar de institución más adelante desde esta misma pantalla.</p>
-    <div style="position:absolute;bottom:15px;font-size:12px;color:#777;">
-      Desarrollado por Luiz-Labs @ 2026
-    </div>
   </div>
 
   <!-- LOGIN -->
@@ -92,15 +89,7 @@
       <span class="login-powered-wordmark">asist<span style="color: #2563eb;">IA</span></span>
     </div>
 
-    <!-- FOOTER -->
-    <div style="
-    position:absolute;
-    bottom:15px;
-    font-size:12px;
-    color:#777;
-  ">
-      Desarrollado por Luiz-Labs @ 2026
-    </div>
+      </div>
 
   </div>
 
@@ -119,9 +108,6 @@
       <input id="mobileDniInicio" placeholder="Ingrese DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
       <button onclick="ingresarMovilInicio()">INGRESAR</button>
     </div>
-    <footer style="margin-top:20px;font-size:12px;color:#97a4bf;">
-      Desarrollado por Luiz-Labs @ 2026
-    </footer>
   </div>
 
   <div id="vistaMovil" style="display:none;text-align:center;padding:20px;">
@@ -158,9 +144,6 @@
       <button onclick="iniciarEscaneo()">📷 Escanear QR</button>
     </div>
 
-    <footer style="margin-top:20px;font-size:12px;color:#97a4bf;">
-      Desarrollado por Luiz-Labs @ 2026
-    </footer>
 
   </div>
 
@@ -439,12 +422,13 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             Usuarios de la institución
           </h2>
+          <p class="user-module-subtitle">Administra accesos, perfiles y credenciales del equipo</p>
 
           <div id="formUsuarioAdmin" class="user-form-card">
-            <div class="form-header">
-              <h3 id="tituloFormUsuarioAdmin">Crear usuario institucional <span id="badgeEditUsuarioAdmin" class="edit-badge" style="display:none;">Editando</span></h3>
-              <p id="subtituloFormUsuarioAdmin">Define credenciales, perfil y datos de contacto</p>
-            </div>
+              <div class="form-header">
+                <h3 id="tituloFormUsuarioAdmin">Crear usuario <span id="badgeEditUsuarioAdmin" class="edit-badge" style="display:none;">Editando</span></h3>
+                <p id="subtituloFormUsuarioAdmin">Define credenciales y perfil institucional</p>
+              </div>
             <div class="form-body">
               <div class="form-section">
                 <span class="form-section-title">A. Identidad</span>
@@ -457,7 +441,7 @@
                     <label for="userApellidos">Apellidos</label>
                     <input id="userApellidos" placeholder="Ej. Pérez">
                   </div>
-                  <div class="form-group field-md">
+                  <div class="form-group field-sm">
                     <label for="userDni">DNI</label>
                     <input id="userDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
                   </div>
@@ -475,14 +459,14 @@
                     <label for="userPass">Clave</label>
                     <input id="userPass" type="password" placeholder="••••••••">
                   </div>
-                  <div class="form-group field-md">
-                    <label for="userRol">Rol Sistema</label>
+                  <div class="form-group field-sm">
+                    <label for="userRol">Rol</label>
                     <select id="userRol">
                       <option value="administrador">Administrador</option>
                     </select>
                   </div>
-                  <div class="form-group field-md">
-                    <label for="userPerfil">Perfil Funcional</label>
+                  <div class="form-group field-sm">
+                    <label for="userPerfil">Perfil</label>
                     <select id="userPerfil"></select>
                   </div>
                 </div>
@@ -491,11 +475,11 @@
               <div class="form-section">
                 <span class="form-section-title">C. Contacto</span>
                 <div class="form-grid">
-                  <div class="form-group field-xl">
+                  <div class="form-group field-lg">
                     <label for="userCorreo">Correo</label>
                     <input id="userCorreo" placeholder="correo@dominio.com" type="email">
                   </div>
-                  <div class="form-group field-md">
+                  <div class="form-group field-sm">
                     <label for="userCelular">Celular</label>
                     <input id="userCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
                   </div>
@@ -503,8 +487,8 @@
               </div>
             </div>
             <div class="form-actions-bar">
-              <button onclick="guardarUsuarioAdmin()">Guardar Usuario</button>
-              <button class="secondary" onclick="generarClaveUsuarioAdmin()">Generar clave</button>
+              <button onclick="guardarUsuarioAdmin()">Guardar</button>
+              <button class="secondary" onclick="generarClaveUsuarioAdmin()">Generar</button>
               <button class="secondary icon-btn-with-text" id="btnCopiarClaveAdmin" onclick="copiarClaveUsuarioAdmin()" title="Copiar clave">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <rect x="9" y="3" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
@@ -512,8 +496,7 @@
                 </svg>
                 <span>Copiar</span>
               </button>
-              <button class="secondary" onclick="cancelarEdicionUsuarioAdmin()">Cancelar edición</button>
-              <button class="secondary" onclick="limpiarUsuarioAdmin()">Limpiar</button>
+              <button class="secondary" onclick="cancelarEdicionUsuarioAdmin()">Cancelar</button>
             </div>
           </div>
 
@@ -850,9 +833,6 @@
 
     </div>
 
-    <div style="text-align:center;padding:10px;font-size:12px;color:#777;">
-      Desarrollado por Luiz-Labs @ 2026
-    </div>
 
   </div>
 
@@ -913,13 +893,14 @@
         <div id="luizBloqueUsuarios" style="display:none;">
           <div class="card" style="margin-bottom:24px;">
             <h2 class="user-module-title">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l2.236 2.236m-2.236-2.236l2.236-2.236"></path></svg>
-              Usuarios globales LuizLabs
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              Gestión de usuarios asistIA
             </h2>
+            <p class="user-module-subtitle">Administra accesos globales y usuarios por institución</p>
           <div id="formUsuarioGlobalLuiz" class="user-form-card">
             <div class="form-header">
-              <h3 id="tituloFormUsuarioGlobal">Crear usuario global <span id="badgeEditUsuarioGlobal" class="edit-badge" style="display:none;">Editando</span></h3>
-              <p id="subtituloFormUsuarioGlobal">Define credenciales de superusuario para LuizLabs</p>
+              <h3 id="tituloFormUsuarioGlobal">Usuarios globales <span id="badgeEditUsuarioGlobal" class="edit-badge" style="display:none;">Editando</span></h3>
+              <p id="subtituloFormUsuarioGlobal">Cuentas con acceso administrativo al sistema</p>
             </div>
             <div class="form-body">
               <div class="form-section">
@@ -933,7 +914,7 @@
                     <label for="luizGlobalApellidos">Apellidos</label>
                     <input id="luizGlobalApellidos" placeholder="Ej. Labs">
                   </div>
-                  <div class="form-group field-md">
+                  <div class="form-group field-sm">
                     <label for="luizGlobalDni">DNI</label>
                     <input id="luizGlobalDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
                   </div>
@@ -947,7 +928,7 @@
                     <label for="luizGlobalUserNombre">Usuario</label>
                     <input id="luizGlobalUserNombre" placeholder="superusuario">
                   </div>
-                  <div class="form-group field-md">
+                  <div class="form-group field-sm">
                     <label for="luizGlobalUserRol">Rol</label>
                     <select id="luizGlobalUserRol">
                       <option value="superusuario">Superusuario</option>
@@ -963,11 +944,11 @@
               <div class="form-section">
                 <span class="form-section-title">C. Contacto</span>
                 <div class="form-grid">
-                  <div class="form-group field-xl">
+                  <div class="form-group field-lg">
                     <label for="luizGlobalCorreo">Correo</label>
                     <input id="luizGlobalCorreo" placeholder="correo@dominio.com" type="email">
                   </div>
-                  <div class="form-group field-md">
+                  <div class="form-group field-sm">
                     <label for="luizGlobalCelular">Celular</label>
                     <input id="luizGlobalCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
                   </div>
@@ -1021,8 +1002,8 @@
             </h2>
           <div id="formUsuarioAdminLuiz" class="user-form-card">
             <div class="form-header">
-              <h3 id="tituloFormUsuarioAdminLuiz">Crear administrador institucional <span id="badgeEditUsuarioAdminLuiz" class="edit-badge" style="display:none;">Editando</span></h3>
-              <p id="subtituloFormUsuarioAdminLuiz">Asigna un administrador a una institución específica</p>
+              <h3 id="tituloFormUsuarioAdminLuiz">Usuarios admin por institución <span id="badgeEditUsuarioAdminLuiz" class="edit-badge" style="display:none;">Editando</span></h3>
+              <p id="subtituloFormUsuarioAdminLuiz">Accesos administrativos vinculados a cada institución</p>
             </div>
             <div class="form-body">
               <div class="form-section">
@@ -1036,7 +1017,7 @@
                     <label for="luizUserApellidos">Apellidos</label>
                     <input id="luizUserApellidos" placeholder="Ej. Ramírez">
                   </div>
-                  <div class="form-group field-md">
+                  <div class="form-group field-sm">
                     <label for="luizUserDni">DNI</label>
                     <input id="luizUserDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
                   </div>
@@ -1058,13 +1039,13 @@
                     <label for="luizUserTenant">Institución</label>
                     <select id="luizUserTenant"></select>
                   </div>
-                  <div class="form-group field-md">
+                  <div class="form-group field-sm">
                     <label for="luizUserRol">Rol</label>
                     <select id="luizUserRol">
                       <option value="administrador">Administrador</option>
                     </select>
                   </div>
-                  <div class="form-group field-md">
+                  <div class="form-group field-sm">
                     <label for="luizUserPerfil">Perfil</label>
                     <select id="luizUserPerfil"></select>
                   </div>
@@ -1074,11 +1055,11 @@
               <div class="form-section">
                 <span class="form-section-title">C. Contacto</span>
                 <div class="form-grid">
-                  <div class="form-group field-xl">
+                  <div class="form-group field-lg">
                     <label for="luizUserCorreo">Correo</label>
                     <input id="luizUserCorreo" placeholder="correo@dominio.com" type="email">
                   </div>
-                  <div class="form-group field-md">
+                  <div class="form-group field-sm">
                     <label for="luizUserCelular">Celular</label>
                     <input id="luizUserCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
                   </div>
@@ -1208,8 +1189,8 @@
       </div>
     </div>
 
-    <div style="text-align:center;padding:10px;font-size:12px;color:#777;">
-      Desarrollado por Luiz-Labs @ 2026
+    <div class="main-footer">
+      asistIA · Desarrollado por Luiz-Labs © 2026
     </div>
   </div>
 

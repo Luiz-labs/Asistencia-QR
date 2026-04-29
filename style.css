@@ -3111,11 +3111,20 @@ body {
 @media (max-width: 600px) {
   .form-group, .field-sm, .field-md, .field-lg, .field-xl, .field-full { grid-column: span 12; }
   .form-actions-bar {
-    flex-direction: column;
+    flex-direction: column-reverse;
   }
   .form-actions-bar button {
     width: 100%;
   }
+}
+
+.main-footer {
+  text-align: center;
+  padding: 30px 20px;
+  font-size: 13px;
+  color: #86868b;
+  border-top: 1px solid #f0f0f2;
+  margin-top: 20px;
 }
 
 .icon-btn-with-text {
@@ -3164,9 +3173,9 @@ body {
 }
 
 .form-actions-bar button {
-  height: 38px !important;
-  padding: 0 20px !important;
-  border-radius: 10px !important;
+  height: 42px !important;
+  padding: 0 22px !important;
+  border-radius: 14px !important;
   font-size: 14px !important;
   font-weight: 600 !important;
   cursor: pointer;
