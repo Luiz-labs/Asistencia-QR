@@ -5,9 +5,12 @@
   --line: #e5e5ea;
   --text: #1d1d1f;
   --muted: #86868b;
-  --brand: #185cbc;
-  --brand-dark: #124694;
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --brand: #6366f1;
+  --brand-dark: #4f46e5;
+  --brand-soft: rgba(99, 102, 241, 0.12);
+  --brand-softer: #eef2ff;
+  --brand-line: #c7d2fe;
+  --shadow: 0 12px 30px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
 * {
@@ -26,14 +29,14 @@ h6,
 .tenant-subtitle,
 .login-card-title,
 .mobile-tenant-title {
-  font-family: "Sora", sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.2px;
+  font-family: "Sora", "Inter", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -165,7 +168,9 @@ h2 {
 .sidebar-account-btn:hover {
   filter: none;
   transform: none;
-  background: #e8eef9;
+  background: var(--brand-softer);
+  border-color: var(--brand-line);
+  color: var(--brand-dark);
 }
 
 .cuenta-modal {
@@ -395,19 +400,20 @@ h2 {
   border-radius: 12px;
   color: #233252;
   cursor: pointer;
-  font-weight: 500;
-  transition: background .2s, transform .2s;
+  font-weight: 600;
+  transition: background .2s, color .2s, box-shadow .2s, transform .2s;
 }
 
 .nav-item:hover {
-  background: rgba(0, 0, 0, 0.03);
-  /* hover */
+  background: var(--brand-softer);
+  color: var(--brand-dark);
 }
 
 .nav-item.active {
-  background: rgba(24, 92, 188, 0.08);
+  background: var(--brand-soft);
   color: var(--brand);
   transform: none;
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.14);
 }
 
 .card {
@@ -436,20 +442,20 @@ button {
   color: white;
   border: none;
   padding: 0 18px;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   min-width: 110px;
   height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all .2s;
+  transition: background-color .2s, box-shadow .2s, transform .2s, filter .2s;
 }
 
 button:hover {
-  filter: brightness(0.97);
+  background: var(--brand-dark);
   transform: translateY(-1px);
 }
 
@@ -457,7 +463,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(24, 92, 188, 0.25);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.22);
   border-color: var(--brand);
 }
 
@@ -468,6 +474,12 @@ button.secondary {
   box-shadow: none;
   color: #172033;
   min-width: 100px;
+}
+
+button.secondary:hover {
+  background: var(--brand-softer);
+  border-color: var(--brand-line);
+  color: var(--brand-dark);
 }
 
 table {
@@ -489,7 +501,7 @@ th {
 }
 
 #vistaDesktop button {
-  box-shadow: 0 8px 20px rgba(15, 88, 216, 0.15);
+  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.16);
 }
 
 .input-date {
@@ -549,11 +561,11 @@ select {
 
 @media (hover:hover) and (pointer:fine) {
   .login-card:hover {
-    border-color: rgba(92, 169, 255, 0.6) !important;
+    border-color: rgba(99, 102, 241, 0.42) !important;
     box-shadow:
       0 12px 36px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04),
-      0 0 0 1px rgba(92, 169, 255, 0.24),
-      0 0 18px rgba(92, 169, 255, 0.22);
+      0 0 0 1px rgba(99, 102, 241, 0.18),
+      0 0 18px rgba(99, 102, 241, 0.16);
   }
 }
 
@@ -573,9 +585,9 @@ select {
 
 .login-tenant-head h1 {
   margin: 0;
-  font-family: "Outfit", "Sora", "Avenir Next", "Nunito Sans", sans-serif;
+  font-family: "Sora", "Inter", sans-serif;
   font-weight: 800;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.04em;
   color: #1a2e57;
 }
 
@@ -601,9 +613,9 @@ select {
 
 .login-card-title {
   margin-bottom: 20px;
-  font-family: "Outfit", "Sora", "Avenir Next", "Nunito Sans", sans-serif;
+  font-family: "Sora", "Inter", sans-serif;
   font-weight: 800;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.04em;
   color: #18284c;
 }
 
@@ -624,11 +636,11 @@ select {
 }
 
 .login-powered-wordmark {
-  font-family: "Outfit", "Sora", "Avenir Next", "Nunito Sans", sans-serif;
+  font-family: "Sora", "Inter", sans-serif;
   font-size: 22px;
   line-height: .9;
   font-weight: 800;
-  letter-spacing: -0.25px;
+  letter-spacing: -0.04em;
   background: var(--brand);
   /* replaced gradient */
   -webkit-background-clip: text;
@@ -820,9 +832,9 @@ select {
 }
 
 .course-module--editing {
-  border-color: #c5d4f5;
+  border-color: var(--brand-line);
   background: linear-gradient(180deg, #f5f8ff 0%, #fafcff 100%);
-  box-shadow: 0 0 0 1px rgba(24, 92, 188, 0.06);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.08);
 }
 
 .course-edit-banner {
@@ -833,8 +845,8 @@ select {
   margin: 0 0 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(24, 92, 188, 0.08);
-  border: 1px solid rgba(24, 92, 188, 0.18);
+  background: var(--brand-soft);
+  border: 1px solid rgba(99, 102, 241, 0.18);
 }
 
 .course-edit-banner[hidden] {
@@ -850,7 +862,7 @@ select {
   background: rgba(255, 255, 255, 0.85);
   padding: 4px 8px;
   border-radius: 6px;
-  border: 1px solid rgba(24, 92, 188, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .course-edit-banner-text {
@@ -1060,14 +1072,14 @@ select {
   padding: 0 !important;
   min-width: 32px !important;
   border-radius: 10px;
-  background: #edf1f8 !important;
-  color: #1f2c45 !important;
+  background: var(--brand-softer) !important;
+  color: var(--brand-dark) !important;
   box-shadow: none !important;
-  border: 1px solid #d7e0ef;
+  border: 1px solid var(--brand-line);
 }
 
 .icon-btn:hover {
-  background: #e4ebf7 !important;
+  background: #e0e7ff !important;
   transform: none !important;
   filter: none !important;
 }
@@ -1105,7 +1117,7 @@ select {
 .state-toggle.active {
   background: var(--brand);
   /* replaced gradient */
-  border-color: #2c9b52;
+  border-color: var(--brand);
 }
 
 .state-toggle.active .dot {
@@ -1211,14 +1223,14 @@ select {
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #eaf1ff;
-  color: #2d55a5;
+  background: var(--brand-softer);
+  color: var(--brand-dark);
   margin-left: 6px;
 }
 
 .btn-link {
   background: transparent !important;
-  color: #0f6bfd !important;
+  color: var(--brand) !important;
   border: none !important;
   box-shadow: none !important;
   min-width: auto !important;
@@ -1232,7 +1244,7 @@ select {
 .btn-link:hover {
   transform: none !important;
   filter: none !important;
-  color: #0b56c8 !important;
+  color: var(--brand-dark) !important;
 }
 
 .config-subtitle {
@@ -1309,7 +1321,7 @@ select {
   /* replaced gradient */
   border-color: var(--brand);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(24, 92, 188, 0.2);
+  box-shadow: 0 8px 18px rgba(99, 102, 241, 0.2);
 }
 
 .mode-options label:has(input:checked),
@@ -1318,7 +1330,7 @@ select {
   /* replaced gradient */
   border-color: var(--brand);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(24, 92, 188, 0.2);
+  box-shadow: 0 8px 18px rgba(99, 102, 241, 0.2);
 }
 
 #listaAspirantes p {
@@ -1386,7 +1398,7 @@ select {
 
 .mobile-asistia-wordmark {
   margin: 0;
-  font-family: "Outfit", "Sora", "Avenir Next", "Nunito Sans", sans-serif;
+  font-family: "Sora", "Inter", sans-serif;
   font-size: clamp(1.88rem, 7vw, 2.35rem);
   line-height: 0.95;
   font-weight: 800;
@@ -1633,7 +1645,7 @@ select {
 
 #formulario .form-header h3 {
   margin: 0;
-  font-family: "Outfit", "Sora", "Avenir Next", "Nunito Sans", sans-serif;
+  font-family: "Sora", "Inter", sans-serif;
   font-size: 20px;
   line-height: 1.2;
   color: #1a2e57;
@@ -1695,8 +1707,8 @@ select {
   background: var(--brand);
   /* replaced gradient */
   color: #fff !important;
-  border-color: #1e66de !important;
-  box-shadow: 0 8px 18px rgba(23, 88, 210, 0.22) !important;
+  border-color: var(--brand) !important;
+  box-shadow: 0 8px 18px rgba(99, 102, 241, 0.22) !important;
 }
 
 .mobile-section-btn.active::after {
@@ -1794,9 +1806,9 @@ select {
   height: 36px;
   padding: 0;
   border-radius: 50%;
-  background: #eef3ff;
-  color: #21457f;
-  border: 1px solid #cfdbf3;
+  background: var(--brand-softer);
+  color: var(--brand-dark);
+  border: 1px solid var(--brand-line);
   box-shadow: none !important;
   font-size: 18px;
   font-weight: 700;
@@ -1804,7 +1816,7 @@ select {
 }
 
 .modal-close:hover {
-  background: #dfeaff;
+  background: #e0e7ff;
   transform: none;
   filter: none;
 }
@@ -1823,16 +1835,16 @@ select {
   height: 36px;
   padding: 0 12px;
   border-radius: 12px;
-  background: #edf1f8 !important;
-  color: #182744 !important;
-  border: 1px solid #d5deef;
+  background: #f6f7ff !important;
+  color: var(--brand-dark) !important;
+  border: 1px solid var(--brand-line);
   box-shadow: 0 8px 18px rgba(18, 35, 68, 0.14) !important;
   font-size: 12px;
   font-weight: 600;
 }
 
 .tenant-admin-access-btn:hover {
-  background: #e3eaf7 !important;
+  background: #e8ebff !important;
   transform: none !important;
   filter: none !important;
 }
@@ -1946,7 +1958,7 @@ select {
 
 .brand-main {
   margin: 0 0 14px;
-  font-family: "Outfit", "Sora", "Avenir Next", "Nunito Sans", sans-serif;
+  font-family: "Sora", "Inter", sans-serif;
   font-size: clamp(3.45rem, 6.9vw, 5.15rem);
   font-weight: 800;
   line-height: 0.96;
@@ -1956,7 +1968,7 @@ select {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 10px 28px rgba(15, 88, 216, 0.2);
+  text-shadow: 0 10px 28px rgba(99, 102, 241, 0.18);
 }
 
 .tenant-subtitle {
@@ -1964,7 +1976,7 @@ select {
   font-size: clamp(1.35rem, 2.2vw, 1.95rem);
   font-weight: 600;
   letter-spacing: 0.4px;
-  color: #3d5b8f;
+  color: #4f5fb3;
 }
 
 .tenant-caption {
@@ -2024,7 +2036,7 @@ select {
   justify-content: center;
   font-size: 17px;
   font-weight: 800;
-  color: #153b7a;
+  color: #eef2ff;
   background: var(--brand);
   /* replaced gradient */
 }
@@ -2045,8 +2057,8 @@ select {
   font-weight: 700;
   padding: 4px 10px;
   border-radius: 999px;
-  background: #e9f2ff;
-  color: #1f4e9f;
+  background: var(--brand-softer);
+  color: var(--brand-dark);
 }
 
 .tenant-tag.disabled {
@@ -2411,7 +2423,7 @@ select {
   /* Botones del panel: más sutiles en móvil (sin cambiar funcionalidad) */
   #vistaDesktop button,
   #vistaLuizLabs button {
-    box-shadow: 0 6px 14px rgba(15, 88, 216, 0.12);
+    box-shadow: 0 6px 14px rgba(99, 102, 241, 0.14);
   }
 
   #vistaDesktop button.secondary,
