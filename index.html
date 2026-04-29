@@ -435,7 +435,10 @@
         </div>
 
         <div id="vistaUsuarios" style="display:none;">
-          <h2>Usuarios</h2>
+          <h2 class="user-module-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            Usuarios de la institución
+          </h2>
 
           <div class="card config-card">
             <h3>Perfiles de Acceso</h3>
@@ -484,19 +487,33 @@
               <button class="secondary" onclick="cancelarEdicionUsuarioAdmin()">Cancelar edición</button>
               <button class="secondary" onclick="limpiarUsuarioAdmin()">Limpiar</button>
             </div>
-            <div class="table-wrap user-table-wrap">
-              <table>
+
+            <!-- BUSCADOR Y FILTROS PRO -->
+            <div class="user-search-bar">
+              <div class="search-input-wrapper">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="inputBusquedaUsuarios" placeholder="Buscar usuario o nombre..." onkeyup="renderUsuariosAdmin()">
+              </div>
+              <div class="filter-wrapper">
+                <label for="filtroPerfilUsuarios">Perfil:</label>
+                <select id="filtroPerfilUsuarios" onchange="renderUsuariosAdmin()">
+                  <option value="todos">Todos</option>
+                  <option value="administrador">Administrador</option>
+                  <option value="staff">Staff</option>
+                </select>
+              </div>
+              <div id="contadorUsuarios" class="user-counter">Mostrando 0 usuarios</div>
+            </div>
+
+            <div class="user-table-card">
+              <table class="user-table-compact">
                 <thead>
                   <tr>
-                    <th>Nombres</th>
-                    <th>Apellidos</th>
-                    <th>DNI</th>
-                    <th>Correo</th>
-                    <th>Celular</th>
                     <th>Usuario</th>
-                    <th>Rol</th>
+                    <th>Nombre completo</th>
                     <th>Perfil</th>
-                    <th>Acciones</th>
+                    <th>Estado</th>
+                    <th style="text-align:right;">Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="tablaUsuariosAdmin"></tbody>
@@ -865,8 +882,11 @@
         </div>
 
         <div id="luizBloqueUsuarios" style="display:none;">
-          <div class="card" style="margin-bottom:14px;">
-            <h2 style="margin-bottom:10px;">Usuarios asistIA (globales)</h2>
+          <div class="card" style="margin-bottom:24px;">
+            <h2 class="user-module-title">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l2.236 2.236m-2.236-2.236l2.236-2.236"></path></svg>
+              Usuarios globales LuizLabs
+            </h2>
             <div class="config-grid" style="margin-bottom:10px;">
               <div>
                 <label for="luizGlobalNombres">Nombres</label>
@@ -917,20 +937,25 @@
               <button class="secondary" onclick="cancelarEdicionUsuarioGlobalLuiz()">Cancelar edición</button>
               <button class="secondary" onclick="limpiarUsuarioGlobalLuizForm()">Limpiar</button>
             </div>
-            <div class="table-wrap">
-              <table class="luiz-users-table">
+
+            <!-- BUSCADOR Y CONTADOR GLOBAL -->
+            <div class="user-search-bar">
+              <div class="search-input-wrapper">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="inputBusquedaGlobal" placeholder="Buscar usuario o nombre..." onkeyup="renderPanelLuizLabs()">
+              </div>
+              <div id="contadorGlobal" class="user-counter">Mostrando 0 usuarios globales</div>
+            </div>
+
+            <div class="user-table-card">
+              <table class="user-table-compact">
                 <thead>
                   <tr>
-                    <th>Nombres</th>
-                    <th>Apellidos</th>
-                    <th>DNI</th>
-                    <th>Correo</th>
-                    <th>Celular</th>
                     <th>Usuario</th>
+                    <th>Nombre</th>
                     <th>Rol</th>
                     <th>Estado</th>
-                    <th>Fecha</th>
-                    <th class="actions-col">Acciones</th>
+                    <th style="text-align:right;">Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="tablaUsuariosGlobalLuiz"></tbody>
@@ -939,7 +964,10 @@
           </div>
 
           <div class="card">
-            <h2 style="margin-bottom:10px;">Usuarios admin por institución</h2>
+            <h2 class="user-module-title">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              Usuarios admin por institución
+            </h2>
             <div class="config-grid" style="margin-bottom:10px;">
               <div>
                 <label for="luizUserNombres">Nombres</label>
@@ -997,22 +1025,34 @@
               <button class="secondary" onclick="cancelarEdicionUsuarioAdminLuiz()">Cancelar edición</button>
               <button class="secondary" onclick="limpiarUsuarioAdminLuizForm()">Limpiar</button>
             </div>
-            <div class="table-wrap">
-              <table class="luiz-users-table">
+
+            <!-- BUSCADOR Y FILTROS ADMIN POR INST -->
+            <div class="user-search-bar">
+              <div class="search-input-wrapper">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="inputBusquedaAdminLuiz" placeholder="Buscar usuario o nombre..." onkeyup="renderPanelLuizLabs()">
+              </div>
+              <div class="filter-wrapper">
+                <label for="filtroPerfilAdminLuiz">Perfil:</label>
+                <select id="filtroPerfilAdminLuiz" onchange="renderPanelLuizLabs()">
+                  <option value="todos">Todos</option>
+                  <option value="administrador">Administrador</option>
+                  <option value="staff">Staff</option>
+                </select>
+              </div>
+              <div id="contadorAdminLuiz" class="user-counter">Mostrando 0 usuarios</div>
+            </div>
+
+            <div class="user-table-card">
+              <table class="user-table-compact">
                 <thead>
                   <tr>
-                    <th>Nombres</th>
-                    <th>Apellidos</th>
-                    <th>DNI</th>
-                    <th>Correo</th>
-                    <th>Celular</th>
                     <th>Usuario</th>
-                    <th>Rol</th>
-                    <th>Perfil</th>
+                    <th>Nombre</th>
                     <th>Institución</th>
-                    <th>Estado institución</th>
-                    <th>Fecha</th>
-                    <th class="actions-col">Acciones</th>
+                    <th>Perfil</th>
+                    <th>Estado</th>
+                    <th style="text-align:right;">Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="tablaUsuariosAdminLuiz"></tbody>

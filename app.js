@@ -228,6 +228,41 @@ let editPerfilLuizIndex = -1
 let soporteLuizLabsSupabase = null
 let soporteActividadLogsSupabase = null
 let soporteUsuariosLuizSupabase = null
+
+/* UI HELPERS USUARIOS PRO */
+function toggleDetallesUsuario(rowId) {
+    const row = document.getElementById(rowId)
+    if (!row) return
+    const isExpanded = row.classList.contains('expanded')
+    
+    // Opcional: Cerrar otros rows expandidos en la misma tabla
+    const table = row.closest('table')
+    if (table) {
+        table.querySelectorAll('.user-details-row.expanded').forEach(r => {
+            if (r.id !== rowId) r.classList.remove('expanded')
+        })
+    }
+    
+    row.classList.toggle('expanded', !isExpanded)
+}
+
+function renderBadgePerfil(perfilId) {
+    const pId = String(perfilId || "").toLowerCase()
+    const perfil = obtenerPerfilPorId(pId)
+    const nombre = perfil?.nombre || (pId === 'superusuario' ? 'Superusuario' : 'Administrador')
+    
+    if (pId === 'superusuario' || pId === 'administrador' || pId.includes('admin')) {
+        return `<span class="badge badge-profile-admin">👑 ${nombre}</span>`
+    }
+    return `<span class="badge badge-profile-staff">👤 ${nombre}</span>`
+}
+
+function renderBadgeEstado(activo) {
+    if (activo) {
+        return `<span class="badge badge-status-active">Activo</span>`
+    }
+    return `<span class="badge badge-status-inactive">Inactivo</span>`
+}
 let soporteCursosSupabase = null
 let syncLuizLabsEnCurso = null
 let cursoActualId = 1
@@ -2253,6 +2288,9 @@ function renderPanelLuizLabs() {
         tablaInst.innerHTML = html
     }
 
+    // --- BLOQUE 1: USUARIOS GLOBALES ---
+    const searchGlobal = String(document.getElementById("inputBusquedaGlobal")?.value || "").toLowerCase()
+    
     const usuariosGlobalesLocales = (usuariosAdminLuiz || [])
         .map((u, idx) => ({ u, idx, source: "local" }))
         .filter(({ u }) => esUsuarioGlobalAsistIA(u))
@@ -2277,7 +2315,14 @@ function renderPanelLuizLabs() {
             source: "supabase"
         }))
 
-    const usuariosGlobales = usuariosGlobalesLocales.concat(usuariosGlobalesSupabase)
+    const usuariosGlobalesRaw = usuariosGlobalesLocales.concat(usuariosGlobalesSupabase)
+    const usuariosGlobales = usuariosGlobalesRaw.filter(({ u }) => {
+        const full = `${u.nombres} ${u.apellidos} ${u.usuario}`.toLowerCase()
+        return !searchGlobal || full.includes(searchGlobal)
+    })
+
+    const elContadorGlobal = document.getElementById("contadorGlobal")
+    if (elContadorGlobal) elContadorGlobal.innerText = `Mostrando ${usuariosGlobales.length} usuarios globales`
 
     if (!usuariosGlobales.length) {
         tablaGlobal.innerHTML = `<tr><td colspan="10">Sin usuarios globales.</td></tr>`
@@ -2288,39 +2333,68 @@ function renderPanelLuizLabs() {
             const fechaUser = String(u.fecha_creacion || "").slice(0, 10)
             const protegido = esUsuarioProtegidoLuiz(u.usuario)
             const esSupabase = source === "supabase"
+            const rowId = `global-user-${idx}-${source}`
+
             globalHtml += `
-        <tr>
-          <td>${u.nombres || "-"}</td>
-          <td>${u.apellidos || "-"}</td>
-          <td>${u.dni || "-"}</td>
-          <td>${u.correo || "-"}</td>
-          <td>${u.celular || "-"}</td>
+        <tr class="user-row" onclick="toggleDetallesUsuario('${rowId}')">
           <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">PROTEGIDO</span>` : ""}${esSupabase ? ` <span class="tag-system">SUPABASE</span>` : ""}</td>
-          <td>${normalizarRolUsuario(u.rol)}</td>
-          <td>${estadoUser ? "Activo" : "Inactivo"}</td>
-          <td>${fechaUser || "-"}</td>
-          <td class="actions-col">
-            <div class="table-actions luiz-actions">
-              ${protegido
+          <td>${u.nombres || u.nombre || ""} ${u.apellidos || ""}</td>
+          <td>${renderBadgePerfil(normalizarRolUsuario(u.rol))}</td>
+          <td>${renderBadgeEstado(estadoUser)}</td>
+          <td>
+            <div class="user-actions">
+               <button class="btn-action btn-details">Ver detalles</button>
+            </div>
+          </td>
+        </tr>
+        <tr id="${rowId}" class="user-details-row">
+          <td colspan="5">
+            <div class="user-details-content">
+              <div class="detail-item">
+                <span class="detail-label">DNI</span>
+                <span class="detail-value">${u.dni || "-"}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Correo</span>
+                <span class="detail-value">${u.correo || "-"}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Celular</span>
+                <span class="detail-value">${u.celular || "-"}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Rol Técnico</span>
+                <span class="detail-value">${normalizarRolUsuario(u.rol)}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Fecha Creación</span>
+                <span class="detail-value">${fechaUser || "-"}</span>
+              </div>
+              <div class="detail-item" style="grid-column: 1 / -1; margin-top: 10px;">
+                <span class="detail-label">Acciones de gestión</span>
+                <div class="table-actions luiz-actions" style="margin-top:5px; justify-content: flex-start;">
+                   ${protegido
                     ? `
-                  <button onclick="editarUsuarioGlobalLuiz(${idx})">Editar</button>
-                  <span class="hint">Protegido</span>
-                `
+                      <button onclick="event.stopPropagation(); editarUsuarioGlobalLuiz(${idx})">Editar</button>
+                      <span class="hint">Protegido</span>
+                    `
                     : esSupabase
                         ? `<span class="hint">Gestionado por Supabase</span>`
                         : `
-                  <button onclick="editarUsuarioGlobalLuiz(${idx})">Editar</button>
-                  <button class="secondary" onclick="regenerarClaveUsuarioAdminLuiz(${idx})" title="Regenerar clave temporal">Reset</button>
-                  <button
-                    class="state-toggle ${estadoUser ? "active" : ""}"
-                    onclick="toggleEstadoUsuarioGlobalLuiz(${idx})"
-                    title="${estadoUser ? "Desactivar usuario" : "Activar usuario"}"
-                    aria-label="${estadoUser ? "Desactivar usuario" : "Activar usuario"}">
-                    <span class="dot"></span>
-                  </button>
-                  <button class="secondary" onclick="eliminarUsuarioGlobalLuiz(${idx})">Eliminar</button>
-                `
+                      <button onclick="event.stopPropagation(); editarUsuarioGlobalLuiz(${idx})">Editar</button>
+                      <button class="secondary" onclick="event.stopPropagation(); regenerarClaveUsuarioAdminLuiz(${idx})" title="Regenerar clave temporal">Reset</button>
+                      <button
+                        class="state-toggle ${estadoUser ? "active" : ""}"
+                        onclick="event.stopPropagation(); toggleEstadoUsuarioGlobalLuiz(${idx})"
+                        title="${estadoUser ? "Desactivar usuario" : "Activar usuario"}"
+                        aria-label="${estadoUser ? "Desactivar usuario" : "Activar usuario"}">
+                        <span class="dot"></span>
+                      </button>
+                      <button class="secondary" onclick="event.stopPropagation(); eliminarUsuarioGlobalLuiz(${idx})">Eliminar</button>
+                    `
                 }
+                </div>
+              </div>
             </div>
           </td>
         </tr>
@@ -2329,9 +2403,29 @@ function renderPanelLuizLabs() {
         tablaGlobal.innerHTML = globalHtml
     }
 
-    const usuariosInstitucionales = (usuariosAdminLuiz || [])
+    // --- BLOQUE 2: USUARIOS ADMIN POR INSTITUCIÓN ---
+    const searchAdmin = String(document.getElementById("inputBusquedaAdminLuiz")?.value || "").toLowerCase()
+    const filterPerfilAdmin = String(document.getElementById("filtroPerfilAdminLuiz")?.value || "todos").toLowerCase()
+
+    const usuariosInstitucionalesRaw = (usuariosAdminLuiz || [])
         .map((u, idx) => ({ u, idx }))
         .filter(({ u }) => esUsuarioInstitucionalLuiz(u))
+
+    const usuariosInstitucionales = usuariosInstitucionalesRaw.filter(({ u }) => {
+        const full = `${u.nombres} ${u.apellidos} ${u.usuario}`.toLowerCase()
+        const matchesSearch = !searchAdmin || full.includes(searchAdmin)
+        
+        const perfilId = String(u.perfilId || "administrador").toLowerCase()
+        let matchesPerfil = true
+        if (filterPerfilAdmin !== "todos") {
+            matchesPerfil = perfilId.includes(filterPerfilAdmin)
+        }
+        
+        return matchesSearch && matchesPerfil
+    })
+
+    const elContadorAdminLuiz = document.getElementById("contadorAdminLuiz")
+    if (elContadorAdminLuiz) elContadorAdminLuiz.innerText = `Mostrando ${usuariosInstitucionales.length} usuarios`
 
     if (!usuariosInstitucionales.length) {
         tablaUsers.innerHTML = `<tr><td colspan="12">Sin usuarios admin.</td></tr>`
@@ -2339,41 +2433,74 @@ function renderPanelLuizLabs() {
         let usersHtml = ""
         usuariosInstitucionales.forEach(({ u, idx }) => {
             const inst = obtenerInstitucionLuiz(u.tenantId)
-            const estado = inst?.estado === "activo" ? "Activa" : "Inactiva"
+            const instNombre = inst?.nombre || u.tenantId || "-"
             const estadoUser = u.estado === "activo"
             const fechaUser = String(u.fecha_creacion || "").slice(0, 10)
             const protegido = esUsuarioProtegidoLuiz(u.usuario)
-            const perfilNombre = obtenerPerfilPorId(u.perfilId)?.nombre || "Administrador"
+            const perfilId = u.perfilId || "administrador"
+            const perfilNombre = obtenerPerfilPorId(perfilId)?.nombre || "Administrador"
+            const rowId = `luiz-inst-user-${idx}`
+
             usersHtml += `
-        <tr>
-          <td>${u.nombres || "-"}</td>
-          <td>${u.apellidos || "-"}</td>
-          <td>${u.dni || "-"}</td>
-          <td>${u.correo || "-"}</td>
-          <td>${u.celular || "-"}</td>
+        <tr class="user-row" onclick="toggleDetallesUsuario('${rowId}')">
           <td>${u.usuario || ""}${protegido ? ` <span class="tag-system">PROTEGIDO</span>` : ""}</td>
-          <td>${u.rol || ""}</td>
-          <td>${perfilNombre}</td>
-          <td>${inst?.nombre || u.tenantId || ""}</td>
-          <td>${estado}</td>
-          <td>${fechaUser}</td>
-          <td class="actions-col">
-            <div class="table-actions luiz-actions">
-              ${protegido
+          <td>${u.nombres || u.nombre || ""} ${u.apellidos || ""}</td>
+          <td>${instNombre}</td>
+          <td>${renderBadgePerfil(perfilId)}</td>
+          <td>${renderBadgeEstado(estadoUser)}</td>
+          <td>
+            <div class="user-actions">
+               <button class="btn-action btn-details">Ver detalles</button>
+            </div>
+          </td>
+        </tr>
+        <tr id="${rowId}" class="user-details-row">
+          <td colspan="6">
+            <div class="user-details-content">
+              <div class="detail-item">
+                <span class="detail-label">DNI</span>
+                <span class="detail-value">${u.dni || "-"}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Correo</span>
+                <span class="detail-value">${u.correo || "-"}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Celular</span>
+                <span class="detail-value">${u.celular || "-"}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Rol Técnico</span>
+                <span class="detail-value">${u.rol || ""}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Fecha Creación</span>
+                <span class="detail-value">${fechaUser || "-"}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Estado Institución</span>
+                <span class="detail-value">${inst?.estado === "activo" ? "Activa" : "Inactiva"}</span>
+              </div>
+              <div class="detail-item" style="grid-column: 1 / -1; margin-top: 10px;">
+                <span class="detail-label">Acciones de gestión</span>
+                <div class="table-actions luiz-actions" style="margin-top:5px; justify-content: flex-start;">
+                   ${protegido
                     ? `<span class="hint">Protegido</span>`
                     : `
-                  <button onclick="editarUsuarioAdminLuiz(${idx})">Editar</button>
-                  <button class="secondary" onclick="regenerarClaveUsuarioAdminLuiz(${idx})" title="Regenerar clave temporal">Reset</button>
-                  <button
-                    class="state-toggle ${estadoUser ? "active" : ""}"
-                    onclick="toggleEstadoUsuarioAdminLuiz(${idx})"
-                    title="${estadoUser ? "Desactivar usuario" : "Activar usuario"}"
-                    aria-label="${estadoUser ? "Desactivar usuario" : "Activar usuario"}">
-                    <span class="dot"></span>
-                  </button>
-                  <button class="secondary" onclick="eliminarUsuarioAdminLuiz(${idx})">Eliminar</button>
-                `
+                      <button onclick="event.stopPropagation(); editarUsuarioAdminLuiz(${idx})">Editar</button>
+                      <button class="secondary" onclick="event.stopPropagation(); regenerarClaveUsuarioAdminLuiz(${idx})" title="Regenerar clave temporal">Reset</button>
+                      <button
+                        class="state-toggle ${estadoUser ? "active" : ""}"
+                        onclick="event.stopPropagation(); toggleEstadoUsuarioAdminLuiz(${idx})"
+                        title="${estadoUser ? "Desactivar usuario" : "Activar usuario"}"
+                        aria-label="${estadoUser ? "Desactivar usuario" : "Activar usuario"}">
+                        <span class="dot"></span>
+                      </button>
+                      <button class="secondary" onclick="event.stopPropagation(); eliminarUsuarioAdminLuiz(${idx})">Eliminar</button>
+                    `
                 }
+                </div>
+              </div>
             </div>
           </td>
         </tr>
@@ -4273,14 +4400,35 @@ function renderUsuariosAdmin() {
     if (!tablaUsuariosAdmin) return
     poblarPerfilesInstitucionales()
     const tenantActual = String(tenantActivoId || "").trim().toLowerCase()
-    const usuariosInstitucionales = usuariosAdmin
+    
+    const search = String(document.getElementById("inputBusquedaUsuarios")?.value || "").toLowerCase()
+    const filterPerfil = String(document.getElementById("filtroPerfilUsuarios")?.value || "todos").toLowerCase()
+
+    const usuariosInstitucionalesRaw = usuariosAdmin
         .map((u, sourceIndex) => Object.assign({}, u, { sourceIndex }))
         .filter(u =>
             !SYSTEM_USERS.some(s => s.usuario === u.usuario) &&
             normalizarRolUsuario(u.rol) !== ROLES_ADMIN.SUPERUSUARIO &&
             (!tenantActual || !String(u.tenantId || "").trim() || String(u.tenantId || "").trim().toLowerCase() === tenantActual)
         )
-    const data = SYSTEM_USERS.concat(usuariosInstitucionales)
+    
+    const dataRaw = SYSTEM_USERS.concat(usuariosInstitucionalesRaw)
+    
+    const data = dataRaw.filter(u => {
+        const full = `${u.nombres || u.nombre} ${u.apellidos || ""} ${u.usuario}`.toLowerCase()
+        const matchesSearch = !search || full.includes(search)
+        
+        const perfilId = String(perfilesUsuariosLocales?.[String(u.usuario || "").toLowerCase()] || "administrador").toLowerCase()
+        let matchesPerfil = true
+        if (filterPerfil !== "todos") {
+            matchesPerfil = perfilId.includes(filterPerfil)
+        }
+        
+        return matchesSearch && matchesPerfil
+    })
+
+    const elContador = document.getElementById("contadorUsuarios")
+    if (elContador) elContador.innerText = `Mostrando ${data.length} usuarios`
 
     if (!data.length) {
         tablaUsuariosAdmin.innerHTML = `<tr><td colspan="10">Sin usuarios creados.</td></tr>`
@@ -4291,24 +4439,53 @@ function renderUsuariosAdmin() {
     data.forEach((u, idx) => {
         const isSystem = !!u.system
         const perfilId = String(perfilesUsuariosLocales?.[String(u.usuario || "").toLowerCase()] || "administrador")
-        const perfilNombre = obtenerPerfilPorId(perfilId)?.nombre || "Administrador"
+        const rowId = `inst-user-${idx}`
+
         html += `
-      <tr>
-        <td>${u.nombres || u.nombre || ""}${isSystem ? `<span class="tag-system">SISTEMA</span>` : ""}</td>
-        <td>${u.apellidos || "-"}</td>
-        <td>${u.dni || "-"}</td>
-        <td>${u.correo || "-"}</td>
-        <td>${u.celular || "-"}</td>
-        <td>${u.usuario || ""}</td>
-        <td>${u.rol || ""}</td>
-        <td>${perfilNombre}</td>
+      <tr class="user-row" onclick="toggleDetallesUsuario('${rowId}')">
+        <td>${u.usuario || ""}${isSystem ? `<span class="tag-system">SISTEMA</span>` : ""}</td>
+        <td>${u.nombres || u.nombre || ""} ${u.apellidos || ""}</td>
+        <td>${renderBadgePerfil(perfilId)}</td>
+        <td>${renderBadgeEstado(u.activo !== false)}</td>
         <td>
-          <div class="table-actions">
-            ${isSystem
+           <div class="user-actions">
+              <button class="btn-action btn-details">Ver detalles</button>
+           </div>
+        </td>
+      </tr>
+      <tr id="${rowId}" class="user-details-row">
+        <td colspan="5">
+          <div class="user-details-content">
+            <div class="detail-item">
+              <span class="detail-label">DNI</span>
+              <span class="detail-value">${u.dni || "-"}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Correo</span>
+              <span class="detail-value">${u.correo || "-"}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Celular</span>
+              <span class="detail-value">${u.celular || "-"}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Rol Técnico</span>
+              <span class="detail-value">${u.rol || ""}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Institución</span>
+              <span class="detail-value">${u.tenantId || "Global"}</span>
+            </div>
+            <div class="detail-item" style="grid-column: 1 / -1; margin-top: 10px;">
+              <span class="detail-label">Acciones de gestión</span>
+              <div class="table-actions" style="margin-top:5px; justify-content: flex-start;">
+                ${isSystem
                 ? `<span class="hint">No editable</span>`
-                : `<button onclick="editarUsuarioAdmin(${u.sourceIndex})">Modificar</button>
-                 <button class="secondary" onclick="eliminarUsuarioAdmin(${u.sourceIndex})">Eliminar</button>`
+                : `<button onclick="event.stopPropagation(); editarUsuarioAdmin(${u.sourceIndex})">Modificar</button>
+                   <button class="secondary" onclick="event.stopPropagation(); eliminarUsuarioAdmin(${u.sourceIndex})">Eliminar</button>`
             }
+              </div>
+            </div>
           </div>
         </td>
       </tr>
