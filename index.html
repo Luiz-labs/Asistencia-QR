@@ -89,7 +89,7 @@
       <span class="login-powered-wordmark">asist<span style="color: #2563eb;">IA</span></span>
     </div>
 
-      </div>
+  </div>
 
   </div>
 
@@ -229,7 +229,8 @@
           <span class="chevron">▾</span>
         </div>
         <button id="btnInstitucion" onclick="volverSeleccionCliente()" class="secondary">Institución</button>
-        <button id="btnVolverLuizLabs" onclick="irPanelPrincipalLuizLabs()" class="secondary" style="display:none;">Panel principal</button>
+        <button id="btnVolverLuizLabs" onclick="irPanelPrincipalLuizLabs()" class="secondary"
+          style="display:none;">Panel principal</button>
         <button id="btnHeaderLogout" onclick="logout()" class="secondary">Salir</button>
       </div>
     </div>
@@ -412,16 +413,23 @@
 
         <div id="vistaUsuarios" style="display:none;">
           <h2 class="user-module-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
             Usuarios de la institución
           </h2>
           <p class="user-module-subtitle">Administra accesos, perfiles y credenciales del equipo</p>
 
           <div id="formUsuarioAdmin" class="user-form-card">
-              <div class="form-header">
-                <h3 id="tituloFormUsuarioAdmin">Crear usuario <span id="badgeEditUsuarioAdmin" class="edit-badge" style="display:none;">Editando</span></h3>
-                <p id="subtituloFormUsuarioAdmin">Define credenciales y perfil institucional</p>
-              </div>
+            <div class="form-header">
+              <h3 id="tituloFormUsuarioAdmin">Crear usuario <span id="badgeEditUsuarioAdmin" class="edit-badge"
+                  style="display:none;">Editando</span></h3>
+              <p id="subtituloFormUsuarioAdmin">Define credenciales y perfil institucional</p>
+            </div>
             <div class="form-body">
               <div class="form-section">
                 <span class="form-section-title">A. Identidad</span>
@@ -482,7 +490,8 @@
             <div class="form-actions-bar">
               <button onclick="guardarUsuarioAdmin()">Guardar</button>
               <button class="secondary" onclick="generarClaveUsuarioAdmin()">Generar</button>
-              <button class="secondary icon-btn-with-text" id="btnCopiarClaveAdmin" onclick="copiarClaveUsuarioAdmin()" title="Copiar clave">
+              <button class="secondary icon-btn-with-text" id="btnCopiarClaveAdmin" onclick="copiarClaveUsuarioAdmin()"
+                title="Copiar clave">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <rect x="9" y="3" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
                   <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
@@ -493,338 +502,343 @@
             </div>
           </div>
 
-            <!-- BUSCADOR Y FILTROS PRO -->
-            <div class="user-search-bar">
-              <div class="search-input-wrapper">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="inputBusquedaUsuarios" placeholder="Buscar usuario o nombre..." onkeyup="renderUsuariosAdmin()">
+          <!-- BUSCADOR Y FILTROS PRO -->
+          <div class="user-search-bar">
+            <div class="search-input-wrapper">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="inputBusquedaUsuarios" placeholder="Buscar usuario o nombre..."
+                onkeyup="renderUsuariosAdmin()">
+            </div>
+            <div class="filter-wrapper">
+              <label for="filtroPerfilUsuarios">Perfil:</label>
+              <select id="filtroPerfilUsuarios" onchange="renderUsuariosAdmin()">
+                <option value="todos">Todos</option>
+                <option value="administrador">Administrador</option>
+                <option value="staff">Staff</option>
+              </select>
+            </div>
+            <div id="contadorUsuarios" class="user-counter">Mostrando 0 usuarios</div>
+          </div>
+
+          <div class="user-table-card">
+            <table class="user-table-compact">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Nombre completo</th>
+                  <th>Perfil</th>
+                  <th>Estado</th>
+                  <th style="text-align:right;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaUsuariosAdmin"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="vistaConfig" style="display:none;">
+
+        <h2>Configuración</h2>
+
+        <!-- GPS -->
+        <div class="card config-card">
+          <h3>GPS</h3>
+          <div class="hint gps-upload-hint">Carga masiva de coordenadas UBO (columnas: <strong>UBO, LATITUD,
+              LONGITUD</strong>. Opcional: <strong>NOMBRE</strong>).</div>
+          <label class="gps-toggle-label">
+            <input type="checkbox" id="toggleGPS">
+            Activar validación GPS (Proximamente)
+          </label>
+          <div class="config-row file-upload-row" style="margin-top:10px;">
+            <input type="file" id="archivoUbosSedes" accept=".xlsx,.xls,.csv">
+            <button onclick="cargarExcelUbosSedes()">Subir Coordenadas</button>
+            <button class="secondary" onclick="cargarUbos()">Refrescar UBOs</button>
+          </div>
+          <p id="msgCargaUbosSedes" class="hint"></p>
+        </div>
+
+        <div class="card config-card">
+          <h3>Carga de Aspirantes (Excel / SQL)</h3>
+          <div class="hint">Archivo requerido con columnas: <strong>apellidos, nombres, dni, ubo</strong>. El listado
+            integra datos desde <strong>aspirantes</strong> y registros en <strong>asistencias</strong>.</div>
+          <div class="config-row file-upload-row" style="margin-top:10px;">
+            <input type="file" id="archivoAspirantes" accept=".xlsx,.xls,.csv">
+            <button onclick="cargarExcelAspirantes()">Subir Archivo</button>
+            <button class="secondary" onclick="cargarAspirantesCargados()">Refrescar Listado</button>
+          </div>
+          <p id="msgCargaAspirantes" class="hint"></p>
+          <div class="table-wrap user-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Apellidos</th>
+                  <th>Nombres</th>
+                  <th>DNI</th>
+                  <th>UBO</th>
+                  <th>Origen</th>
+                </tr>
+              </thead>
+              <tbody id="tablaAspirantesCargados"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- RETIRAR ASPIRANTE -->
+        <div class="card config-card">
+
+          <h3>Retirar Aspirante</h3>
+
+          <div class="config-row">
+            <select id="filtroUboConfig"></select>
+            <input id="filtroTextoRetiro" placeholder="Buscar por DNI o nombre">
+            <button onclick="buscarAspirantes()">Buscar</button>
+            <button class="secondary" onclick="limpiarRetiro()">Limpiar</button>
+          </div>
+
+          <div id="listaAspirantes"></div>
+
+        </div>
+
+        <!-- ASPIRANTE RETIRADOS -->
+        <div class="card config-card">
+
+          <h3>📌 Aspirantes Retirados</h3>
+
+          <div class="config-row">
+            <select id="filtroRetirados"></select>
+            <input id="filtroTextoRetirados" placeholder="Buscar por DNI o nombre">
+            <button onclick="cargarRetirados()">Buscar</button>
+            <button class="secondary" onclick="limpiarRetirados()">Limpiar</button>
+          </div>
+
+          <div id="listaRetirados"></div>
+
+        </div>
+
+        <!-- CURSO -->
+        <div class="card config-card">
+
+          <h3>Configuración de Curso</h3>
+
+          <div class="course-module">
+            <h4>Nombre de Curso</h4>
+            <div class="config-grid">
+              <div>
+                <input id="cursoNombre" placeholder="ESBAS 2026 - I" aria-label="Nombre de curso"
+                  style="text-transform:uppercase;">
               </div>
-              <div class="filter-wrapper">
-                <label for="filtroPerfilUsuarios">Perfil:</label>
-                <select id="filtroPerfilUsuarios" onchange="renderUsuariosAdmin()">
-                  <option value="todos">Todos</option>
-                  <option value="administrador">Administrador</option>
-                  <option value="staff">Staff</option>
+            </div>
+          </div>
+
+          <div class="course-module">
+            <h4>Rango de Duración</h4>
+            <div class="config-grid">
+              <div>
+                <label for="cursoInicio">Fecha inicio</label>
+                <input type="date" id="cursoInicio">
+              </div>
+              <div>
+                <label for="cursoFin">Fecha término</label>
+                <input type="date" id="cursoFin">
+              </div>
+              <div>
+                <label for="cursoRadio">Radio GPS (metros)</label>
+                <input type="number" id="cursoRadio" min="10" max="500" step="5" placeholder="50">
+              </div>
+            </div>
+          </div>
+
+          <div class="course-module" id="courseModuleSecciones">
+            <h4>Secciones del curso</h4>
+            <p class="hint course-module-hint">Crea una sección nueva o usa <strong>Modificar</strong> en la tabla
+              para
+              editarla.</p>
+            <div id="courseSecEditBanner" class="course-edit-banner" hidden>
+              <span class="course-edit-badge">Modo edición</span>
+              <span class="course-edit-banner-text">Estás editando: <strong id="courseSecEditLabel"></strong></span>
+            </div>
+            <p id="msgCursoSeccion" class="course-inline-msg" role="status" aria-live="polite"></p>
+            <div class="config-grid">
+              <div>
+                <label for="secCursoNombre">Sección</label>
+                <input id="secCursoNombre" placeholder="Ejemplo: A" maxlength="20">
+              </div>
+              <div>
+                <label for="secCursoModalidad">Modalidad</label>
+                <select id="secCursoModalidad">
+                  <option value="Presencial">Presencial</option>
+                  <option value="Virtual">Virtual</option>
                 </select>
               </div>
-              <div id="contadorUsuarios" class="user-counter">Mostrando 0 usuarios</div>
+              <div>
+                <label for="secCursoHora">Hora inicio</label>
+                <input type="time" id="secCursoHora">
+              </div>
+              <div>
+                <label>Días</label>
+                <select id="secCursoDiasSelect" class="days-select" multiple size="1"
+                  title="Haz clic para ver más días">
+                  <option value="Lunes">Lunes</option>
+                  <option value="Martes">Martes</option>
+                  <option value="Miércoles">Miércoles</option>
+                  <option value="Jueves">Jueves</option>
+                  <option value="Viernes">Viernes</option>
+                  <option value="Sábado">Sábado</option>
+                  <option value="Domingo">Domingo</option>
+                </select>
+              </div>
             </div>
-
-            <div class="user-table-card">
-              <table class="user-table-compact">
-                <thead>
-                  <tr>
-                    <th>Usuario</th>
-                    <th>Nombre completo</th>
-                    <th>Perfil</th>
-                    <th>Estado</th>
-                    <th style="text-align:right;">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="tablaUsuariosAdmin"></tbody>
-              </table>
+            <div class="course-actions">
+              <button type="button" id="btnSecCursoPrimary" onclick="guardarSeccionCurso()">CREAR SECCIÓN</button>
+              <button type="button" class="secondary" id="btnSecCursoCancel"
+                onclick="cancelarEdicionSeccionCurso()">Limpiar formulario</button>
             </div>
-          </div>
-        </div>
-
-        <div id="vistaConfig" style="display:none;">
-
-          <h2>Configuración</h2>
-
-          <!-- GPS -->
-          <div class="card config-card">
-            <h3>GPS</h3>
-            <div class="hint gps-upload-hint">Carga masiva de coordenadas UBO (columnas: <strong>UBO, LATITUD,
-                LONGITUD</strong>. Opcional: <strong>NOMBRE</strong>).</div>
-            <label class="gps-toggle-label">
-              <input type="checkbox" id="toggleGPS">
-              Activar validación GPS (Proximamente)
-            </label>
-            <div class="config-row file-upload-row" style="margin-top:10px;">
-              <input type="file" id="archivoUbosSedes" accept=".xlsx,.xls,.csv">
-              <button onclick="cargarExcelUbosSedes()">Subir Coordenadas</button>
-              <button class="secondary" onclick="cargarUbos()">Refrescar UBOs</button>
-            </div>
-            <p id="msgCargaUbosSedes" class="hint"></p>
-          </div>
-
-          <div class="card config-card">
-            <h3>Carga de Aspirantes (Excel / SQL)</h3>
-            <div class="hint">Archivo requerido con columnas: <strong>apellidos, nombres, dni, ubo</strong>. El listado
-              integra datos desde <strong>aspirantes</strong> y registros en <strong>asistencias</strong>.</div>
-            <div class="config-row file-upload-row" style="margin-top:10px;">
-              <input type="file" id="archivoAspirantes" accept=".xlsx,.xls,.csv">
-              <button onclick="cargarExcelAspirantes()">Subir Archivo</button>
-              <button class="secondary" onclick="cargarAspirantesCargados()">Refrescar Listado</button>
-            </div>
-            <p id="msgCargaAspirantes" class="hint"></p>
-            <div class="table-wrap user-table-wrap">
+            <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Apellidos</th>
-                    <th>Nombres</th>
-                    <th>DNI</th>
+                    <th>Sección</th>
+                    <th>Modalidad</th>
+                    <th>Hora Inicio</th>
+                    <th>Días</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaSeccionesCurso"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="course-module" id="courseModuleSedeUbo">
+            <h4>UBOs sede por sección</h4>
+            <p class="hint course-module-hint">Define la UBO sede por sección o usa <strong>Modificar</strong> para
+              editar un registro existente.</p>
+            <div id="courseSedeEditBanner" class="course-edit-banner" hidden>
+              <span class="course-edit-badge">Modo edición</span>
+              <span class="course-edit-banner-text">Estás editando sede: <strong
+                  id="courseSedeEditLabel"></strong></span>
+            </div>
+            <p id="msgCursoSede" class="course-inline-msg" role="status" aria-live="polite"></p>
+            <div class="config-grid">
+              <div>
+                <label for="uboSecNombre">Sección</label>
+                <select id="uboSecNombre"></select>
+              </div>
+              <div>
+                <label for="uboSecUbo">UBO</label>
+                <select id="uboSecUbo"></select>
+              </div>
+              <div>
+                <label for="uboSecHora">Hora inicio</label>
+                <input type="time" id="uboSecHora">
+              </div>
+              <div>
+                <label for="uboSecModalidad">Modalidad</label>
+                <select id="uboSecModalidad">
+                  <option value="Presencial">Presencial</option>
+                  <option value="Virtual">Virtual</option>
+                </select>
+              </div>
+              <div>
+                <label>Días</label>
+                <select id="uboSecDiasSelect" class="days-select" multiple size="1" title="Haz clic para ver más días">
+                  <option value="Lunes">Lunes</option>
+                  <option value="Martes">Martes</option>
+                  <option value="Miércoles">Miércoles</option>
+                  <option value="Jueves">Jueves</option>
+                  <option value="Viernes">Viernes</option>
+                  <option value="Sábado">Sábado</option>
+                  <option value="Domingo">Domingo</option>
+                </select>
+              </div>
+              <div>
+                <label>Días de sesión</label>
+                <div class="toggle-wrap">
+                  <input type="checkbox" id="uboSecTodosDias">
+                  <span>Todos</span>
+                </div>
+              </div>
+            </div>
+            <div class="course-actions">
+              <button type="button" id="btnSedePrimary" onclick="guardarSedeUbo()">CREAR SEDE UBO</button>
+              <button type="button" class="secondary" id="btnSedeCancel" onclick="cancelarEdicionSedeUbo()">Limpiar
+                formulario</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Sección</th>
                     <th>UBO</th>
-                    <th>Origen</th>
+                    <th>Modalidad</th>
+                    <th>Hora Inicio</th>
+                    <th>Días</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
-                <tbody id="tablaAspirantesCargados"></tbody>
+                <tbody id="tablaSedesUbo"></tbody>
               </table>
             </div>
           </div>
 
-          <!-- RETIRAR ASPIRANTE -->
-          <div class="card config-card">
-
-            <h3>Retirar Aspirante</h3>
-
-            <div class="config-row">
-              <select id="filtroUboConfig"></select>
-              <input id="filtroTextoRetiro" placeholder="Buscar por DNI o nombre">
-              <button onclick="buscarAspirantes()">Buscar</button>
-              <button class="secondary" onclick="limpiarRetiro()">Limpiar</button>
-            </div>
-
-            <div id="listaAspirantes"></div>
-
-          </div>
-
-          <!-- ASPIRANTE RETIRADOS -->
-          <div class="card config-card">
-
-            <h3>📌 Aspirantes Retirados</h3>
-
-            <div class="config-row">
-              <select id="filtroRetirados"></select>
-              <input id="filtroTextoRetirados" placeholder="Buscar por DNI o nombre">
-              <button onclick="cargarRetirados()">Buscar</button>
-              <button class="secondary" onclick="limpiarRetirados()">Limpiar</button>
-            </div>
-
-            <div id="listaRetirados"></div>
-
-          </div>
-
-          <!-- CURSO -->
-          <div class="card config-card">
-
-            <h3>Configuración de Curso</h3>
-
-            <div class="course-module">
-              <h4>Nombre de Curso</h4>
-              <div class="config-grid">
-                <div>
-                  <input id="cursoNombre" placeholder="ESBAS 2026 - I" aria-label="Nombre de curso" style="text-transform:uppercase;">
-                </div>
-              </div>
-            </div>
-
-            <div class="course-module">
-              <h4>Rango de Duración</h4>
-              <div class="config-grid">
-                <div>
-                  <label for="cursoInicio">Fecha inicio</label>
-                  <input type="date" id="cursoInicio">
-                </div>
-                <div>
-                  <label for="cursoFin">Fecha término</label>
-                  <input type="date" id="cursoFin">
-                </div>
-                <div>
-                  <label for="cursoRadio">Radio GPS (metros)</label>
-                  <input type="number" id="cursoRadio" min="10" max="500" step="5" placeholder="50">
-                </div>
-              </div>
-            </div>
-
-            <div class="course-module" id="courseModuleSecciones">
-              <h4>Secciones del curso</h4>
-              <p class="hint course-module-hint">Crea una sección nueva o usa <strong>Modificar</strong> en la tabla
-                para
-                editarla.</p>
-              <div id="courseSecEditBanner" class="course-edit-banner" hidden>
-                <span class="course-edit-badge">Modo edición</span>
-                <span class="course-edit-banner-text">Estás editando: <strong id="courseSecEditLabel"></strong></span>
-              </div>
-              <p id="msgCursoSeccion" class="course-inline-msg" role="status" aria-live="polite"></p>
-              <div class="config-grid">
-                <div>
-                  <label for="secCursoNombre">Sección</label>
-                  <input id="secCursoNombre" placeholder="Ejemplo: A" maxlength="20">
-                </div>
-                <div>
-                  <label for="secCursoModalidad">Modalidad</label>
-                  <select id="secCursoModalidad">
-                    <option value="Presencial">Presencial</option>
-                    <option value="Virtual">Virtual</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="secCursoHora">Hora inicio</label>
-                  <input type="time" id="secCursoHora">
-                </div>
-                <div>
-                  <label>Días</label>
-                  <select id="secCursoDiasSelect" class="days-select" multiple size="1"
-                    title="Haz clic para ver más días">
-                    <option value="Lunes">Lunes</option>
-                    <option value="Martes">Martes</option>
-                    <option value="Miércoles">Miércoles</option>
-                    <option value="Jueves">Jueves</option>
-                    <option value="Viernes">Viernes</option>
-                    <option value="Sábado">Sábado</option>
-                    <option value="Domingo">Domingo</option>
-                  </select>
-                </div>
-              </div>
-              <div class="course-actions">
-                <button type="button" id="btnSecCursoPrimary" onclick="guardarSeccionCurso()">CREAR SECCIÓN</button>
-                <button type="button" class="secondary" id="btnSecCursoCancel"
-                  onclick="cancelarEdicionSeccionCurso()">Limpiar formulario</button>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Sección</th>
-                      <th>Modalidad</th>
-                      <th>Hora Inicio</th>
-                      <th>Días</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tablaSeccionesCurso"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="course-module" id="courseModuleSedeUbo">
-              <h4>UBOs sede por sección</h4>
-              <p class="hint course-module-hint">Define la UBO sede por sección o usa <strong>Modificar</strong> para
-                editar un registro existente.</p>
-              <div id="courseSedeEditBanner" class="course-edit-banner" hidden>
-                <span class="course-edit-badge">Modo edición</span>
-                <span class="course-edit-banner-text">Estás editando sede: <strong
-                    id="courseSedeEditLabel"></strong></span>
-              </div>
-              <p id="msgCursoSede" class="course-inline-msg" role="status" aria-live="polite"></p>
-              <div class="config-grid">
-                <div>
-                  <label for="uboSecNombre">Sección</label>
-                  <select id="uboSecNombre"></select>
-                </div>
-                <div>
-                  <label for="uboSecUbo">UBO</label>
-                  <select id="uboSecUbo"></select>
-                </div>
-                <div>
-                  <label for="uboSecHora">Hora inicio</label>
-                  <input type="time" id="uboSecHora">
-                </div>
-                <div>
-                  <label for="uboSecModalidad">Modalidad</label>
-                  <select id="uboSecModalidad">
-                    <option value="Presencial">Presencial</option>
-                    <option value="Virtual">Virtual</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Días</label>
-                  <select id="uboSecDiasSelect" class="days-select" multiple size="1"
-                    title="Haz clic para ver más días">
-                    <option value="Lunes">Lunes</option>
-                    <option value="Martes">Martes</option>
-                    <option value="Miércoles">Miércoles</option>
-                    <option value="Jueves">Jueves</option>
-                    <option value="Viernes">Viernes</option>
-                    <option value="Sábado">Sábado</option>
-                    <option value="Domingo">Domingo</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Días de sesión</label>
-                  <div class="toggle-wrap">
-                    <input type="checkbox" id="uboSecTodosDias">
-                    <span>Todos</span>
-                  </div>
-                </div>
-              </div>
-              <div class="course-actions">
-                <button type="button" id="btnSedePrimary" onclick="guardarSedeUbo()">CREAR SEDE UBO</button>
-                <button type="button" class="secondary" id="btnSedeCancel" onclick="cancelarEdicionSedeUbo()">Limpiar
-                  formulario</button>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Sección</th>
-                      <th>UBO</th>
-                      <th>Modalidad</th>
-                      <th>Hora Inicio</th>
-                      <th>Días</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tablaSedesUbo"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="config-actions course-footer-actions">
-              <p class="hint course-footer-hint">Guarda nombre, fechas, radio y configuraciones generales del curso. Las
-                secciones y sedes se gestionan en los módulos superiores.</p>
-              <p id="msgCursoFooter" class="course-inline-msg" role="status" aria-live="polite"></p>
-              <div class="course-footer-actions-row">
-                <button type="button" onclick="guardarCurso()">Guardar curso</button>
-                <button type="button" class="btn-danger-outline" id="btnVaciarSeccionesSedes"
-                  onclick="confirmarLimpiarListasCurso()">Vaciar secciones y sedes…</button>
-              </div>
-            </div>
-
-          </div>
-
-
-
-        </div>
-
-        <div id="vistaActividad" style="display:none;">
-          <h2>Actividad</h2>
-          <div class="card config-card" style="margin-bottom:14px;">
-            <h3>Logs institucionales</h3>
-            <p id="logsTenantRangeLabel" class="hint">Mostrando mes actual.</p>
-            <div class="config-row">
-              <input id="filtroActividadTenantTexto" placeholder="Buscar acción/usuario/ruta">
-              <input id="filtroActividadTenantDesde" type="date">
-              <input id="filtroActividadTenantHasta" type="date">
-              <button onclick="cargarActividadTenant()">Filtrar</button>
-              <button class="secondary" onclick="limpiarActividadTenant()">Limpiar</button>
-              <button class="secondary" onclick="exportarActividadCSV('tenant')">Exportar CSV</button>
-            </div>
-            <div class="table-wrap user-table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Fecha</th>
-                    <th>Acción</th>
-                    <th>Usuario</th>
-                    <th>Dispositivo</th>
-                    <th>Rol</th>
-                    <th>Detalle</th>
-                  </tr>
-                </thead>
-                <tbody id="tablaActividadTenant"></tbody>
-              </table>
+          <div class="config-actions course-footer-actions">
+            <p class="hint course-footer-hint">Guarda nombre, fechas, radio y configuraciones generales del curso. Las
+              secciones y sedes se gestionan en los módulos superiores.</p>
+            <p id="msgCursoFooter" class="course-inline-msg" role="status" aria-live="polite"></p>
+            <div class="course-footer-actions-row">
+              <button type="button" onclick="guardarCurso()">Guardar curso</button>
+              <button type="button" class="btn-danger-outline" id="btnVaciarSeccionesSedes"
+                onclick="confirmarLimpiarListasCurso()">Vaciar secciones y sedes…</button>
             </div>
           </div>
+
         </div>
 
 
 
       </div>
 
+      <div id="vistaActividad" style="display:none;">
+        <h2>Actividad</h2>
+        <div class="card config-card" style="margin-bottom:14px;">
+          <h3>Logs institucionales</h3>
+          <p id="logsTenantRangeLabel" class="hint">Mostrando mes actual.</p>
+          <div class="config-row">
+            <input id="filtroActividadTenantTexto" placeholder="Buscar acción/usuario/ruta">
+            <input id="filtroActividadTenantDesde" type="date">
+            <input id="filtroActividadTenantHasta" type="date">
+            <button onclick="cargarActividadTenant()">Filtrar</button>
+            <button class="secondary" onclick="limpiarActividadTenant()">Limpiar</button>
+            <button class="secondary" onclick="exportarActividadCSV('tenant')">Exportar CSV</button>
+          </div>
+          <div class="table-wrap user-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Acción</th>
+                  <th>Usuario</th>
+                  <th>Dispositivo</th>
+                  <th>Rol</th>
+                  <th>Detalle</th>
+                </tr>
+              </thead>
+              <tbody id="tablaActividadTenant"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+
     </div>
+
+  </div>
 
 
   </div>
@@ -891,88 +905,102 @@
         <div id="luizBloqueUsuarios" style="display:none;">
           <div class="card" style="margin-bottom:24px;">
             <h2 class="user-module-title">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                </path>
+              </svg>
               Gestión de usuarios asistIA
             </h2>
             <p class="user-module-subtitle">Administra accesos globales y usuarios por institución</p>
-          <div id="formUsuarioGlobalLuiz" class="user-form-card">
-            <div class="form-header">
-              <h3 id="tituloFormUsuarioGlobal">Usuarios globales <span id="badgeEditUsuarioGlobal" class="edit-badge" style="display:none;">Editando</span></h3>
-              <p id="subtituloFormUsuarioGlobal">Cuentas con acceso administrativo al sistema</p>
-            </div>
-            <div class="form-body">
-              <div class="form-section">
-                <span class="form-section-title">A. Identidad</span>
-                <div class="form-grid">
-                  <div class="form-group col-4">
-                    <label for="luizGlobalNombres">Nombres</label>
-                    <input id="luizGlobalNombres" placeholder="Ej. Luiz">
-                  </div>
-                  <div class="form-group col-4">
-                    <label for="luizGlobalApellidos">Apellidos</label>
-                    <input id="luizGlobalApellidos" placeholder="Ej. Labs">
-                  </div>
-                  <div class="form-group col-2">
-                    <label for="luizGlobalDni">DNI</label>
-                    <input id="luizGlobalDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+            <div id="formUsuarioGlobalLuiz" class="user-form-card">
+              <div class="form-header">
+                <h3 id="tituloFormUsuarioGlobal">Usuarios globales <span id="badgeEditUsuarioGlobal" class="edit-badge"
+                    style="display:none;">Editando</span></h3>
+                <p id="subtituloFormUsuarioGlobal">Cuentas con acceso administrativo al sistema</p>
+              </div>
+              <div class="form-body">
+                <div class="form-section">
+                  <span class="form-section-title">A. Identidad</span>
+                  <div class="form-grid">
+                    <div class="form-group col-4">
+                      <label for="luizGlobalNombres">Nombres</label>
+                      <input id="luizGlobalNombres" placeholder="Ej. Luiz">
+                    </div>
+                    <div class="form-group col-4">
+                      <label for="luizGlobalApellidos">Apellidos</label>
+                      <input id="luizGlobalApellidos" placeholder="Ej. Labs">
+                    </div>
+                    <div class="form-group col-2">
+                      <label for="luizGlobalDni">DNI</label>
+                      <input id="luizGlobalDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="form-section">
-                <span class="form-section-title">B. Acceso</span>
-                <div class="form-grid">
-                  <div class="form-group col-3">
-                    <label for="luizGlobalUserNombre">Usuario</label>
-                    <input id="luizGlobalUserNombre" placeholder="superusuario">
-                  </div>
-                  <div class="form-group col-3">
-                    <label for="luizGlobalUserRol">Rol</label>
-                    <select id="luizGlobalUserRol">
-                      <option value="superusuario">Superusuario</option>
-                    </select>
-                  </div>
-                  <div class="form-group col-3">
-                    <label for="luizGlobalUserPass">Clave</label>
-                    <input id="luizGlobalUserPass" placeholder="••••••••">
+                <div class="form-section">
+                  <span class="form-section-title">B. Acceso</span>
+                  <div class="form-grid">
+                    <div class="form-group col-3">
+                      <label for="luizGlobalUserNombre">Usuario</label>
+                      <input id="luizGlobalUserNombre" placeholder="superusuario">
+                    </div>
+                    <div class="form-group col-3">
+                      <label for="luizGlobalUserRol">Rol</label>
+                      <select id="luizGlobalUserRol">
+                        <option value="superusuario">Superusuario</option>
+                      </select>
+                    </div>
+                    <div class="form-group col-3">
+                      <label for="luizGlobalUserPass">Clave</label>
+                      <input id="luizGlobalUserPass" placeholder="••••••••">
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="form-section">
-                <span class="form-section-title">C. Contacto</span>
-                <div class="form-grid">
-                  <div class="form-group col-5">
-                    <label for="luizGlobalCorreo">Correo</label>
-                    <input id="luizGlobalCorreo" placeholder="correo@dominio.com" type="email">
-                  </div>
-                  <div class="form-group col-3">
-                    <label for="luizGlobalCelular">Celular</label>
-                    <input id="luizGlobalCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
+                <div class="form-section">
+                  <span class="form-section-title">C. Contacto</span>
+                  <div class="form-grid">
+                    <div class="form-group col-5">
+                      <label for="luizGlobalCorreo">Correo</label>
+                      <input id="luizGlobalCorreo" placeholder="correo@dominio.com" type="email">
+                    </div>
+                    <div class="form-group col-3">
+                      <label for="luizGlobalCelular">Celular</label>
+                      <input id="luizGlobalCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*"
+                        maxlength="15">
+                    </div>
                   </div>
                 </div>
               </div>
+              <div class="form-actions-bar">
+                <button onclick="guardarUsuarioGlobalLuiz()">Guardar usuario global</button>
+                <button class="secondary" onclick="generarClaveUsuarioGlobalLuiz()">Generar clave</button>
+                <button class="secondary icon-btn-with-text" id="btnCopiarClaveGlobal"
+                  onclick="copiarClaveUsuarioGlobalLuiz()" title="Copiar clave global" aria-label="Copiar clave global">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <rect x="9" y="3" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
+                    <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
+                  </svg>
+                  <span>Copiar</span>
+                </button>
+                <button class="secondary" onclick="cancelarEdicionUsuarioGlobalLuiz()">Cancelar edición</button>
+                <button class="secondary" onclick="limpiarUsuarioGlobalLuizForm()">Limpiar</button>
+              </div>
             </div>
-            <div class="form-actions-bar">
-              <button onclick="guardarUsuarioGlobalLuiz()">Guardar usuario global</button>
-              <button class="secondary" onclick="generarClaveUsuarioGlobalLuiz()">Generar clave</button>
-              <button class="secondary icon-btn-with-text" id="btnCopiarClaveGlobal" onclick="copiarClaveUsuarioGlobalLuiz()" title="Copiar clave global" aria-label="Copiar clave global">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <rect x="9" y="3" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
-                  <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
-                </svg>
-                <span>Copiar</span>
-              </button>
-              <button class="secondary" onclick="cancelarEdicionUsuarioGlobalLuiz()">Cancelar edición</button>
-              <button class="secondary" onclick="limpiarUsuarioGlobalLuizForm()">Limpiar</button>
-            </div>
-          </div>
 
             <!-- BUSCADOR Y CONTADOR GLOBAL -->
             <div class="user-search-bar">
               <div class="search-input-wrapper">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="inputBusquedaGlobal" placeholder="Buscar usuario o nombre..." onkeyup="renderPanelLuizLabs()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="inputBusquedaGlobal" placeholder="Buscar usuario o nombre..."
+                  onkeyup="renderPanelLuizLabs()">
               </div>
               <div id="contadorGlobal" class="user-counter">Mostrando 0 usuarios globales</div>
             </div>
@@ -995,95 +1023,109 @@
 
           <div class="card">
             <h2 class="user-module-title">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
               Usuarios admin por institución
             </h2>
-          <div id="formUsuarioAdminLuiz" class="user-form-card">
-            <div class="form-header">
-              <h3 id="tituloFormUsuarioAdminLuiz">Usuarios admin por institución <span id="badgeEditUsuarioAdminLuiz" class="edit-badge" style="display:none;">Editando</span></h3>
-              <p id="subtituloFormUsuarioAdminLuiz">Accesos administrativos vinculados a cada institución</p>
-            </div>
-            <div class="form-body">
-              <div class="form-section">
-                <span class="form-section-title">A. Identidad</span>
-                <div class="form-grid">
-                  <div class="form-group col-4">
-                    <label for="luizUserNombres">Nombres</label>
-                    <input id="luizUserNombres" placeholder="Ej. Pedro">
-                  </div>
-                  <div class="form-group col-4">
-                    <label for="luizUserApellidos">Apellidos</label>
-                    <input id="luizUserApellidos" placeholder="Ej. Ramírez">
-                  </div>
-                  <div class="form-group col-2">
-                    <label for="luizUserDni">DNI</label>
-                    <input id="luizUserDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+            <div id="formUsuarioAdminLuiz" class="user-form-card">
+              <div class="form-header">
+                <h3 id="tituloFormUsuarioAdminLuiz">Usuarios admin por institución <span id="badgeEditUsuarioAdminLuiz"
+                    class="edit-badge" style="display:none;">Editando</span></h3>
+                <p id="subtituloFormUsuarioAdminLuiz">Accesos administrativos vinculados a cada institución</p>
+              </div>
+              <div class="form-body">
+                <div class="form-section">
+                  <span class="form-section-title">A. Identidad</span>
+                  <div class="form-grid">
+                    <div class="form-group col-4">
+                      <label for="luizUserNombres">Nombres</label>
+                      <input id="luizUserNombres" placeholder="Ej. Pedro">
+                    </div>
+                    <div class="form-group col-4">
+                      <label for="luizUserApellidos">Apellidos</label>
+                      <input id="luizUserApellidos" placeholder="Ej. Ramírez">
+                    </div>
+                    <div class="form-group col-2">
+                      <label for="luizUserDni">DNI</label>
+                      <input id="luizUserDni" placeholder="DNI" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="form-section">
-                <span class="form-section-title">B. Acceso y Destino</span>
-                <div class="form-grid">
-                  <div class="form-group col-3">
-                    <label for="luizUserNombre">Usuario</label>
-                    <input id="luizUserNombre" placeholder="admin@institucion">
-                  </div>
-                  <div class="form-group col-3">
-                    <label for="luizUserPass">Clave</label>
-                    <input id="luizUserPass" placeholder="••••••••">
-                  </div>
-                  <div class="form-group col-4">
-                    <label for="luizUserTenant">Institución</label>
-                    <select id="luizUserTenant"></select>
-                  </div>
-                  <div class="form-group col-3">
-                    <label for="luizUserRol">Rol</label>
-                    <select id="luizUserRol">
-                      <option value="administrador">Administrador</option>
-                    </select>
-                  </div>
-                  <div class="form-group col-3">
-                    <label for="luizUserPerfil">Perfil</label>
-                    <select id="luizUserPerfil"></select>
+                <div class="form-section">
+                  <span class="form-section-title">B. Acceso y Destino</span>
+                  <div class="form-grid">
+                    <div class="form-group col-3">
+                      <label for="luizUserNombre">Usuario</label>
+                      <input id="luizUserNombre" placeholder="admin@institucion">
+                    </div>
+                    <div class="form-group col-3">
+                      <label for="luizUserPass">Clave</label>
+                      <input id="luizUserPass" placeholder="••••••••">
+                    </div>
+                    <div class="form-group col-4">
+                      <label for="luizUserTenant">Institución</label>
+                      <select id="luizUserTenant"></select>
+                    </div>
+                    <div class="form-group col-3">
+                      <label for="luizUserRol">Rol</label>
+                      <select id="luizUserRol">
+                        <option value="administrador">Administrador</option>
+                      </select>
+                    </div>
+                    <div class="form-group col-3">
+                      <label for="luizUserPerfil">Perfil</label>
+                      <select id="luizUserPerfil"></select>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="form-section">
-                <span class="form-section-title">C. Contacto</span>
-                <div class="form-grid">
-                  <div class="form-group col-5">
-                    <label for="luizUserCorreo">Correo</label>
-                    <input id="luizUserCorreo" placeholder="correo@dominio.com" type="email">
-                  </div>
-                  <div class="form-group col-3">
-                    <label for="luizUserCelular">Celular</label>
-                    <input id="luizUserCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*" maxlength="15">
+                <div class="form-section">
+                  <span class="form-section-title">C. Contacto</span>
+                  <div class="form-grid">
+                    <div class="form-group col-5">
+                      <label for="luizUserCorreo">Correo</label>
+                      <input id="luizUserCorreo" placeholder="correo@dominio.com" type="email">
+                    </div>
+                    <div class="form-group col-3">
+                      <label for="luizUserCelular">Celular</label>
+                      <input id="luizUserCelular" placeholder="999999999" inputmode="numeric" pattern="[0-9]*"
+                        maxlength="15">
+                    </div>
                   </div>
                 </div>
               </div>
+              <div class="form-actions-bar">
+                <button onclick="guardarUsuarioAdminLuiz()">Guardar usuario</button>
+                <button class="secondary" onclick="generarClaveUsuarioLuiz()">Generar clave</button>
+                <button class="secondary icon-btn-with-text" id="btnCopiarClaveLuiz" onclick="copiarClaveUsuarioLuiz()"
+                  title="Copiar clave" aria-label="Copiar clave">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <rect x="9" y="3" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
+                    <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
+                  </svg>
+                  <span>Copiar</span>
+                </button>
+                <button class="secondary" onclick="cancelarEdicionUsuarioAdminLuiz()">Cancelar edición</button>
+                <button class="secondary" onclick="limpiarUsuarioAdminLuizForm()">Limpiar</button>
+              </div>
             </div>
-            <div class="form-actions-bar">
-              <button onclick="guardarUsuarioAdminLuiz()">Guardar usuario</button>
-              <button class="secondary" onclick="generarClaveUsuarioLuiz()">Generar clave</button>
-              <button class="secondary icon-btn-with-text" id="btnCopiarClaveLuiz" onclick="copiarClaveUsuarioLuiz()" title="Copiar clave" aria-label="Copiar clave">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <rect x="9" y="3" width="11" height="14" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
-                  <rect x="4" y="8" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.8"></rect>
-                </svg>
-                <span>Copiar</span>
-              </button>
-              <button class="secondary" onclick="cancelarEdicionUsuarioAdminLuiz()">Cancelar edición</button>
-              <button class="secondary" onclick="limpiarUsuarioAdminLuizForm()">Limpiar</button>
-            </div>
-          </div>
 
             <!-- BUSCADOR Y FILTROS ADMIN POR INST -->
             <div class="user-search-bar">
               <div class="search-input-wrapper">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="inputBusquedaAdminLuiz" placeholder="Buscar usuario o nombre..." onkeyup="renderPanelLuizLabs()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="inputBusquedaAdminLuiz" placeholder="Buscar usuario o nombre..."
+                  onkeyup="renderPanelLuizLabs()">
               </div>
               <div class="filter-wrapper">
                 <label for="filtroPerfilAdminLuiz">Perfil:</label>

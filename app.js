@@ -127,7 +127,7 @@ function renderCurrentUserInfo() {
         { name: 'currentUserName', role: 'currentUserRole' },
         { name: 'currentUserNameLuiz', role: 'currentUserRoleLuiz' }
     ];
-    
+
     const sesion = obtenerSesionAdminActiva();
     const profile = window.currentProfile;
     const nombre = profile?.full_name?.trim() || sesion?.usuario || "";
@@ -251,7 +251,7 @@ function toggleDetallesUsuario(rowId) {
     const row = document.getElementById(rowId)
     if (!row) return
     const isExpanded = row.classList.contains('expanded')
-    
+
     // Opcional: Cerrar otros rows expandidos en la misma tabla
     const table = row.closest('table')
     if (table) {
@@ -259,7 +259,7 @@ function toggleDetallesUsuario(rowId) {
             if (r.id !== rowId) r.classList.remove('expanded')
         })
     }
-    
+
     row.classList.toggle('expanded', !isExpanded)
 }
 
@@ -267,7 +267,7 @@ function renderBadgePerfil(perfilId) {
     const pId = String(perfilId || "").toLowerCase()
     const perfil = obtenerPerfilPorId(pId)
     const nombre = perfil?.nombre || (pId === 'superusuario' ? 'Superusuario' : 'Administrador')
-    
+
     if (pId === 'superusuario' || pId === 'administrador' || pId.includes('admin')) {
         return `<span class="badge badge-profile-admin">👑 ${nombre}</span>`
     }
@@ -2087,7 +2087,7 @@ function renderPanelLuizLabs() {
 
     // --- BLOQUE 1: USUARIOS GLOBALES ---
     const searchGlobal = String(document.getElementById("inputBusquedaGlobal")?.value || "").toLowerCase()
-    
+
     const usuariosGlobalesLocales = (usuariosAdminLuiz || [])
         .map((u, idx) => ({ u, idx, source: "local" }))
         .filter(({ u }) => esUsuarioGlobalAsistIA(u))
@@ -2211,13 +2211,13 @@ function renderPanelLuizLabs() {
     const usuariosInstitucionales = usuariosInstitucionalesRaw.filter(({ u }) => {
         const full = `${u.nombres} ${u.apellidos} ${u.usuario}`.toLowerCase()
         const matchesSearch = !searchAdmin || full.includes(searchAdmin)
-        
+
         const perfilId = String(u.perfilId || "administrador").toLowerCase()
         let matchesPerfil = true
         if (filterPerfilAdmin !== "todos") {
             matchesPerfil = perfilId.includes(filterPerfil)
         }
-        
+
         return matchesSearch && matchesPerfil
     })
 
@@ -3382,10 +3382,9 @@ function aplicarTenantEnUI() {
         tenantSubtituloLogin.innerText = linea
         tenantSubtituloLogin.style.display = esModoStaff ? "none" : "block"
     }
-    const tenantCursoLoginEl = document.getElementById("tenantCursoLogin")
-    if (tenantCursoLoginEl) {
-        tenantCursoLoginEl.innerText = curso
-        tenantCursoLoginEl.style.display = "none"
+    if (tenantCursoLogin) {
+        tenantCursoLogin.innerText = curso
+        tenantCursoLogin.style.display = "none"
     }
     if (tenantCardTituloLogin) tenantCardTituloLogin.innerText = tituloCard
 
@@ -4261,7 +4260,7 @@ function renderUsuariosAdmin() {
     if (!tablaUsuariosAdmin) return
     poblarPerfilesInstitucionales()
     const tenantActual = String(tenantActivoId || "").trim().toLowerCase()
-    
+
     const search = String(document.getElementById("inputBusquedaUsuarios")?.value || "").toLowerCase()
     const filterPerfil = String(document.getElementById("filtroPerfilUsuarios")?.value || "todos").toLowerCase()
 
@@ -4272,19 +4271,19 @@ function renderUsuariosAdmin() {
             normalizarRolUsuario(u.rol) !== ROLES_ADMIN.SUPERUSUARIO &&
             (!tenantActual || !String(u.tenantId || "").trim() || String(u.tenantId || "").trim().toLowerCase() === tenantActual)
         )
-    
+
     const dataRaw = SYSTEM_USERS.concat(usuariosInstitucionalesRaw)
-    
+
     const data = dataRaw.filter(u => {
         const full = `${u.nombres || u.nombre} ${u.apellidos || ""} ${u.usuario}`.toLowerCase()
         const matchesSearch = !search || full.includes(search)
-        
+
         const perfilId = String(perfilesUsuariosLocales?.[String(u.usuario || "").toLowerCase()] || "administrador").toLowerCase()
         let matchesPerfil = true
         if (filterPerfil !== "todos") {
             matchesPerfil = perfilId.includes(filterPerfil)
         }
-        
+
         return matchesSearch && matchesPerfil
     })
 
@@ -5211,6 +5210,7 @@ function aplicarLayout() {
     actualizarBotonesVista()
     aplicarVisibilidadAccesoAdminInstitucional()
     actualizarInfoSesionHeader()
+    evaluarInicioTutorialAutomatico()
 }
 
 function actualizarEstadoChecks() {
@@ -6226,18 +6226,18 @@ async function cargarAlertasReporte() {
 
     const alertasUnicas = []
     const claves = new Set()
-    ;(scopedData || []).forEach(r => {
-        const key = [
-            r.fecha || "",
-            r.hora || "",
-            r.dni || "",
-            r.tipo || "",
-            r.detalle || ""
-        ].join("|")
-        if (claves.has(key)) return
-        claves.add(key)
-        alertasUnicas.push(r)
-    })
+        ; (scopedData || []).forEach(r => {
+            const key = [
+                r.fecha || "",
+                r.hora || "",
+                r.dni || "",
+                r.tipo || "",
+                r.detalle || ""
+            ].join("|")
+            if (claves.has(key)) return
+            claves.add(key)
+            alertasUnicas.push(r)
+        })
 
     let html = `
   <table>
@@ -6790,13 +6790,22 @@ document.addEventListener("keydown", e => {
         cerrarModal()
         cerrarCuentaModal()
         cerrarAccesoAdminInstitucional()
+        if (tutorialActivo && typeof cerrarTutorial === "function") {
+            cerrarTutorial()
+        }
     }
 })
 
 window.addEventListener("resize", () => {
+    if (!tutorialActivo) return
+    const step = tutorialSteps[tutorialPasoActual]
+    posicionarTooltipTutorial(obtenerTargetTutorial(step))
 })
 
 window.addEventListener("scroll", () => {
+    if (!tutorialActivo) return
+    const step = tutorialSteps[tutorialPasoActual]
+    posicionarTooltipTutorial(obtenerTargetTutorial(step))
 }, true)
 
 async function guardarCurso() {
