@@ -399,6 +399,17 @@
           </h2>
           <p class="user-module-subtitle">Administra accesos, perfiles y credenciales del equipo</p>
 
+          <details class="module-accordion" open>
+            <summary class="module-accordion-summary">
+              <div class="module-accordion-copy">
+                <h3>Crear usuario</h3>
+                <p>Registra o edita accesos administrativos de la institución.</p>
+              </div>
+              <div class="module-accordion-meta">
+                <span class="module-accordion-icon" aria-hidden="true"></span>
+              </div>
+            </summary>
+            <div class="module-accordion-body">
           <div id="formUsuarioAdmin" class="user-form-card">
             <div class="form-header">
               <h3 id="tituloFormUsuarioAdmin">Crear usuario <span id="badgeEditUsuarioAdmin" class="edit-badge"
@@ -476,6 +487,8 @@
               <button class="secondary" onclick="cancelarEdicionUsuarioAdmin()">Cancelar</button>
             </div>
           </div>
+            </div>
+          </details>
 
           <!-- BUSCADOR Y FILTROS PRO -->
           <div class="user-search-bar">
@@ -517,11 +530,23 @@
 
         <div id="vistaConfig" class="app-section" style="display:none;">
 
-        <h2>Configuración</h2>
+        <div class="section-head section-head-compact">
+          <h2 class="section-heading">Configuración</h2>
+          <p class="section-subtitle">Organiza parámetros institucionales, carga de aspirantes y estructura del curso.</p>
+        </div>
 
-        <!-- GPS -->
+        <details class="module-accordion">
+          <summary class="module-accordion-summary">
+            <div class="module-accordion-copy">
+              <h3>GPS</h3>
+              <p>Coordenadas UBO y validación geográfica de asistencia.</p>
+            </div>
+            <div class="module-accordion-meta">
+              <span class="module-accordion-icon" aria-hidden="true"></span>
+            </div>
+          </summary>
+          <div class="module-accordion-body">
         <div class="card config-card">
-          <h3>GPS</h3>
           <div class="hint gps-upload-hint">Carga masiva de coordenadas UBO (columnas: <strong>UBO, LATITUD,
               LONGITUD</strong>. Opcional: <strong>NOMBRE</strong>).</div>
           <label class="gps-toggle-label">
@@ -535,7 +560,20 @@
           </div>
           <p id="msgCargaUbosSedes" class="hint"></p>
         </div>
+          </div>
+        </details>
 
+        <details class="module-accordion" open>
+          <summary class="module-accordion-summary">
+            <div class="module-accordion-copy">
+              <h3>Carga de Aspirantes</h3>
+              <p>Importa padrones y revisa el listado consolidado.</p>
+            </div>
+            <div class="module-accordion-meta">
+              <span class="module-accordion-icon" aria-hidden="true"></span>
+            </div>
+          </summary>
+          <div class="module-accordion-body">
         <div class="card config-card">
           <h3>Carga de Aspirantes (Excel / SQL)</h3>
           <div class="hint">Archivo requerido con columnas: <strong>apellidos, nombres, dni, ubo</strong>. El listado
@@ -561,8 +599,20 @@
             </table>
           </div>
         </div>
+          </div>
+        </details>
 
-        <!-- RETIRAR ASPIRANTE -->
+        <details class="module-accordion">
+          <summary class="module-accordion-summary">
+            <div class="module-accordion-copy">
+              <h3>Retirar Aspirante</h3>
+              <p>Busca aspirantes, retíralos y revisa el historial de retiros.</p>
+            </div>
+            <div class="module-accordion-meta">
+              <span class="module-accordion-icon" aria-hidden="true"></span>
+            </div>
+          </summary>
+          <div class="module-accordion-body">
         <div class="card config-card">
 
           <h3>Retirar Aspirante</h3>
@@ -578,7 +628,6 @@
 
         </div>
 
-        <!-- ASPIRANTE RETIRADOS -->
         <div class="card config-card">
 
           <h3>📌 Aspirantes Retirados</h3>
@@ -593,11 +642,21 @@
           <div id="listaRetirados"></div>
 
         </div>
+          </div>
+        </details>
 
-        <!-- CURSO -->
+        <details class="module-accordion">
+          <summary class="module-accordion-summary">
+            <div class="module-accordion-copy">
+              <h3>Configuración de Curso</h3>
+              <p>Nombre, fechas, radio GPS y acciones generales del curso.</p>
+            </div>
+            <div class="module-accordion-meta">
+              <span class="module-accordion-icon" aria-hidden="true"></span>
+            </div>
+          </summary>
+          <div class="module-accordion-body">
         <div class="card config-card">
-
-          <h3>Configuración de Curso</h3>
 
           <div class="course-module">
             <h4>Nombre de Curso</h4>
@@ -626,7 +685,32 @@
               </div>
             </div>
           </div>
+          <div class="config-actions course-footer-actions">
+            <p class="hint course-footer-hint">Guarda nombre, fechas, radio y configuraciones generales del curso. Las
+              secciones y sedes se gestionan en los módulos superiores.</p>
+            <p id="msgCursoFooter" class="course-inline-msg" role="status" aria-live="polite"></p>
+            <div class="course-footer-actions-row">
+              <button type="button" onclick="guardarCurso()">Guardar curso</button>
+              <button type="button" class="btn-danger-outline" id="btnVaciarSeccionesSedes"
+                onclick="confirmarLimpiarListasCurso()">Vaciar secciones y sedes…</button>
+            </div>
+          </div>
+        </div>
+          </div>
+        </details>
 
+        <details class="module-accordion">
+          <summary class="module-accordion-summary">
+            <div class="module-accordion-copy">
+              <h3>Secciones de Curso</h3>
+              <p>Alta, edición y listado de secciones del curso activo.</p>
+            </div>
+            <div class="module-accordion-meta">
+              <span class="module-accordion-icon" aria-hidden="true"></span>
+            </div>
+          </summary>
+          <div class="module-accordion-body">
+          <div class="card config-card">
           <div class="course-module" id="courseModuleSecciones">
             <h4>Secciones del curso</h4>
             <p class="hint course-module-hint">Crea una sección nueva o usa <strong>Modificar</strong> en la tabla
@@ -687,7 +771,22 @@
               </table>
             </div>
           </div>
+          </div>
+          </div>
+        </details>
 
+        <details class="module-accordion">
+          <summary class="module-accordion-summary">
+            <div class="module-accordion-copy">
+              <h3>UBOs / Sedes por sección</h3>
+              <p>Asigna UBO sede, modalidad, horario y días por sección.</p>
+            </div>
+            <div class="module-accordion-meta">
+              <span class="module-accordion-icon" aria-hidden="true"></span>
+            </div>
+          </summary>
+          <div class="module-accordion-body">
+          <div class="card config-card">
           <div class="course-module" id="courseModuleSedeUbo">
             <h4>UBOs sede por sección</h4>
             <p class="hint course-module-hint">Define la UBO sede por sección o usa <strong>Modificar</strong> para
@@ -759,19 +858,9 @@
               </table>
             </div>
           </div>
-
-          <div class="config-actions course-footer-actions">
-            <p class="hint course-footer-hint">Guarda nombre, fechas, radio y configuraciones generales del curso. Las
-              secciones y sedes se gestionan en los módulos superiores.</p>
-            <p id="msgCursoFooter" class="course-inline-msg" role="status" aria-live="polite"></p>
-            <div class="course-footer-actions-row">
-              <button type="button" onclick="guardarCurso()">Guardar curso</button>
-              <button type="button" class="btn-danger-outline" id="btnVaciarSeccionesSedes"
-                onclick="confirmarLimpiarListasCurso()">Vaciar secciones y sedes…</button>
-            </div>
           </div>
-
-        </div>
+          </div>
+        </details>
 
 
 

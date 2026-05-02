@@ -1477,6 +1477,16 @@ select {
   margin-bottom: 18px;
 }
 
+#vistaConfig .module-accordion + .module-accordion,
+#vistaUsuarios .module-accordion + .module-accordion {
+  margin-top: 14px;
+}
+
+#vistaConfig .module-accordion-body > .config-card,
+#vistaUsuarios .module-accordion-body > .user-form-card {
+  margin-top: 0;
+}
+
 #vistaConfig .card h3 {
   margin-bottom: 14px;
   font-size: 24px;
