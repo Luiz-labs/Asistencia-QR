@@ -1055,12 +1055,50 @@ select {
   min-width: 0;
 }
 
+.tenant-screen#loginScreen {
+  justify-content: center;
+  padding: 32px 20px;
+}
+
 .login-head-wrap {
   text-align: center;
-  margin-bottom: 30px;
+  width: min(100%, 520px);
+  margin: 0 auto 22px;
+}
+
+.login-tenant-title {
+  margin: 0;
+}
+
+.login-tenant-subtitle {
+  margin: 6px 0 0;
+  font-family: "Sora", "Inter", sans-serif;
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: #233760;
+}
+
+.login-tenant-course {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #66748f;
 }
 
 .login-card {
+  width: min(100%, 460px);
+  padding: 34px 34px 28px;
+  border-radius: 18px;
+  border: 1px solid rgba(196, 207, 226, 0.72);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 28px 64px rgba(22, 36, 66, 0.12),
+    0 10px 24px rgba(22, 36, 66, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  margin: 0 auto;
+  text-align: center;
   transition: border-color .24s ease, box-shadow .24s ease;
 }
 
@@ -1074,18 +1112,30 @@ select {
   }
 }
 
+.login-card-logo {
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 14px;
+  display: block;
+  object-fit: contain;
+  border-radius: 18px;
+  border: 1px solid #d8e3f4;
+  background: #fff;
+  padding: 8px;
+  box-shadow: 0 12px 28px rgba(29, 62, 119, 0.12);
+}
+
 .login-input-row {
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
   align-items: stretch;
   width: 100%;
 }
 
 .login-tenant-head {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
+  display: block;
 }
 
 .login-tenant-head h1 {
@@ -1094,6 +1144,8 @@ select {
   font-weight: 800;
   letter-spacing: -0.04em;
   color: #1a2e57;
+  font-size: clamp(2.1rem, 4vw, 3rem);
+  line-height: 0.98;
 }
 
 .login-project-title {
@@ -1117,15 +1169,47 @@ select {
 }
 
 .login-card-title {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   font-family: "Sora", "Inter", sans-serif;
   font-weight: 800;
   letter-spacing: -0.04em;
   color: #18284c;
+  font-size: clamp(1.55rem, 2.2vw, 1.95rem);
+  line-height: 1.05;
+}
+
+#loginScreen .login-card input {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid #d4deee;
+  background: #fbfcff;
+  padding: 0 14px;
+}
+
+#loginScreen .login-card input::placeholder {
+  color: #95a2bb;
+}
+
+.login-submit-btn {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.login-message {
+  min-height: 1.2em;
+  margin-top: 12px;
+  color: #c2362b;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .login-powered {
-  margin-top: 10px;
+  width: min(100%, 460px);
+  margin: 16px auto 0;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -1152,6 +1236,45 @@ select {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   transform: translateY(1px);
+}
+
+@media (max-width: 640px) {
+  .tenant-screen#loginScreen {
+    padding: 24px 20px;
+  }
+
+  .login-head-wrap {
+    width: min(100%, 460px);
+    margin-bottom: 18px;
+  }
+
+  .login-card {
+    width: min(100%, 460px);
+    padding: 26px 22px 22px;
+  }
+
+  .login-card-logo {
+    width: 76px;
+    height: 76px;
+    margin-bottom: 12px;
+  }
+
+  .login-tenant-head h1 {
+    font-size: clamp(1.8rem, 9vw, 2.35rem);
+  }
+
+  .login-tenant-subtitle {
+    font-size: clamp(1.05rem, 5vw, 1.3rem);
+  }
+
+  .login-card-title {
+    font-size: clamp(1.35rem, 6vw, 1.65rem);
+  }
+
+  .login-powered {
+    width: min(100%, 460px);
+    margin-top: 14px;
+  }
 }
 
 #tabla {

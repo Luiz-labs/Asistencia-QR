@@ -36,29 +36,28 @@
     <!-- TITULO FUERA -->
     <div class="login-head-wrap">
       <div class="login-tenant-head">
-        <h1 id="tenantTituloLogin" style="margin:0;">XXIV Comandancia Departamental Lima Sur</h1>
+        <h1 id="tenantTituloLogin" class="login-tenant-title">XXIV Comandancia Departamental Lima Sur</h1>
       </div>
-      <h2 id="tenantSubtituloLogin" style="margin:5px 0;">Incorporación y ESBAS</h2>
-      <p id="tenantCursoLogin" style="color:#666;">Instrucción ESBAS 2026</p>
+      <h2 id="tenantSubtituloLogin" class="login-tenant-subtitle">Incorporación y ESBAS</h2>
+      <p id="tenantCursoLogin" class="login-tenant-course">Instrucción ESBAS 2026</p>
     </div>
 
     <div class="login-card">
 
-      <img id="tenantLogoLoginCard" class="tenant-dynamic-logo" src="/asistIA_logo.png"
-        style="width:80px;height:80px;margin-bottom:10px;">
+      <img id="tenantLogoLoginCard" class="tenant-dynamic-logo login-card-logo" src="/asistIA_logo.png">
 
       <h2 id="tenantCardTituloLogin" class="login-card-title">ESBAS 2026</h2>
 
       <!-- INPUTS EN LINEA -->
       <div class="login-input-row">
-        <input id="loginUser" placeholder="Usuario" style="flex:1;">
-        <input id="loginPass" type="password" placeholder="Clave" style="flex:1;">
+        <input id="loginUser" placeholder="Usuario">
+        <input id="loginPass" type="password" placeholder="Clave">
       </div>
 
       <!-- BOTON -->
-      <button onclick="login()" style="width:100%;">Ingresar</button>
+      <button class="login-submit-btn" onclick="login()">Ingresar</button>
 
-      <p id="loginMsg" style="margin-top:10px;color:red;"></p>
+      <p id="loginMsg" class="login-message"></p>
 
     </div>
 
