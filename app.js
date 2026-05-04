@@ -3640,6 +3640,10 @@ function aplicarTenantEnUI() {
         tenantCursoLogin.style.display = "none"
     }
     if (tenantCardTituloLogin) tenantCardTituloLogin.innerText = tituloCard
+    if (loginCardCaption) {
+        loginCardCaption.innerText = "Control Inteligente de Asistencia"
+        loginCardCaption.style.display = esModoStaff ? "none" : "block"
+    }
 
     if (tenantTituloMovil) tenantTituloMovil.innerText = titulo
     if (tenantSubtituloMovil) tenantSubtituloMovil.innerText = linea

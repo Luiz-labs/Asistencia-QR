@@ -1348,6 +1348,16 @@ select {
   line-height: 1.05;
 }
 
+.login-card-caption {
+  margin: -8px 0 18px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: #61728f;
+  white-space: nowrap;
+}
+
 #loginScreen .login-card input {
   width: 100%;
   height: 48px;
