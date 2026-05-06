@@ -160,6 +160,15 @@ h2 {
   margin-bottom: 10px;
 }
 
+#luizBloquePerfiles .profile-permissions-grid {
+  margin-top: 12px;
+  margin-bottom: 14px;
+}
+
+#luizBloquePerfiles .section-actions-spaced {
+  margin-bottom: 18px;
+}
+
 .config-row-topspaced {
   margin-top: 10px;
 }
@@ -2067,6 +2076,16 @@ select {
 .luiz-users-table td {
   vertical-align: middle;
   white-space: nowrap;
+}
+
+#luizBloquePerfiles .table-wrap {
+  margin-top: 2px;
+}
+
+#luizBloquePerfiles .luiz-users-table th,
+#luizBloquePerfiles .luiz-users-table td {
+  padding-top: 13px;
+  padding-bottom: 13px;
 }
 
 .luiz-users-table td.actions-col {
