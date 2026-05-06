@@ -122,6 +122,24 @@ function toggleByPermission(permission, elementId, displayStyle = 'block') {
     }
 }
 
+function buildEmptyStateHTML(title, text, icon = "○", compact = false) {
+    return `
+      <div class="empty-state${compact ? " empty-state-compact" : ""}">
+        <div class="empty-state-icon" aria-hidden="true">${icon}</div>
+        <div class="empty-state-title">${title}</div>
+        <div class="empty-state-text">${text}</div>
+      </div>
+    `
+}
+
+function buildEmptyTableRow(colspan, title, text, icon = "○") {
+    return `
+      <tr class="empty-state-row">
+        <td colspan="${colspan}">${buildEmptyStateHTML(title, text, icon, true)}</td>
+      </tr>
+    `
+}
+
 function limpiarCurrentProfileVisual() {
     window.currentProfile = null
 }
@@ -868,7 +886,12 @@ function renderTablaActividadTenant(rows = []) {
     const tbody = document.getElementById("tablaActividadTenant")
     if (!tbody) return
     if (!rows.length) {
-        tbody.innerHTML = `<tr><td colspan="6">Sin actividad en este tenant.</td></tr>`
+        tbody.innerHTML = buildEmptyTableRow(
+            6,
+            "Sin actividad registrada",
+            "Sin actividad registrada en este rango.",
+            "🧾"
+        )
         return
     }
     let html = ""
@@ -891,7 +914,12 @@ function renderTablaActividadGlobal(rows = []) {
     const tbody = document.getElementById("tablaActividadGlobal")
     if (!tbody) return
     if (!rows.length) {
-        tbody.innerHTML = `<tr><td colspan="7">Sin actividad registrada.</td></tr>`
+        tbody.innerHTML = buildEmptyTableRow(
+            7,
+            "Sin actividad registrada",
+            "Sin actividad registrada en este rango.",
+            "🧾"
+        )
         return
     }
     let html = ""
@@ -2263,7 +2291,12 @@ function renderPanelLuizLabs() {
     }
 
     if (!institucionesLuiz.length) {
-        tablaInst.innerHTML = `<tr><td colspan="5">Sin instituciones.</td></tr>`
+        tablaInst.innerHTML = buildEmptyTableRow(
+            5,
+            "Sin instituciones",
+            "Todavia no hay instituciones registradas en la plataforma.",
+            "🏢"
+        )
     } else {
         let html = ""
         institucionesLuiz
@@ -2341,7 +2374,12 @@ function renderPanelLuizLabs() {
     if (elContadorGlobal) elContadorGlobal.innerText = `Mostrando ${usuariosGlobales.length} usuarios globales`
 
     if (!usuariosGlobales.length) {
-        tablaGlobal.innerHTML = `<tr><td colspan="10">Sin usuarios globales.</td></tr>`
+        tablaGlobal.innerHTML = buildEmptyTableRow(
+            5,
+            "Sin usuarios globales",
+            "No se encontraron cuentas globales para mostrar en este momento.",
+            "👥"
+        )
     } else {
         let globalHtml = ""
         usuariosGlobales.forEach(({ u, idx, source }) => {
@@ -2444,7 +2482,12 @@ function renderPanelLuizLabs() {
     if (elContadorAdminLuiz) elContadorAdminLuiz.innerText = `Mostrando ${usuariosInstitucionales.length} usuarios`
 
     if (!usuariosInstitucionales.length) {
-        tablaUsers.innerHTML = `<tr><td colspan="12">Sin usuarios admin.</td></tr>`
+        tablaUsers.innerHTML = buildEmptyTableRow(
+            6,
+            "Sin usuarios institucionales",
+            "No se encontraron usuarios administradores por institucion.",
+            "👤"
+        )
     } else {
         let usersHtml = ""
         usuariosInstitucionales.forEach(({ u, idx }) => {
@@ -2530,7 +2573,12 @@ function renderPanelLuizLabs() {
             .map((perfil, idx) => ({ perfil, idx }))
             .sort((a, b) => String(a.perfil.nombre || "").localeCompare(String(b.perfil.nombre || "")))
         if (!perfilesOrdenados.length) {
-            tablaPerfiles.innerHTML = `<tr><td colspan="5">Sin perfiles.</td></tr>`
+            tablaPerfiles.innerHTML = buildEmptyTableRow(
+                5,
+                "Sin perfiles de acceso",
+                "Aun no hay perfiles creados para esta vista de gestion.",
+                "🛡️"
+            )
         } else {
             let perfilesHtml = ""
             perfilesOrdenados.forEach(({ perfil: p, idx }) => {
@@ -4548,7 +4596,12 @@ function renderUsuariosAdmin() {
     if (elContador) elContador.innerText = `Mostrando ${data.length} usuarios`
 
     if (!data.length) {
-        tablaUsuariosAdmin.innerHTML = `<tr><td colspan="10">Sin usuarios creados.</td></tr>`
+        tablaUsuariosAdmin.innerHTML = buildEmptyTableRow(
+            5,
+            "Sin usuarios creados",
+            "No se encontraron usuarios para los filtros aplicados.",
+            "👥"
+        )
         return
     }
 
@@ -4877,7 +4930,12 @@ async function cargarAspirantesCargados() {
     if (!tablaEl) return
     try {
         if (!haySupabase()) {
-            tablaEl.innerHTML = `<tr><td colspan="5">Supabase no disponible.</td></tr>`
+            tablaEl.innerHTML = buildEmptyTableRow(
+                5,
+                "Sin conexion disponible",
+                "No se pudo cargar el listado porque Supabase no esta disponible.",
+                "☁️"
+            )
             if (msgEl) msgEl.innerText = "No se pudo conectar con Supabase."
             return
         }
@@ -4911,7 +4969,12 @@ async function cargarAspirantesCargados() {
         }
 
         if (errorAspirantes) {
-            tablaEl.innerHTML = `<tr><td colspan="5">No se pudo cargar el listado.</td></tr>`
+            tablaEl.innerHTML = buildEmptyTableRow(
+                5,
+                "No se pudo cargar el listado",
+                "Ocurrio un problema al consultar aspirantes para esta institucion.",
+                "⚠️"
+            )
             if (msgEl) msgEl.innerText = `Error listando aspirantes: ${errorAspirantes.message || "desconocido"}`
             return
         }
@@ -4961,7 +5024,12 @@ async function cargarAspirantesCargados() {
             .slice(0, 600)
 
         if (!lista.length) {
-            tablaEl.innerHTML = `<tr><td colspan="5">Sin aspirantes cargados.</td></tr>`
+            tablaEl.innerHTML = buildEmptyTableRow(
+                5,
+                "Sin aspirantes cargados",
+                "Todavia no hay aspirantes ni registros asociados para mostrar.",
+                "📄"
+            )
             if (msgEl) msgEl.innerText = "Listado actualizado: 0 registros."
             return
         }
@@ -4982,7 +5050,12 @@ async function cargarAspirantesCargados() {
         if (msgEl) msgEl.innerText = `Listado actualizado: ${lista.length} registro(s).`
     } catch (e) {
         console.error("Error en cargarAspirantesCargados:", e)
-        tablaEl.innerHTML = `<tr><td colspan="5">Error cargando listado.</td></tr>`
+        tablaEl.innerHTML = buildEmptyTableRow(
+            5,
+            "Error cargando listado",
+            "No se pudo completar la carga del listado de aspirantes.",
+            "⚠️"
+        )
         if (msgEl) msgEl.innerText = "Error cargando listado de aspirantes."
     }
 }
@@ -6404,11 +6477,11 @@ function renderTabla(data) {
         const msg = hayFiltroUbo
             ? "No hay registros para la UBO seleccionada en el rango indicado."
             : "No hay datos para el rango seleccionado."
-        tabla.innerHTML = `
-      <div class="hint" style="padding:8px 2px;">
-        ${msg}
-      </div>
-    `
+        tabla.innerHTML = buildEmptyStateHTML(
+            "Sin resultados para reportes",
+            msg,
+            "📊"
+        )
         return
     }
 
@@ -6504,14 +6577,22 @@ async function cargarAlertasReporte() {
 
     if (error) {
         console.warn("No se pudo cargar asistencia_alertas:", error.message)
-        tablaAlertasContenido.innerHTML = "No se pudieron cargar alertas."
+        tablaAlertasContenido.innerHTML = buildEmptyStateHTML(
+            "No se pudieron cargar alertas",
+            "Intenta nuevamente o revisa la conexion con el servidor.",
+            "⚠️"
+        )
         return
     }
 
     const scopedData = filtrarDataTenantActivo(data)
 
     if (!scopedData || scopedData.length === 0) {
-        tablaAlertasContenido.innerHTML = "No hay alertas registradas en este período."
+        tablaAlertasContenido.innerHTML = buildEmptyStateHTML(
+            "Sin alertas registradas",
+            "No se encontraron alertas para el periodo consultado.",
+            "🔍"
+        )
         return
     }
 
@@ -6603,7 +6684,11 @@ function limpiarFiltros() {
     fechaHasta.value = to
 
     tabla.innerHTML = ""
-    tablaAlertasContenido.innerHTML = "Sin alertas registradas."
+    tablaAlertasContenido.innerHTML = buildEmptyStateHTML(
+        "Sin alertas registradas",
+        "Ajusta los filtros para consultar un periodo con actividad.",
+        "🔍"
+    )
 
 }
 
@@ -6786,7 +6871,12 @@ async function cargarDashboard() {
         })
 
     if (!html) {
-        html = `<p class="hint">No hay datos para el rango seleccionado.</p>`
+        html = buildEmptyStateHTML(
+            "Sin riesgo acumulado",
+            "No se encontraron registros en rojo para el rango seleccionado.",
+            "📉",
+            true
+        )
     }
 
     topUbo.innerHTML = html
@@ -6799,7 +6889,11 @@ function verAlertasDispositivo() {
 
     if (!data.length) {
         modalTitulo.innerText = "Alertas de Dispositivo"
-        modalContenido.innerHTML = "<p>No hay alertas en el rango seleccionado.</p>"
+        modalContenido.innerHTML = buildEmptyStateHTML(
+            "Sin alertas de dispositivo",
+            "No se encontraron alertas para el rango seleccionado.",
+            "🔒"
+        )
         modal.style.display = "flex"
         return
     }
@@ -6841,6 +6935,17 @@ function verUbo(ubo) {
 
     let data = window.detalleSemaforo["rojo"]
         .filter(x => x.ubo == ubo)
+
+    if (!data.length) {
+        modalTitulo.innerText = "UBO " + ubo
+        modalContenido.innerHTML = buildEmptyStateHTML(
+            "Sin registros para esta UBO",
+            "No se encontraron registros en rojo para esta UBO en el rango seleccionado.",
+            "📍"
+        )
+        modal.style.display = "flex"
+        return
+    }
 
     let html = `
   <table>
@@ -7005,6 +7110,17 @@ function seleccionarAspirante(dni, nombre) {
 function verDetalle(color) {
 
     let data = window.detalleSemaforo[color] || []
+
+    if (!data.length) {
+        modalTitulo.innerText = "Semáforo " + color.toUpperCase()
+        modalContenido.innerHTML = buildEmptyStateHTML(
+            "Sin registros para este semaforo",
+            "No se encontraron registros para este semaforo en el rango seleccionado.",
+            "🚦"
+        )
+        modal.style.display = "flex"
+        return
+    }
 
     let html = `
   <table>
@@ -7396,7 +7512,12 @@ async function eliminarSeccionCurso(idx) {
 
 function renderSeccionesCurso() {
     if (!cursoSecciones.length) {
-        tablaSeccionesCurso.innerHTML = `<tr><td colspan="5">Sin secciones creadas.</td></tr>`
+        tablaSeccionesCurso.innerHTML = buildEmptyTableRow(
+            5,
+            "Sin secciones creadas",
+            "Todavia no hay secciones registradas para el curso activo.",
+            "🗂️"
+        )
         return
     }
 
@@ -7646,7 +7767,12 @@ async function eliminarSedeUbo(idx) {
 
 function renderSedesUbo() {
     if (!cursoSedesUbo.length) {
-        tablaSedesUbo.innerHTML = `<tr><td colspan="6">Sin UBOs sede creadas.</td></tr>`
+        tablaSedesUbo.innerHTML = buildEmptyTableRow(
+            6,
+            "Sin UBOs o sedes configuradas",
+            "Todavia no hay asignaciones de UBO sede para las secciones del curso.",
+            "📍"
+        )
         return
     }
 
