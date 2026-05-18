@@ -2544,7 +2544,7 @@ function renderPanelLuizLabs() {
 
     const institucionesVisibles = (institucionesLuiz || []).filter(inst => {
         const slug = String(inst.slug || "").trim().toLowerCase();
-        return slug !== "esbas-24-demo" && inst.estado === "activo";
+        return slug !== "esbas-24-demo";
     })
 
     if (!institucionesVisibles.length) {
