@@ -321,13 +321,21 @@ const TENANTS = {
 }
 
 function listaTenantsOrdenada() {
-    return Object.values(TENANTS).sort((a, b) =>
-        String(a.nombre || "").localeCompare(String(b.nombre || ""), "es")
-    )
+    return Object.values(TENANTS)
+        .filter(t => {
+            const slug = String(t.id || "").trim().toLowerCase();
+            return slug !== "esbas-24-demo" && t.habilitado !== false;
+        })
+        .sort((a, b) =>
+            String(a.nombre || "").localeCompare(String(b.nombre || ""), "es")
+        )
 }
 
 function primerTenantFallback() {
-    const vals = Object.values(TENANTS)
+    const vals = Object.values(TENANTS).filter(t => {
+        const slug = String(t.id || "").trim().toLowerCase();
+        return slug !== "esbas-24-demo" && t.habilitado !== false;
+    })
     return vals.length ? vals[0] : null
 }
 let tenantActivoId = ""
@@ -1386,7 +1394,9 @@ function limpiarSesionAdminActiva() {
     limpiarCurrentProfileVisual()
     guardarSesionAdminEnStorage()
     sincronizarEstadoLegacyAdmin()
-    actualizarInfoSesionHeader()
+    if (!logoutInProgress) {
+        actualizarInfoSesionHeader()
+    }
 }
 
 function obtenerSesionAdminActiva() {
@@ -2507,7 +2517,7 @@ function renderPanelLuizLabs() {
     poblarFiltroTenantLogsGlobal()
 
     if (elTenant) {
-        const institucionesActivas = institucionesLuiz.filter(i => i.estado === "activo")
+        const institucionesActivas = institucionesLuiz.filter(i => i.estado === "activo" && String(i.slug || "").toLowerCase() !== "esbas-24-demo")
         let tenantHtml = `<option value="">Seleccionar institución</option>`
         institucionesActivas.forEach(inst => {
             tenantHtml += `<option value="${inst.slug}">${inst.nombre}</option>`
@@ -8417,7 +8427,7 @@ function actualizarUIModoEdicionSeccion() {
     const banner = document.getElementById("courseSecEditBanner")
     const label = document.getElementById("courseSecEditLabel")
     const module = document.getElementById("courseModuleSecciones")
-    const legacyDisabled = true
+    const legacyDisabled = false
     const inputs = [
         document.getElementById("secCursoNombre"),
         document.getElementById("secCursoModalidad"),
@@ -8426,20 +8436,20 @@ function actualizarUIModoEdicionSeccion() {
     ]
     const editing = editSeccionCursoIndex >= 0
     if (btn) {
-        btn.textContent = "SOLO LECTURA"
-        btn.disabled = legacyDisabled
-        btn.title = "La edición se migrará al modelo backend-driven."
+        btn.textContent = editing ? "GUARDAR CAMBIOS" : "CREAR SECCIÓN"
+        btn.disabled = false
+        btn.title = ""
     }
     if (btnCancel) {
-        btnCancel.textContent = "Solo lectura"
-        btnCancel.disabled = legacyDisabled
+        btnCancel.textContent = editing ? "Cancelar edición" : "Limpiar formulario"
+        btnCancel.disabled = false
     }
     inputs.forEach(input => {
         if (!input) return
-        input.disabled = legacyDisabled
-        input.title = "La edición se migrará al modelo backend-driven."
+        input.disabled = false
+        input.title = ""
     })
-    if (banner) banner.hidden = true
+    if (banner) banner.hidden = !editing
     if (label && editing) {
         const item = cursoSecciones[editSeccionCursoIndex]
         label.textContent = item ? String(item.seccion || "").trim() || "—" : "—"
@@ -9373,7 +9383,7 @@ async function logout() {
     if (logoutInProgress) return
     logoutInProgress = true
 
-    // Deshabilitar todos los botones de Salir visualmente y bloquear interacciones
+    // 2. Deshabilitar botones de Salir visualmente y bloquear interacciones
     const logoutButtons = ["btnSalirTenant", "btnHeaderLogout", "btnHeaderLogoutLuiz", "btnCuentaLogout"]
     logoutButtons.forEach(id => {
         const btn = document.getElementById(id)
@@ -9385,38 +9395,69 @@ async function logout() {
 
     const sesionPrev = obtenerSesionAdminActiva()
     const origenSesion = sesionPrev.origen || ""
-    if (sesionPrev?.autenticado) {
-        try {
-            await registrarActividad("logout_admin", {
-                origen: origenSesion
-            }, {
-                usuario: sesionPrev.usuario,
-                rol: sesionPrev.rol,
-                tenantId: sesionPrev.tenantId || tenantActivoId || ""
-            })
-        } catch (e) {
-            console.warn("Error al registrar actividad de logout:", e)
-        }
+    const usuarioPrev = sesionPrev.usuario || ""
+    const rolPrev = sesionPrev.rol || ""
+    const tenantIdPrev = sesionPrev.tenantId || tenantActivoId || ""
+
+    // 3. Capturar path actual y preparar redirección
+    let destino = window.location.pathname
+    if (accesoDirectoInstitucion && origenSesion === "staff_root") {
+        destino = "/"
     }
-    if (haySupabase()) {
-        try {
-            await supabaseClient.auth.signOut()
-        } catch (e) {
-            console.warn("Error signing out from Supabase:", e)
-        }
-    }
-    resetEstadoSesionAdminUI()
 
     const urlObj = new URL(window.location.href)
+    urlObj.pathname = destino
     urlObj.searchParams.set("logout", "1")
     urlObj.searchParams.set("t", Date.now().toString())
+    const destinoFinal = urlObj.pathname + urlObj.search
 
-    if (accesoDirectoInstitucion && origenSesion === "staff_root") {
-        window.location.replace("/?logout=1&t=" + Date.now().toString())
-        return
+    // 6. Limpiar localStorage/sessionStorage de sesión de inmediato (sincrónico)
+    resetEstadoSesionAdminUI()
+
+    // 7. Limpiar variables globales (sincrónico, sin aplicar layouts visuales intermedios)
+    sesionAdminActiva = crearSesionAdminVacia()
+
+    // Helper para ejecutar promesas asíncronas con un timeout corto
+    const runWithTimeout = (promise, ms) => {
+        return new Promise(resolve => {
+            const timer = setTimeout(() => {
+                console.warn(`[logout] Timeout reached: ${ms}ms`);
+                resolve(null);
+            }, ms);
+            promise.then(
+                res => {
+                    clearTimeout(timer);
+                    resolve(res);
+                },
+                err => {
+                    clearTimeout(timer);
+                    console.warn(`[logout] Promise rejected:`, err);
+                    resolve(null);
+                }
+            );
+        });
+    };
+
+    // 4. Intentar registrarActividad en background con timeout máximo de 800ms
+    if (sesionPrev?.autenticado) {
+        const registrarPromise = registrarActividad("logout_admin", {
+            origen: origenSesion
+        }, {
+            usuario: usuarioPrev,
+            rol: rolPrev,
+            tenantId: tenantIdPrev
+        });
+        await runWithTimeout(registrarPromise, 800);
     }
 
-    window.location.replace(window.location.pathname + urlObj.search)
+    // 5. Intentar supabaseClient.auth.signOut() con timeout máximo de 1200ms
+    if (haySupabase()) {
+        const signOutPromise = supabaseClient.auth.signOut();
+        await runWithTimeout(signOutPromise, 1200);
+    }
+
+    // 8. window.location.replace para evitar volver atrás con el botón del navegador
+    window.location.replace(destinoFinal)
 }
 
 /* Legacy public attendance flow removed.
