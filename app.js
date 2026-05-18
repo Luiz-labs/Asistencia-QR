@@ -2447,7 +2447,7 @@ function sincronizarTenantsDesdeInstituciones() {
         if (inst) {
             t.nombre = inst.nombre
             t.logo = obtenerLogoInstitucion(inst)
-            t.habilitado = inst.estado === "activo"
+            t.habilitado = inst.estado === "activo" && t.id !== "esbas-24-demo"
         }
     })
 
@@ -2459,7 +2459,7 @@ function sincronizarTenantsDesdeInstituciones() {
             linea: "Módulo institucional",
             curso: "Instrucción asistIA",
             logo: obtenerLogoInstitucion(inst),
-            habilitado: inst.estado === "activo",
+            habilitado: inst.estado === "activo" && inst.slug !== "esbas-24-demo",
             usuariosSistema: []
         }
     })
@@ -2542,7 +2542,12 @@ function renderPanelLuizLabs() {
         }
     }
 
-    if (!institucionesLuiz.length) {
+    const institucionesVisibles = (institucionesLuiz || []).filter(inst => {
+        const slug = String(inst.slug || "").trim().toLowerCase();
+        return slug !== "esbas-24-demo" && inst.estado === "activo";
+    })
+
+    if (!institucionesVisibles.length) {
         tablaInst.innerHTML = buildEmptyTableRow(
             5,
             "Sin instituciones",
@@ -2551,7 +2556,7 @@ function renderPanelLuizLabs() {
         )
     } else {
         let html = ""
-        institucionesLuiz
+        institucionesVisibles
             .slice()
             .sort((a, b) => String(a.nombre).localeCompare(String(b.nombre)))
             .forEach(inst => {
