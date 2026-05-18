@@ -134,7 +134,7 @@ function debeOcultarMensajePublico(item) {
 function deduplicarMensajes(messages = []) {
     const seen = new Set()
     return messages.filter(item => {
-        const key = String(item || "").trim().toLowerCase()
+        const key = String(item || "").replace(/\.+$/, "").trim().toLowerCase()
         if (!key || seen.has(key)) return false
         seen.add(key)
         return true
@@ -1026,9 +1026,9 @@ async function ingresarMovilInicio() {
             const warnings = extraerMensajesContexto(contextoRPC.warnings)
             const estadoAmigable = formatearEstadoAsistenciaAmigable(contextoRPC.estado_asistencia)
             if (contextoRPC.estado_asistencia === "TARDANZA") {
-                warnings.unshift(`Registro en ${estadoAmigable.toLowerCase()}.`)
+                warnings.unshift(`Registro en ${estadoAmigable.toLowerCase()}`)
             } else if (contextoRPC.estado_asistencia === "FUERA_DE_HORARIO") {
-                warnings.unshift(`Registro ${estadoAmigable.toLowerCase()}.`)
+                warnings.unshift(`Registro ${estadoAmigable.toLowerCase()}`)
             }
             if (warnings.length > 0) {
                 setMensaje(warnings.join(" | "), "warning")
@@ -1250,9 +1250,9 @@ function construirWarningsRegistro(data, contextoAsistencia) {
     ).trim().toUpperCase()
 
     if (estado === "TARDANZA") {
-        warnings.unshift("Registro en tardanza.")
+        warnings.unshift("Registro en tardanza")
     } else if (estado === "FUERA_DE_HORARIO") {
-        warnings.unshift("Registro fuera de horario.")
+        warnings.unshift("Registro fuera de horario")
     }
 
     return deduplicarMensajes(warnings.filter(Boolean))
@@ -1458,6 +1458,10 @@ async function guardarAsistencia() {
         } else {
             setMensaje(normalizarMensajePublicoFinal("✅ Asistencia registrada correctamente."), "ok")
         }
+
+        // Limpiar el estado visual posterior al registro ocultando los contenedores interactivos
+        if (formulario) formulario.style.display = "none"
+        if (stepIngreso) stepIngreso.style.display = "none"
 
         debugContextLog("guardarAsistencia: registro exitoso", {
             dni: dniRegistro,

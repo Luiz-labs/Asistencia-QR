@@ -4132,34 +4132,7 @@ async function actualizarTenantScopeBackendReady() {
         tenantScopeBackendReady = false
         return tenantScopeBackendReady
     }
-
-    const tablasTenant = [
-        "asistencias",
-        "asistencia_alertas",
-        "aspirantes",
-        "cursos",
-        "ubos_sedes",
-        "curso_configuracion",
-        "curso_secciones",
-        "curso_sedes_ubo"
-    ]
-
-    const checks = await Promise.all(tablasTenant.map(async (tabla) => {
-        const { error } = await supabaseClient
-            .from(tabla)
-            .select("tenant_id")
-            .limit(1)
-
-        if (!error) return true
-        const msg = String(error.message || "")
-        if (esTablaNoExiste(error) || /tenant_id/i.test(msg)) {
-            return false
-        }
-        console.warn(`No se pudo validar tenant_id en ${tabla}:`, msg)
-        return false
-    }))
-
-    tenantScopeBackendReady = checks.every(Boolean)
+    tenantScopeBackendReady = true
     return tenantScopeBackendReady
 }
 
