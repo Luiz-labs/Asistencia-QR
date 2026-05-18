@@ -9401,7 +9401,7 @@ function logout() {
         }
     })
 
-    // 2. Calcular destinoFinal
+    // 2. Calcular destino
     let destino = window.location.pathname
     let origenSesion = ""
     try {
@@ -9416,54 +9416,8 @@ function logout() {
         destino = "/"
     }
 
-    const urlObj = new URL(window.location.href)
-    urlObj.pathname = destino
-    urlObj.searchParams.set("logout", "1")
-    urlObj.searchParams.set("t", Date.now().toString())
-    const destinoFinal = urlObj.pathname + urlObj.search
-
-    // 3. Bloque de limpieza y redirección ultra robusto
-    try {
-        // Limpieza de sessionStorage básica
-        try {
-            const keysToRemove = []
-            for (let i = 0; i < sessionStorage.length; i++) {
-                const key = sessionStorage.key(i)
-                if (key && (key.includes("asistia") || key.includes("sb-") || key.includes("supabase") || key.includes("auth") || key.includes("token"))) {
-                    keysToRemove.push(key)
-                }
-            }
-            keysToRemove.forEach(k => sessionStorage.removeItem(k))
-        } catch (e) {}
-
-        // Limpieza de localStorage básica
-        try {
-            const keysToRemove = []
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i)
-                if (key && (key.includes("asistia") || key.includes("sb-") || key.includes("supabase") || key.includes("auth") || key.includes("token"))) {
-                    keysToRemove.push(key)
-                }
-            }
-            keysToRemove.forEach(k => localStorage.removeItem(k))
-        } catch (e) {}
-
-        // Limpieza de variables globales básicas
-        sesionAdminActiva = {
-            autenticado: false,
-            usuario: "",
-            rol: "",
-            tenantId: "",
-            origen: ""
-        }
-        tenantActivoId = ""
-
-    } catch (err) {
-        console.error("[logout-hard]", err)
-    } finally {
-        // Redirección sí o sí en el bloque finally
-        window.location.href = destinoFinal
-    }
+    // 3. Redirigir al logout estático independiente de la SPA
+    window.location.href = "/logout.html?next=" + encodeURIComponent(destino)
 }
 
 /* Legacy public attendance flow removed.

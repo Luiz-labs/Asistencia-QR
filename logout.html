@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cerrando sesión - asistIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-color: #6366f1;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logout-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 3rem 2rem;
+      border-radius: 24px;
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .brand-logo {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1.5rem;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.5px;
+    }
+
+    p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 2rem;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(99, 102, 241, 0.1);
+      border-top: 4px solid var(--accent-color);
+      border-radius: 50%;
+      margin: 0 auto;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logout-container">
+    <img src="/asistIA_logo.png" alt="asistIA Logo" class="brand-logo" onerror="this.style.display='none'">
+    <h1>Cerrando sesión</h1>
+    <p>Estamos limpiando tu sesión y optimizando tu almacenamiento de forma segura...</p>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    (async function() {
+      // 1. Obtener ruta de redirección del parámetro 'next' de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      let nextPath = urlParams.get('next') || '/';
+      
+      // Sanitizar la redirección para prevenir open redirect externo
+      if (nextPath.startsWith('http://') || nextPath.startsWith('https://') || nextPath.startsWith('//')) {
+        nextPath = '/';
+      }
+
+      // Asegurar que la redirección contenga cache-busting en la URL de destino
+      const targetUrl = new URL(nextPath, window.location.origin);
+      targetUrl.searchParams.set('logout', '1');
+      targetUrl.searchParams.set('t', Date.now().toString());
+      const finalRedirectionUrl = targetUrl.pathname + targetUrl.search;
+
+      // 2. Limpieza exhaustiva de sessionStorage y localStorage
+      try {
+        const keysToClear = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.includes('asistia') || key.includes('sb-') || key.includes('supabase') || key.includes('auth') || key.includes('token') || key.includes('luizlabs'))) {
+            keysToClear.push(key);
+          }
+        }
+        keysToClear.forEach(k => localStorage.removeItem(k));
+      } catch (e) {
+        console.warn('Error al limpiar localStorage:', e);
+      }
+
+      try {
+        const keysToClear = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && (key.includes('asistia') || key.includes('sb-') || key.includes('supabase') || key.includes('auth') || key.includes('token') || key.includes('luizlabs'))) {
+            keysToClear.push(key);
+          }
+        }
+        keysToClear.forEach(k => sessionStorage.removeItem(k));
+      } catch (e) {
+        console.warn('Error al limpiar sessionStorage:', e);
+      }
+
+      // 3. Limpieza de Cachés de Navegador (CacheStorage API)
+      if ('caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+        } catch (e) {
+          console.warn('Error al limpiar CacheStorage:', e);
+        }
+      }
+
+      // 4. Baja y desregistro de Service Workers (PWA)
+      if ('serviceWorker' in navigator) {
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map(reg => reg.unregister()));
+        } catch (e) {
+          console.warn('Error al dar de baja Service Workers:', e);
+        }
+      }
+
+      // 5. Pequeño delay de 600ms para dar feedback visual suave y asegurar que terminen los desregistros
+      setTimeout(() => {
+        window.location.replace(finalRedirectionUrl);
+      }, 600);
+    })();
+  </script>
+</body>
+</html>
