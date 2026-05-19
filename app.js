@@ -5167,7 +5167,31 @@ function cargarFiltroSeccionDashboard() {
     }
 }
 
-function descargarExcelDesdeJSON(filename, rows) {
+function asegurarLibreria(url, globalVar) {
+    return new Promise((resolve) => {
+        if (window[globalVar] || (globalVar === "jspdf" && window.jspdf?.jsPDF)) {
+            resolve(true)
+            return
+        }
+        const script = document.createElement("script")
+        script.src = url
+        script.onload = () => resolve(true)
+        script.onerror = () => resolve(false)
+        document.head.appendChild(script)
+    })
+}
+
+async function asegurarLibreriasExcel() {
+    return await asegurarLibreria("https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js", "XLSX")
+}
+
+async function asegurarLibreriasPDF() {
+    await asegurarLibreria("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js", "jspdf")
+    await asegurarLibreria("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js", "html2canvas")
+}
+
+async function descargarExcelDesdeJSON(filename, rows) {
+    await asegurarLibreriasExcel()
     if (!window.XLSX) {
         alert("Librería XLSX no disponible")
         return
@@ -5257,7 +5281,8 @@ function exportarRiesgoUboExcel() {
     descargarExcelDesdeJSON("dashboard_riesgo_ubo.xlsx", rows)
 }
 
-function exportarDashboardPDF() {
+async function exportarDashboardPDF() {
+    await asegurarLibreriasPDF()
     if (!window.jspdf?.jsPDF || !window.html2canvas) {
         alert("Librerías para exportación no disponibles")
         return
@@ -5652,6 +5677,7 @@ async function eliminarUsuarioAdmin(idx) {
 }
 
 async function cargarExcelAspirantes() {
+    await asegurarLibreriasExcel()
     const file = archivoAspirantes.files?.[0]
     if (!file) {
         msgCargaAspirantes.innerText = "Selecciona un archivo primero."
@@ -7208,6 +7234,7 @@ async function validateHistoricalRows() {
 }
 
 async function cargarArchivoHistorico(file) {
+    await asegurarLibreriasExcel()
     if (!file) return
 
     const { fileInput, fileMeta } = getHistoricalImportElements()
@@ -7491,6 +7518,7 @@ async function cargarAspirantesCargados() {
 }
 
 async function cargarExcelUbosSedes() {
+    await asegurarLibreriasExcel()
     const file = archivoUbosSedes.files?.[0]
     if (!file) {
         msgCargaUbosSedes.innerText = "Selecciona un archivo primero."
@@ -8796,6 +8824,40 @@ function actualizarEstadoChecks() {
     })
 }
 
+async function cargarDatosDeSesionAutorizada() {
+    if (!haySupabase()) return
+    try {
+        await cargarUbos()
+    } catch (e) {
+        console.error("Error cargando UBOs:", e)
+    }
+    try {
+        await cargarConfigCurso()
+    } catch (e) {
+        console.error("Error cargando config curso:", e)
+    }
+    try {
+        await cargarAspirantesCargados()
+    } catch (e) {
+        console.error("Error cargando aspirantes:", e)
+    }
+    try {
+        await cargarStaffInstruccion()
+    } catch (e) {
+        console.error("Error cargando staff de instruccion:", e)
+    }
+    try {
+        await cargarReportesStaff()
+    } catch (e) {
+        console.error("Error cargando reportes staff:", e)
+    }
+    try {
+        await cargarUsuariosAdminDesdeSupabase()
+    } catch (e) {
+        console.error("Error cargando usuarios admin:", e)
+    }
+}
+
 window.onload = async () => {
     // Limpiar URL si viene de un flujo de logout
     const paramsUrl = new URLSearchParams(window.location.search || "")
@@ -8824,12 +8886,6 @@ window.onload = async () => {
     await resolverCursoDesdeURL()
 
     try {
-        aplicarLayout()
-    } catch (e) {
-        console.error("Error aplicando layout inicial:", e)
-    }
-
-    try {
         aplicarRangoMesActualEnFiltros()
         aplicarRangoMesActualEnLogs()
         await hidratarActividadLogsInicial()
@@ -8837,40 +8893,8 @@ window.onload = async () => {
         console.error("Error aplicando rango de fechas:", e)
     }
 
-    if (haySupabase()) {
-        try {
-            await cargarUbos()
-        } catch (e) {
-            console.error("Error cargando UBOs:", e)
-        }
-        try {
-            await cargarConfigCurso()
-        } catch (e) {
-            console.error("Error cargando config curso:", e)
-        }
-        try {
-            await cargarAspirantesCargados()
-        } catch (e) {
-            console.error("Error cargando aspirantes:", e)
-        }
-        try {
-            await cargarStaffInstruccion()
-        } catch (e) {
-            console.error("Error cargando staff de instruccion:", e)
-        }
-        try {
-            await cargarReportesStaff()
-        } catch (e) {
-            console.error("Error cargando reportes staff:", e)
-        }
-    } else {
-        console.error("Supabase no cargó. Verifica conexión/CDN.")
-    }
-
-    try {
-        await cargarUsuariosAdminDesdeSupabase()
-    } catch (e) {
-        console.error("Error cargando usuarios admin:", e)
+    if (haySesionAdminActiva()) {
+        await cargarDatosDeSesionAutorizada()
     }
 
     try {
@@ -9220,6 +9244,7 @@ async function loginAccesoAdminInstitucional() {
     await cargarConfigCurso()
     cargarDatos()
 
+    await cargarDatosDeSesionAutorizada()
     await bootstrapAuthorizedApp();
 }
 
@@ -9290,6 +9315,7 @@ async function login() {
                 loginMsg.innerText = ""
                 aplicarLayout()
                 renderTenantSelector()
+                await cargarDatosDeSesionAutorizada()
                 await bootstrapAuthorizedApp();
                 return
             }
@@ -9312,6 +9338,7 @@ async function login() {
             mostrarVista("reportes")
             await cargarConfigCurso()
             cargarDatos()
+            await cargarDatosDeSesionAutorizada()
             await bootstrapAuthorizedApp();
         } else {
             loginMsg.innerText = resultado.motivo === "perfil_inactivo"
