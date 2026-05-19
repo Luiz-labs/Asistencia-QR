@@ -7590,23 +7590,28 @@ async function cargarSeccionesCursoDesdeSupabase() {
     const cursoId = Number(cursoActualId || 1) || 1
     let q = withTenantScope(
         supabaseClient
-            .from("curso_jornada_reglas")
-            .select("tenant_id,curso_id,seccion,modalidad,dias_semana,hora_inicio,activa")
+            .from("curso_secciones")
+            .select("*")
     )
     q = q.eq("curso_id", cursoId)
-         .eq("activa", true)
 
     const { data, error } = await q
         .order("seccion", { ascending: true })
-        .order("hora_inicio", { ascending: true })
 
     if (error) {
         if (esTablaNoExiste(error)) return null
-        console.warn("No se pudo cargar curso_jornada_reglas:", error.message)
+        console.warn("No se pudo cargar curso_secciones:", error.message)
         return null
     }
 
-    const secciones = deduplicarSeccionesDesdeReglas(data || [])
+    const secciones = (data || []).map(x => ({
+        seccion: normalizarCodigoSeccion(x.seccion),
+        modalidad: normalizarModalidad(x.modalidad || "PRESENCIAL"),
+        hora_inicio: x.hora_inicio || "",
+        dias: Array.isArray(x.dias) ? x.dias : [],
+        activa: true
+    })).filter(x => x.seccion)
+
     console.debug("[asistIA-course-config-debug] cargarSeccionesCursoDesdeSupabase", {
         tenantActivoId: tenantCursoId,
         cursoActualId: cursoId,
