@@ -487,14 +487,37 @@ async function sincronizarPendientes({ notificar = false } = {}) {
                     p_origen_registro: String(item?.origen_registro || "offline").trim() || "offline"
                 })
 
-                if (error || !data?.success) {
-                    restantes.push(item)
+                const errorText = error ? String(error.message || error) : ""
+                const isDuplicate = data?.code === "asistencia_duplicada" ||
+                                    /duplicada|ya registró/i.test(String(data?.message || errorText || ""))
+
+                if (error) {
+                    if (esErrorConexion(error)) {
+                        restantes.push(item)
+                    } else if (isDuplicate) {
+                        sincronizados += 1
+                    } else {
+                        console.warn("Error permanente en sincronización offline, descartando registro:", errorText)
+                    }
+                    continue
+                }
+
+                if (!data?.success) {
+                    if (isDuplicate) {
+                        sincronizados += 1
+                    } else {
+                        restantes.push(item)
+                    }
                     continue
                 }
 
                 sincronizados += 1
             } catch (error) {
-                restantes.push(item)
+                if (esErrorConexion(error)) {
+                    restantes.push(item)
+                } else {
+                    console.warn("Excepción permanente en sincronización offline, descartando:", error)
+                }
             }
         }
     } finally {
@@ -1031,7 +1054,7 @@ async function ingresarMovilInicio() {
                 warnings.unshift(`Registro ${estadoAmigable.toLowerCase()}`)
             }
             if (warnings.length > 0) {
-                setMensaje(warnings.join(" | "), "warning")
+                setMensaje(normalizarMensajePublicoFinal(warnings.join(" | ")), "warning")
             } else {
                 setMensaje("")
             }
@@ -1431,6 +1454,17 @@ async function guardarAsistencia() {
         }
 
         if (!data?.registrado && data?.code === "asistencia_duplicada") {
+            // Remover de la cola local si existe una asistencia pendiente hoy para este DNI
+            const colaLoc = leerColaPendientes()
+            const hoyLoc = obtenerFechaHoraLima(new Date()).fecha
+            const nuevaColaLoc = colaLoc.filter(item => {
+                const esMismoDni = limpiarDni(item?.dni) === dniRegistro
+                const esHoy = String(item?.fecha_local || "").trim() === hoyLoc
+                return !(esMismoDni && esHoy)
+            })
+            guardarColaPendientes(nuevaColaLoc)
+            actualizarContadorPendientes()
+
             setMensaje(
                 normalizarMensajePublicoFinal(String(data?.message || "El aspirante ya registró asistencia hoy.")),
                 "warning"
@@ -1450,13 +1484,24 @@ async function guardarAsistencia() {
 
         const warnings = construirWarningsRegistro(data, contextoAsistencia)
 
+        // Remover de la cola local si existe una asistencia pendiente hoy para este DNI
+        const colaLoc = leerColaPendientes()
+        const hoyLoc = obtenerFechaHoraLima(new Date()).fecha
+        const nuevaColaLoc = colaLoc.filter(item => {
+            const esMismoDni = limpiarDni(item?.dni) === dniRegistro
+            const esHoy = String(item?.fecha_local || "").trim() === hoyLoc
+            return !(esMismoDni && esHoy)
+        })
+        guardarColaPendientes(nuevaColaLoc)
+        actualizarContadorPendientes()
+
         if (warnings.length > 0) {
             setMensaje(
-                normalizarMensajePublicoFinal(`✅ Asistencia registrada. ${warnings.join(" | ")}`),
+                `✅ Asistencia registrada. ${normalizarMensajePublicoFinal(warnings.join(" | "))}`,
                 "warning"
             )
         } else {
-            setMensaje(normalizarMensajePublicoFinal("✅ Asistencia registrada correctamente."), "ok")
+            setMensaje("✅ Asistencia registrada correctamente.", "ok")
         }
 
         // Limpiar el estado visual posterior al registro ocultando los contenedores interactivos
