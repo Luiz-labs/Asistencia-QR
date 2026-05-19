@@ -313,7 +313,7 @@ const TENANTS = {
         id: "bomberos-lurin-129",
         nombre: "Bomberos Lurín 129",
         linea: "Módulo institucional",
-        curso: "Próximamente",
+        curso: "Bomberos Lurín 129",
         logo: "/B129logo.png",
         habilitado: true,
         usuariosSistema: []
