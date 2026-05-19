@@ -1525,8 +1525,8 @@ select {
 }
 
 .login-card {
-  width: min(100%, 460px);
-  padding: 32px 30px 26px;
+  width: min(100%, 420px);
+  padding: 24px 24px 20px;
   border-radius: 22px;
   border: 1px solid rgba(196, 207, 226, 0.72);
   background: rgba(255, 255, 255, 0.96);
@@ -1551,15 +1551,15 @@ select {
 }
 
 .login-card-logo {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 12px;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 10px;
   display: block;
   object-fit: contain;
-  border-radius: 18px;
+  border-radius: 16px;
   border: 1px solid #d8e3f4;
   background: #fff;
-  padding: 8px;
+  padding: 6px;
   box-shadow: 0 12px 28px rgba(29, 62, 119, 0.12);
   animation: uiFadeSlideUp 0.46s var(--motion-ease-premium);
 }
@@ -1567,8 +1567,8 @@ select {
 .login-input-row {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 14px;
   align-items: stretch;
   width: 100%;
 }
@@ -1657,7 +1657,7 @@ select {
 }
 
 .login-card-title {
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   font-family: "Sora", "Inter", sans-serif;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -1667,7 +1667,7 @@ select {
 }
 
 .login-card-caption {
-  margin: -6px 0 18px;
+  margin: -6px 0 14px;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.35;
@@ -1678,8 +1678,8 @@ select {
 
 #loginScreen .login-card input {
   width: 100%;
-  height: 50px;
-  border-radius: 14px;
+  height: 52px;
+  border-radius: 12px;
   border: 1px solid #d4deee;
   background: #fbfcff;
   padding: 0 14px;
@@ -1691,8 +1691,8 @@ select {
 
 .login-submit-btn {
   width: 100%;
-  min-height: 48px;
-  border-radius: 14px;
+  min-height: 52px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 700;
 }
@@ -1768,12 +1768,12 @@ select {
   }
 
   .login-head-wrap {
-    width: min(100%, 460px);
+    width: min(100%, 420px);
     margin-bottom: 16px;
   }
 
   .login-card {
-    width: min(100%, 460px);
+    width: min(100%, 420px);
     padding: 24px 20px 20px;
   }
 
@@ -1796,7 +1796,7 @@ select {
   }
 
   .login-powered {
-    width: min(100%, 460px);
+    width: min(100%, 420px);
     margin-top: 14px;
   }
 }
