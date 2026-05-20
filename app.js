@@ -8908,13 +8908,7 @@ window.onload = async () => {
     }
 
     try {
-        if (estaEnFlujoMovilPublico()) {
-            actualizarBotonesVista()
-            aplicarVisibilidadAccesoAdminInstitucional()
-            actualizarInfoSesionHeader()
-        } else {
-            aplicarLayout()
-        }
+        aplicarLayout()
     } catch (e) {
         console.error("Error aplicando layout final:", e)
     }
